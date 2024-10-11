@@ -26,32 +26,32 @@ export default function Home() {
           {/* Left Section */}
           <div className="w-3/5 p-5">
             <div className="text-left font-bold">
-              <span className="text-blue-400">Treasure</span>Map
-              <span className="text-blue-400">Academy</span>
+              <span className="text-blue-800">Treasure</span><span className="text-yellow-400">Map</span>
+              <span className="text-blue-800">Academy</span>
             </div>
             <div className="py-10">
-              <h2 className="text-3xl font-bold text-blue-400 mb-2">
+              <h2 className="text-3xl font-bold text-blue-800 mb-2">
                 Sign in to account
               </h2>
-              <div className="border-2 w-10 border-blue-400 inline-block mb-2"></div>
+              <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
               <div className="flex justify-center my-2">
                 <a
                   href="#"
                   className="border-2 border-gray-200 rounded-full p-3 mx-1"
                 >
-                  <FaFacebookF className="text-sm" />
+                  <FaFacebookF className="text-sm text-blue-800" />
                 </a>
                 <a
                   href="#"
                   className="border-2 border-gray-200 rounded-full p-3 mx-1"
                 >
-                  <FaLinkedinIn className="text-sm" />
+                  <FaLinkedinIn className="text-sm text-blue-800" />
                 </a>
                 <a
                   href="#"
                   className="border-2 border-gray-200 rounded-full p-3 mx-1"
                 >
-                  <FaGoogle className="text-sm" />
+                  <FaGoogle className="text-sm text-blue-800" />
                 </a>
               </div>
               <p className="text-gray-400">or login with an email account</p>
@@ -85,7 +85,7 @@ export default function Home() {
                 </div>
                 <Link
                   href="/dashboard"
-                  className="border-2 border-blue-400 text-blue-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-400 hover:text-white"
+                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-white"
                 >
                   Login
                 </Link>
@@ -94,13 +94,13 @@ export default function Home() {
           </div>
 
           {/* Right Section */}
-          <div className="w-2/5 bg-blue-400 text-white rounded-tr-2xl rounded-br-2xl py-36 px-12">
+          <div className="w-2/5 bg-blue-800 text-white  rounded-tr-2xl rounded-br-2xl py-36 px-12">
             <h2 className="text-3xl font-bold mb-2">Hello Pirate</h2>
             <div className="border-2 w-10 border-white inline-block mb-2"></div>
             <p className="mb-10">Don't have an account?</p>
             <Link
               href="/signup"
-              className="border-2 border-white rounded-full px-12 py-2 inline-block font-semibold hover:bg-white hover:text-blue-400"
+              className="border-2 border-white  rounded-full px-12 py-2 inline-block font-semibold hover:bg-white hover:text-blue-800"
             >
               Sign Up
             </Link>
@@ -110,3 +110,10 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+
+
+
+
