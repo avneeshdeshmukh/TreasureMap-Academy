@@ -137,7 +137,7 @@ export default function Home() {
       {showGif && (
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex items-center justify-center z-50">
         <img
-          src="/videos/treasure3.gif"
+          src="/images/treasure3.gif"
           alt="Treasure Chest Opening"
           className="w-3/4 h-auto max-w-3xl" 
         />
