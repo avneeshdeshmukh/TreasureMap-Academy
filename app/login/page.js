@@ -13,7 +13,7 @@ import { MdLock } from "react-icons/md";
 export default function Home() {
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen py-2 "
+      className="flex flex-col items-center justify-center min-h-screen py-2"
       style={{ backgroundColor: "#efebe2" }}
     >
       <Head>
@@ -26,7 +26,8 @@ export default function Home() {
           {/* Left Section */}
           <div className="w-3/5 p-5">
             <div className="text-left font-bold">
-              <span className="text-blue-800">Treasure</span><span className="text-yellow-400">Map</span>
+              <span className="text-blue-800">Treasure</span>
+              <span className="text-yellow-400">Map</span>
               <span className="text-blue-800">Academy</span>
             </div>
             <div className="py-10">
@@ -75,17 +76,17 @@ export default function Home() {
                   />
                 </div>
                 <div className="flex w-64 mb-5 justify-between">
-                  <label className="flex items-center text-xs ">
-                    <input type="checkbox" name="remember" className="mr-1 " />
+                  <label className="flex items-center text-xs">
+                    <input type="checkbox" name="remember" className="mr-1" />
                     Remember me for 2 weeks
                   </label>
-                  <a href="#" className="text-xs ">
+                  <a href="#" className="text-xs">
                     Forgot Password
                   </a>
                 </div>
                 <Link
                   href="/dashboard"
-                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-white"
+                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
                 >
                   Login
                 </Link>
@@ -94,26 +95,28 @@ export default function Home() {
           </div>
 
           {/* Right Section */}
-          <div className="w-2/5 bg-blue-800 text-white  rounded-tr-2xl rounded-br-2xl py-36 px-12">
-            <h2 className="text-3xl font-bold mb-2">Hello Pirate</h2>
-            <div className="border-2 w-10 border-white inline-block mb-2"></div>
-            <p className="mb-10">Don't have an account?</p>
-            <Link
-              href="/signup"
-              className="border-2 border-white  rounded-full px-12 py-2 inline-block font-semibold hover:bg-white hover:text-blue-800"
-            >
-              Sign Up
-            </Link>
+          <div className="w-2/5 bg-blue-800 text-yellow-400 rounded-tr-2xl rounded-br-2xl py-36 px-12 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center -mt-10">
+              {" "}
+          
+              <img
+                src="/images/login_pirate.png"
+                alt="Pirate"
+                className="w-45 h-45 mb-4"
+              />
+              <h2 className="text-3xl font-bold mb-2">Ahoy, Fearless Buccaneer!</h2>
+              <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
+              <p className="mb-5">Don't have an account yet?</p>
+              <Link
+                href="/signup"
+                className="border-2 border-yellow-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-yellow-400 hover:text-blue-800"
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
       </main>
     </div>
   );
 }
-
-
-
-
-
-
-
