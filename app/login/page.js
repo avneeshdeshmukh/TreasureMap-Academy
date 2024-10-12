@@ -18,7 +18,7 @@ export default function Home() {
   const [showGif, setShowGif] = useState(false); // State to manage GIF visibility
 
   const handleLogin = () => {
-    setShowConfetti(true); 
+    setShowConfetti(true);
     setShowGif(true); // Show GIF
 
     setTimeout(() => {
@@ -133,23 +133,20 @@ export default function Home() {
         </div>
       </main>
 
-
       {showGif && (
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex items-center justify-center z-50">
-        <img
-          src="/images/treasure3.gif"
-          alt="Treasure Chest Opening"
-          className="w-3/4 h-auto max-w-3xl" 
-        />
-      </div>
+          <img
+            src="/images/treasure3.gif"
+            alt="Treasure Chest Opening"
+            className="w-1/2 h-auto max-w-2xl" 
+          />
+        </div>
       )}
 
       {/* Fullscreen Confetti */}
       {showConfetti && (
         <div className="fixed top-0 left-0 w-full h-full z-50">
-          <Confetti
-            numberOfPieces={1000} 
-          />
+          <Confetti numberOfPieces={1000} />
         </div>
       )}
     </div>
