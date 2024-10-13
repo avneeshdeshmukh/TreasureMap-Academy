@@ -6,15 +6,32 @@ import {
   FaEnvelope,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
+import Homehero from "@/components/homepage/Homehero";
+import Rolesection from "@/components/homepage/Rolesection";
+import Featuredcourses from "@/components/homepage/Featuredcourses";
+import Whytma from "@/components/homepage/Whytma";
+import Howitworks from "@/components/homepage/Howitworks";
+import Newsletter from "@/components/homepage/Newsletter";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 " style={{backgroundColor: '#efebe2'}}>
-      <Head>
-        <title>TMA</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
+    <div className="flex flex-col">
+      <Homehero/>
+      <div className="px-3 mt-16">
+      <Rolesection/>
+      </div>
+      <div className="px-3 mt-16">
+      <Howitworks/>
+      </div>
+      <div className="px-3 mt-16">
+      <Featuredcourses/>
+      </div>
+      <div className="px-3 mt-16">
+      <Whytma/>
+      </div>
+      <div className="px-3 mt-16">
+      <Newsletter/>
+      </div>
     </div>
   );
 }
