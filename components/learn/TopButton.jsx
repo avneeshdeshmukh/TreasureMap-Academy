@@ -1,9 +1,10 @@
-import { Flame, CircleDollarSign } from "lucide-react";
+import { Flame, CircleDollarSign, X } from "lucide-react";
 import Link from "next/link";
 
 const iconMap = {
     flame: Flame,
     coins: CircleDollarSign,
+    x : X
 };
 
 const TopButton = ({ right, href, type, color, outline, num }) => {

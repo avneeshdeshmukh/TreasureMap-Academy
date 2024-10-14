@@ -1,6 +1,7 @@
 "use client";
 import Head from "next/head";
 import Link from "next/link";
+import TopButton from "@/components/learn/TopButton";
 
 import {
   FaFacebookF,
@@ -22,6 +23,8 @@ export default function Home() {
         <title>TMA</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <TopButton href={'/home'} right="30px" type={'x'} color={'none'} outline={'gray'} />
 
       <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
         <div className="bg-white rounded-2xl shadow-2xl flex w-2/3 max-w-4xl">
