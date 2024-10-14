@@ -1,0 +1,37 @@
+.custom-tab {
+    color: white;
+    font-weight: 600; /* equivalent to font-semibold */
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.custom-tab.active {
+    background-color: #FBBF24 !important;
+    color: black !important;
+    border-bottom-color: #3B82F6 !important;
+}
+
+.learnerButtons {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.learnerButtons:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(100%);
+}
+
+
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+    filter: invert(50%);
+}
+
+.custom-shadow {
+    box-shadow: 0 4px 20px rgba(69, 69, 71, 0.5);
+}
