@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React from "react";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
@@ -59,8 +60,10 @@ const Rolesection = () => {
                     </p>
                   </div>
                 </div>
-                <div className="learnerButtons bg-blue-950 w-28 h-12 text-white rounded-2xl text-center text-md hover:bg-blue-600 p-2 ml-16">
-                  <button>Sign Up</button>
+                <div className="learnerButtons no-underline appearance-none bg-blue-950 w-28 h-12 rounded-2xl text-center text-md hover:bg-blue-600 p-2 ml-16">
+                  <Link href={'/signup'}>
+                    <button className="text-white ">Sign Up</button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -112,8 +115,10 @@ const Rolesection = () => {
                 </div>
                 <div className="flex justify-end mt-4">
                   {/* Add margin for spacing */}
-                  <div className="learnerButtons bg-blue-950 w-28 h-12 text-white rounded-2xl text-center text-md hover:bg-blue-600 p-2 mr-16">
-                    <button>Sign Up</button>
+                  <div className="learnerButtons no-underline appearance-none bg-blue-950 w-28 h-12  rounded-2xl text-center text-md hover:bg-blue-600 p-2 mr-16">
+                    <Link href={'/signup'}>
+                      <button className="text-white ">Sign Up</button>
+                    </Link>
                   </div>
                 </div>
               </div>
