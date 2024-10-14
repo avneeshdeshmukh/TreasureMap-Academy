@@ -1,19 +1,7 @@
 "use client";
 import React from "react";
-import { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import Rolesection from "@/components/homepage/Rolesection";
 
 const Homehero = () => {
-  useEffect(() => {
-    AOS.init({
-      duration: 1200, // Animation duration (in ms)
-      once: true, // Whether animation should happen only once or every scroll
-      easing: "ease-in-out",
-      offset: 0, // Offset (in pixels) from the original trigger point
-    });
-  }, []);
 
   return (
     <>

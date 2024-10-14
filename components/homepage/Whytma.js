@@ -1,3 +1,6 @@
+"use client"; 
+import React from "react";
+
 const WhySection = ({ imageSrc, altText, title, description, imageFirst }) => {
   return (
     <div className="container mt-6 flex py-8">
