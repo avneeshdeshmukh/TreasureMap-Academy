@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 
 const Homehero = () => {
 
@@ -34,8 +35,10 @@ const Homehero = () => {
               your guides, you will gain insights that are not just theoretical
               but practical and applicable in real-world scenarios.
             </p>
-            <div className="learnerButtons bg-blue-950 w-fit h-12 text-white rounded-2xl text-center text-md hover:bg-blue-600 p-4 flex justify-center items-center">
-              <button>Join the adventure!</button>
+            <div className=" no-underline appearance-none learnerButtons bg-blue-950 w-fit h-12 text-white rounded-2xl text-center text-md hover:bg-blue-600 p-4 flex justify-center items-center">
+              <Link href={'/signup'}>
+                <button className="text-white ">Join The Adventure!</button>
+              </Link>
             </div>
           </div>
         </div>
