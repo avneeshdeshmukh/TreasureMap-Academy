@@ -27,6 +27,7 @@ body {
   }
 } */
 
+
 @layer base {
   :root {
 
@@ -106,6 +107,7 @@ body {
     --radius: 0.5rem
   }
   .dark {
+
 
     --background: 222.2 84% 4.9%;
 
@@ -189,5 +191,4 @@ body {
     @apply bg-background text-foreground;
   }
 }
-
 
