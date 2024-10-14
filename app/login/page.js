@@ -22,7 +22,7 @@ export default function Home() {
     setShowGif(true); // Show GIF
 
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push("/learn");
     }, 4500);
   };
 

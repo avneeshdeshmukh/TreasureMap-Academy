@@ -14,7 +14,7 @@ const TopButton = ({ right, href, type, color, outline, num }) => {
     return (
         <Link
             href={href}
-            className="fixed w-[80px] h-[80px] text-lg top-[15px] bg-transparent flex items-center justify-center z-99 hover: transition-colors duration-300"
+            className="fixed w-20 h-20 text-lg top-4 bg-transparent flex items-center justify-center z-99 hover: transition-colors duration-300"
             style={{
                 right: right,
             }}
