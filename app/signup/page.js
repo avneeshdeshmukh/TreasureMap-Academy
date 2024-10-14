@@ -1,6 +1,6 @@
 "use client";
 import Head from "next/head";
-import Link from 'next/link';
+import Link from "next/link";
 
 import {
   FaFacebookF,
@@ -14,7 +14,10 @@ import { MdLock } from "react-icons/md";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 " style={{backgroundColor: '#efebe2'}}>
+    <div
+      className="flex flex-col items-center justify-center min-h-screen py-2 "
+      style={{ backgroundColor: "#efebe2" }}
+    >
       <Head>
         <title>TMA</title>
         <link rel="icon" href="/favicon.ico" />
@@ -25,30 +28,31 @@ export default function Home() {
           {/* Left Section */}
           <div className="w-3/5 p-5">
             <div className="text-left font-bold">
-              <span className="text-blue-400">Treasure</span>Map
-              <span className="text-blue-400">Academy</span>
+              <span className="text-blue-800">Treasure</span>
+              <span className="text-yellow-400">Map</span>
+              <span className="text-blue-800">Academy</span>
             </div>
             <div className="py-10">
-              <h2 className="text-3xl font-bold text-blue-400 mb-2">
+              <h2 className="text-3xl font-bold text-blue-800 mb-2">
                 Create an account
               </h2>
-              <div className="border-2 w-10 border-blue-400 inline-block mb-2"></div>
+              <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
               <div className="flex justify-center my-2">
                 <a
                   href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
+                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1"
                 >
                   <FaFacebookF className="text-sm" />
                 </a>
                 <a
                   href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
+                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1"
                 >
                   <FaLinkedinIn className="text-sm" />
                 </a>
                 <a
                   href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
+                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1"
                 >
                   <FaGoogle className="text-sm" />
                 </a>
@@ -92,28 +96,37 @@ export default function Home() {
                     className="bg-gray-200 outline-none text-sm flex-1"
                   />
                 </div>
-               
-                <Link href="/login"
-                   className="border-2 border-blue-400 text-blue-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-400 hover:text-white">
-                    Sign Up
+
+                <Link
+                  href="/login"
+                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
+                >
+                  Sign Up
                 </Link>
               </div>
             </div>
           </div>
 
           {/* Right Section */}
-          <div className="w-2/5 bg-blue-400 text-white rounded-tr-2xl rounded-br-2xl py-36 px-12">
-            <h2 className="text-3xl font-bold mb-2">Hello Pirate</h2>
-            <div className="border-2 w-10 border-white inline-block mb-2"></div>
-            <p className="mb-10">Already have an account?</p>
-        
-
-            <Link href="/login"
-                  className="border-2 border-white rounded-full px-12 py-2 inline-block font-semibold hover:bg-white hover:text-blue-400">
-                  Login Here
-                  
-                </Link>
-
+          <div className="w-2/5 bg-blue-800 text-yellow-400 rounded-tr-2xl rounded-br-2xl py-36 px-12 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center -mt-10">
+              {" "}
+              {/* Added a flex container with negative margin */}
+              <img
+                src="/images/signup_pirate.png"
+                alt="Pirate"
+                className="w-45 h-45 mb-4" // Maintain the size as in the login section
+              />
+              <h2 className="text-3xl font-bold mb-2">Join Our Crew, Treasure Seeker!</h2>
+              <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
+              <p className="mb-5">Already have an account?</p>
+              <Link
+                href="/login"
+                className="border-2 border-yellow-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-yellow-400 hover:text-blue-800"
+              >
+                Login Here
+              </Link>
+            </div>
           </div>
         </div>
       </main>
