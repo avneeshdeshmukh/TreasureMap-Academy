@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ export const LessonButton = ({
 
   return (
     <Link
-      href={href}
+      href={'/tempvideoplayer'}
       aria-disabled={locked}
       style={{ pointerEvents: locked ? "none" : "auto" }}
     >
