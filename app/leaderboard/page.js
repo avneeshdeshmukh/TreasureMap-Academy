@@ -1,9 +1,9 @@
 "use client";
 import Sidebar from "@/components/learn/Sidebar";
-import RankCard from "@/components/profile/RankCard"; // Fixed import for RankCard
-import Leaderboard from "@/components/profile/Leaderboard";
+import RankCard from "@/components/leaderboard/RankCard"; // Fixed import for RankCard
+import Leaderboard from "@/components/leaderboard/Leaderboard";
 
-export default function ProfilePage() {
+export default function Home() {
     return (
         <div className="min-h-screen flex" style={{ backgroundColor: "#f5f5dc" }}>
             <Sidebar />

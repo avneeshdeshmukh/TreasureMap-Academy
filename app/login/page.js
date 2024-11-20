@@ -1,6 +1,9 @@
 "use client";
 import Head from "next/head";
 import Link from "next/link";
+import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -8,24 +11,73 @@ import {
   FaLinkedinIn,
   FaGoogle,
   FaEnvelope,
+  FaGithub,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
 import Confetti from "react-confetti";
 import TopButton from "@/components/learn/TopButton";
 
-export default function Home() {
+
+const firestore = getFirestore();
+
+export default function LoginPage() {
   const router = useRouter();
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [showGif, setShowGif] = useState(false); // State to manage GIF visibility
 
-  const handleLogin = () => {
-    setShowConfetti(true);
-    setShowGif(true); // Show GIF
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  // const [showConfetti, setShowConfetti] = useState(false);
+  // const [showGif, setShowGif] = useState(false); // State to manage GIF visibility
 
-    setTimeout(() => {
-      router.push("/learn");
-    }, 4500);
+  // const HandleLogin = () => {
+  //   setShowConfetti(true);
+  //   setShowGif(true); // Show GIF
+
+  //   setTimeout(() => {
+  //     router.push("/learn");
+  //   }, 4500);
+  // };
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Log in with email and password
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      console.log("User logged in successfully!");
+
+      // Redirect to the homepage or another protected page after successful login
+      router.push("/courses"); // Replace with your desired route
+    } catch (err) {
+      // Handle specific errors
+      if (err.code === "auth/user-not-found") {
+        setError("No user found with this email. Please sign up.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Incorrect password. Please try again.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("The email address is not valid. Please provide a valid email.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
+
+      console.error("Error during login:", err.message);
+    }
   };
+
+
+
+  const handleProviderLogin = async (provider) => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log("User Info:", result.user);
+      router.push("/courses");
+    } catch (error) {
+      console.error("Login Error:", error.message);
+    }
+  };
+
+
 
   return (
     <div
@@ -54,61 +106,57 @@ export default function Home() {
               </h2>
               <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
               <div className="flex justify-center my-2">
-                <a
-                  href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
+                <p
+                  onClick={() => handleProviderLogin(new GoogleAuthProvider())}
+                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer"
                 >
-                  <FaFacebookF className="text-sm text-blue-800" />
-                </a>
-                <a
-                  href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
-                >
-                  <FaLinkedinIn className="text-sm text-blue-800" />
-                </a>
-                <a
-                  href="#"
-                  className="border-2 border-gray-200 rounded-full p-3 mx-1"
-                >
-                  <FaGoogle className="text-sm text-blue-800" />
-                </a>
+                  <FaGoogle className="text-sm" />
+                </p>
               </div>
               <p className="text-gray-400">or login with an email account</p>
-              <div className="flex flex-col items-center mt-2">
-                <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                  <FaEnvelope className="text-gray-500 m-2" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="bg-gray-200 outline-none text-sm flex-1"
-                  />
+
+
+              <form onSubmit={handleEmailLogin}>
+                <div className="flex flex-col items-center mt-2">
+                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                    <FaEnvelope className="text-gray-500 m-2" />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                    />
+                  </div>
+                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                    <MdLock className="text-gray-500 m-2" />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                    />
+                  </div>
+                  <div className="flex w-64 mb-5 justify-between">
+                    <label className="flex items-center text-xs">
+                      <input type="checkbox" name="remember" className="mr-1" />
+                      Remember me for 2 weeks
+                    </label>
+                    <a href="#" className="text-xs">
+                      Forgot Password
+                    </a>
+                  </div>
+                  <button
+                    type="submit"
+                    className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
+                  >
+                    Login
+                  </button>
+                  {error && <p>{error}</p>}
                 </div>
-                <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                  <MdLock className="text-gray-500 m-2" />
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    className="bg-gray-200 outline-none text-sm flex-1"
-                  />
-                </div>
-                <div className="flex w-64 mb-5 justify-between">
-                  <label className="flex items-center text-xs">
-                    <input type="checkbox" name="remember" className="mr-1" />
-                    Remember me for 2 weeks
-                  </label>
-                  <a href="#" className="text-xs">
-                    Forgot Password
-                  </a>
-                </div>
-                <button
-                  onClick={handleLogin}
-                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
-                >
-                  Login
-                </button>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -134,24 +182,27 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </main>
+      </main >
 
-      {showGif && (
+      {/* {showGif && (
         <div className="fixed top-0 left-0 w-full h-full bg-transparent flex items-center justify-center z-50">
           <img
             src="/images/treasure3.gif"
             alt="Treasure Chest Opening"
-            className="w-1/2 h-auto max-w-2xl" 
+            className="w-1/2 h-auto max-w-2xl"
           />
         </div>
-      )}
+      )
+      } */}
 
       {/* Fullscreen Confetti */}
-      {showConfetti && (
-        <div className="fixed top-0 left-0 w-full h-full z-50">
-          <Confetti numberOfPieces={1000} />
-        </div>
-      )}
-    </div>
+      {/* {
+        showConfetti && (
+          <div className="fixed top-0 left-0 w-full h-full z-50">
+            <Confetti numberOfPieces={1000} />
+          </div>
+        )
+      } */}
+    </div >
   );
 }
