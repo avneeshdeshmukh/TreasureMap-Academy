@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Anchor } from "lucide-react"
+import Link from "next/link";
 
 const LeaderboardPos = () => {
     return (
@@ -10,18 +11,20 @@ const LeaderboardPos = () => {
             <hr />
             <div className="flex mt-3 mb-2">
                 <div className="w-1/3 flex justify-center items-center me-3 border-yellow-400 border-2 rounded-xl">
-                <Anchor stroke={"#daa520"} size={40}/>
+                    <Anchor stroke={"#daa520"} size={40} />
                 </div>
                 <div className="div w-2/3">
-                     <p className="text-sm font-bold mb-2">You’re 18th Sailor</p>
-                     <p className="text-sm">You've earned 183 Coins this week so far</p>
+                    <p className="text-sm font-bold mb-2">You’re 18th Sailor</p>
+                    <p className="text-sm">You've earned 183 Coins this week so far</p>
                 </div>
             </div>
             <div className="flex justify-end mt-5">
-                <Button
-                    variant='ghost'
-                >View Leaderboard
-                </Button>
+                <Link href={'/leaderboard'}>
+                    <Button
+                        variant='ghost'
+                    >View Leaderboard
+                    </Button>
+                </Link>
             </div>
         </div>
     );
