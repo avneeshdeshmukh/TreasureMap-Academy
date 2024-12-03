@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (max-width: 1024px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Optional: Smooth transitions for layout changes */
+@media (min-width: 1024px) {
+  .layout-transition {
+    transition: all 0.3s ease-in-out;
+  }
+}
+
 
 /* :root {
   --background: #ffffff;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Flag, Crown, Sword, Sailboat } from "lucide-react";
+import { Crown, Sword } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
@@ -22,63 +22,56 @@ export const LessonButton = ({
   const cycleIndex = index % cycleLength;
 
   let indentationLevel;
-
   if (cycleIndex <= 2) indentationLevel = cycleIndex;
   else if (cycleIndex <= 4) indentationLevel = 4 - cycleIndex;
   else if (cycleIndex <= 6) indentationLevel = 4 - cycleIndex;
   else indentationLevel = cycleIndex - 8;
 
-  const rightPosition = indentationLevel * 65;
-
-  const isFirst = index === 0;
-  const isLast = index === totalCount;
+  // Dynamic positions
+  const rightPosition = `${indentationLevel * 25}%`;
+  const isOdd = index % 2 === 1;
+  const isLast = index === totalCount - 1; // Fixed definition
   const isCompleted = !current && !locked;
 
+  // Define Icon
   const Icon = isCompleted ? Crown : Sword;
-
-  const href = isCompleted ? `/lesson/${id}` : "/lesson";
 
   return (
     <Link
-      href={href}
+      href={"/tempvideoplayer"}
       aria-disabled={locked}
       style={{ pointerEvents: locked ? "none" : "auto" }}
     >
       <div
         className="relative"
         style={{
-          right: `${rightPosition}px`,
-          marginTop: isFirst && !isCompleted ? 60 : 24,
+          marginTop: "2rem",
+          transform: `translateX(${isOdd ? rightPosition : `-${rightPosition}`})`,
         }}
       >
         {current ? (
-          <div className="relative h-[102px] w-[102px]">
-            <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-white px-3 py-2.5 font-bold uppercase tracking-wide text-[#4d3300]">
+          <div className="relative h-32 w-20 sm:w-24 md:w-28 lg:w-32">
+            {/* Start Label */}
+            <div className="absolute -top-4 left-2 z-10 animate-bounce rounded-md border bg-white px-2 py-1 font-bold uppercase text-xs sm:text-sm md:text-base lg:text-sm tracking-wide text-[#4d3300]">
               Start
-              <div
-                className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 transform border-x-8 border-t-8 border-x-transparent"
-                aria-hidden
-              />
             </div>
+            {/* Circular Progress */}
             <CircularProgressbarWithChildren
               value={Number.isNaN(percentage) ? 0 : percentage}
               styles={{
-                path: {
-                  stroke: "#eab208",
-                },
-                trail: {
-                  stroke: "#e5e7eb",
-                },
+                path: { stroke: "#eab208" },
+                trail: { stroke: "#e5e7eb" },
               }}
+              className="scale-75"
             >
               <Button
                 size="rounded"
                 variant={locked ? "locked" : "secondary"}
-                className="h-[70px] w-[70px] border-b-8 my-4"
+                className="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14"
               >
                 <Icon
                   className={cn(
-                    "h-10 w-10",
+                    " sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-8 lg:w-8",
                     locked
                       ? "fill-neutral-400 stroke-neutral-400 text-neutral-400"
                       : "fill-primary-foreground text-primary-foreground",
@@ -89,20 +82,23 @@ export const LessonButton = ({
             </CircularProgressbarWithChildren>
           </div>
         ) : isLast ? (
-            <Image
+          <Image
             src={"/images/treasureChest.png"}
-            width={90}
-            height={90}
-            />
+            alt="Treasure Chest"
+            layout="auto"
+            width={20}
+            height={20}
+            className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-10 lg:w-10"
+          />
         ) : (
           <Button
             size="rounded"
             variant={locked ? "locked" : "secondary"}
-            className="h-[70px] w-[70px] border-b-8 my-4"
+            className="h-12 w-12 sm:h-10 sm:w-10 md:h-12 md:w-12 lg:h-14 lg:w-14"
           >
             <Icon
               className={cn(
-                "h-10 w-10",
+                "h-6 w-6 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-8 lg:w-8",
                 locked
                   ? "fill-neutral-400 stroke-neutral-400 text-neutral-400"
                   : "fill-primary-foreground text-primary-foreground",

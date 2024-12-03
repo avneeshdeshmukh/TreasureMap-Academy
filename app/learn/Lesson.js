@@ -21,13 +21,12 @@ export const Lesson = ({
     const rightPosition = indentationLevel * 80;
 
     return(
-        <div className="relative my-10"
+        <div className=""
             style={{
                 right : `${rightPosition}px`
         }}
         >
-            <Image src={"/images/star.png"} width={70} height={70} 
-                
+            <Image src={"/images/star.png"} width={50} height={50} 
             />
         </div>
     )
