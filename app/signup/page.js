@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import TopButton from "@/components/learn/TopButton";
+import TopButton from "@/components/TopButton";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, createUserWithEmailAndPassword,updateProfile} from "firebase/auth";
 import { useRouter } from "next/navigation";
