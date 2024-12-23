@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
 import Confetti from "react-confetti";
-import TopButton from "@/components/learn/TopButton";
+import TopButton from "@/components/TopButton";
 
 
 const firestore = getFirestore();

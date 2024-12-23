@@ -5,7 +5,7 @@ import Link from "next/link";
 const LeaderboardPos = () => {
     return (
         <div
-            className="text-white rounded-xl my-2 fixed top-32 right-3 w-1/5 z-50 border-4 border-[#606060] text-lg bg-[#2c3748] justify-center p-5 shadow-lg"
+            className="text-white rounded-xl my-2  z-50 border-4 border-[#606060] text-lg bg-[#2c3748] justify-center p-5 shadow-lg"
         >
             <h2 className="font-bold text-2xl ms-3 mb-2">Sailor</h2>
             <hr />
@@ -19,7 +19,7 @@ const LeaderboardPos = () => {
                 </div>
             </div>
             <div className="flex justify-end mt-5">
-                <Link href={'/leaderboard'}>
+                <Link href="/leaderboard">
                     <Button
                         variant='ghost'
                     >View Leaderboard

@@ -15,7 +15,7 @@ const SidebarItem = ({ variant, href, icon, label }) => {
     return (
         <Button
           variant={variant}
-          className="h-[52px] justify-start ps-16 items-center my-4"
+          className="h-auto py-2 ps-4 lg:ps-16 justify-start items-center my-4"
           size={"icon"}
           asChild
         >

@@ -1,10 +1,10 @@
-import ProgressBar from "../ProgressBar";
+import { ProgressBar } from "@/components/progress-bar";
 import { Button } from "@/components/ui/button";
 
-const Stats = () => {
+export const Stats = () => {
     return (
         <div
-            className="text-white rounded-xl my-2 fixed top-96 right-3 h-1/2 w-1/5 z-50 border-4 border-[#606060] text-lg bg-[#2c3748] justify-center p-5 shadow-lg"
+            className="text-white rounded-xl my-2 z-50 border-4 border-[#606060] text-lg bg-[#2c3748] justify-center p-5 shadow-lg"
         >
             <h2 className="font-bold text-2xl ms-3 mb-2">Stats</h2>
             <hr />
@@ -39,5 +39,3 @@ const Stats = () => {
         </div>
     );
 };
-
-export default Stats;
