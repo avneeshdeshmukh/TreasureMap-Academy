@@ -48,7 +48,7 @@ export default function LoginPage() {
       console.log("User logged in successfully!");
 
       // Redirect to the homepage or another protected page after successful login
-      router.push("/courses"); // Replace with your desired route
+      router.push("/learn"); // Replace with your desired route
     } catch (err) {
       // Handle specific errors
       if (err.code === "auth/user-not-found") {
@@ -71,7 +71,7 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       console.log("User Info:", result.user);
-      router.push("/courses");
+      router.push("/learn");
     } catch (error) {
       console.error("Login Error:", error.message);
     }

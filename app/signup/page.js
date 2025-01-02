@@ -79,7 +79,7 @@ export default function SignUpPage() {
 
       // Save additional data (if any)
       await saveUserData(user, {});
-      router.push("/courses");
+      router.push("/learn");
     } catch (err) {
       setError(err.message);
     }

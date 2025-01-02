@@ -1,6 +1,6 @@
 export default function RankCard() {
     return (
-        <div className="bg-gray-800 text-white p-4 rounded-lg shadow-lg w-full max-w-md mx-auto flex items-center justify-center h-28">
+        <div className="bg-gray-800  text-white p-4 rounded-lg shadow-lg w-full max-w-md mx-auto flex items-center justify-center h-28">
             <div className="flex items-center w-full">
                 <img
                     src="/images/solo3.png" // Replace with the actual avatar image
