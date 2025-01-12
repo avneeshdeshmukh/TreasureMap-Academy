@@ -4,18 +4,25 @@ import { useState, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import TopButton from "@/components/TopButton";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
-import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, createUserWithEmailAndPassword,updateProfile} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 
 import {
   FaFacebookF,
-  FaLinkedinIn,
   FaGoogle,
   FaEnvelope,
   FaUser,
+  FaAddressCard,
   FaCalendarAlt,
+  FaBriefcase,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
 
@@ -26,33 +33,72 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [occupation, setOccupation] = useState("");
+  const [dob, setDob] = useState("");
   const [error, setError] = useState(null);
 
-  const saveUserData = async (user, additionalData) => {
+  const saveEmailUserData = async (user, additionalData) => {
+    const { name, username, dob, occupation } = additionalData;
+
+    // Convert dob to a Date object (if it's not already a Date object)
+    const parsedDob = dob ? new Date(dob) : null;
+
+    // Check if dob is valid
+    if (parsedDob && isNaN(parsedDob.getTime())) {
+      throw new Error("Invalid Date of Birth");
+    }
+
     const userRef = doc(firestore, "users", user.uid);
     const userData = {
       uid: user.uid,
-      provider: user.providerData[0]?.providerId || "email",
+      email: user.email,
+      isAdditionalInfoAdded: true,
+      isCreator: false,
+      name,
+      username: username.toLowerCase(),
+      dob: parsedDob,
+      occupation,
+      provider: "email",
       createdAt: new Date(),
     };
 
     await setDoc(userRef, userData, { merge: true });
-    console.log("User data saved:", userData);
-  };
+    console.log("Email sign-up data saved : ", userData);
+  }
 
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
+
+    if (!name || !username || !dob || !occupation) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
     try {
+      const usernameQuery = query(
+        collection(firestore, "users"),
+        where("username", "==", username.toLowerCase())
+      );
+      const querySnapshot = await getDocs(usernameQuery);
+
+      if (!querySnapshot.empty) {
+        const error = new Error("The username is already taken.");
+        error.code = "username-taken"; // Custom error code
+        throw error;
+      }
       // Sign up with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-  
+
       // Optionally update displayName
       await updateProfile(user, { displayName: name });
-  
+
+      const additionalData = { name, username, dob, occupation };
+
       // Save additional data
-      await saveUserData(user, { name });
-  
+      await saveEmailUserData(user, additionalData);
+
       console.log("User signed up successfully!");
       router.push("/login");
     } catch (err) {
@@ -63,10 +109,12 @@ export default function SignUpPage() {
         setError("The password is too weak. Please use a stronger password.");
       } else if (err.code === "auth/invalid-email") {
         setError("The email address is not valid. Please provide a valid email.");
+      } else if (err.code === "username-taken") {
+        setError("Username already taken. Please try something else.");
       } else {
-        setError("An unexpected error occurred. Please try again.");
+        setError(`An unexpected error occurred. Please try again. ${err.code}`);
       }
-  
+
       console.error("Error during sign-up:", err.message);
     }
   };
@@ -74,17 +122,37 @@ export default function SignUpPage() {
   const handleProviderSignUp = async (provider) => {
     try {
 
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      // Save additional data (if any)
-      await saveUserData(user, {});
-      router.push("/learn");
-    } catch (err) {
-      setError(err.message);
+      const userRef = doc(firestore, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        const userData = {
+          uid: user.uid,
+          email: user.email,
+          isCreator: false,
+          isAdditionalInfoAdded : false,
+          provider: user.providerData[0]?.providerId,
+          createdAt: new Date(),
+        };
+
+        await setDoc(userRef, userData, { merge: true });
+
+        console.log("New user signed up with provider:", user.providerData[0]?.providerId);
+        router.push("/complete-profile");
+      }
+      else {
+        console.log("Existing user, signed in with provider:", user.providerData[0]?.providerId);
+        router.push("/learn");
+      }
+    }
+    catch (err) {
+      setError(`An error occured ${err.message}`);
     }
   };
-  
+
   return (
     <div
       className="flex flex-col items-center justify-center min-h-screen py-2 "
@@ -124,6 +192,7 @@ export default function SignUpPage() {
                   <FaGoogle className="text-sm" />
                 </p>
               </div>
+              {/* Taking Credentials */}
               <p className="text-gray-400">or sign up with an email</p>
               <form onSubmit={handleEmailSignUp}>
                 <div className="flex flex-col items-center mt-2">
@@ -149,6 +218,41 @@ export default function SignUpPage() {
                     />
                   </div>
                   <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                    <FaAddressCard className="text-gray-500 m-2" />
+                    <input
+                      type="username"
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                    />
+                  </div>
+                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                    <FaCalendarAlt className="text-gray-500 m-2" />
+                    <input
+                      type="date"
+                      placeholder="Date of Birth"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      required
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                    />
+                  </div>
+                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                    <FaBriefcase className="text-gray-500 m-2" />
+                    <select
+                      value={occupation}
+                      onChange={(e) => setOccupation(e.target.value)}
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                      required
+                    >
+                      <option value="">Select Occupation</option>
+                      <option value="student">Student</option>
+                      <option value="working">Working Professional</option>
+                    </select>
+                  </div>
+                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
                     <MdLock className="text-gray-500 m-2" />
                     <input
                       type="password"
@@ -159,18 +263,9 @@ export default function SignUpPage() {
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
-                  {/* <div className="bg-gray-200 w-64 p-2 flex items-center mb-3 text-gray-500">
-                    <FaCalendarAlt className="text-gray-500 m-2" />
-                    <input
-                      type="date"
-                      name="dob"
-                      placeholder="Date of Birth"
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div> */}
 
                   <button
-                  type="submit"
+                    type="submit"
                     className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
                   >
                     Sign Up with Email

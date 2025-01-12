@@ -13,7 +13,7 @@ const MyCourses = () => {
 
   return (
     <div>
-    <div className="bg-[#f8f4eb] rounded-lg shadow-md p-6 mt-6 mx-auto max-w-3xl">
+    <div className="bg-[#f8f4eb] rounded-lg shadow-md p-6 mx-auto max-w-3xl">
       <h1 className="text-3xl font-bold text-[#5a3b1a] mb-6">My Courses</h1>
       
       {/* Course List */}

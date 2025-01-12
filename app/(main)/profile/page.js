@@ -1,10 +1,41 @@
 "use client";
-import { useAuth } from "@/app/context/AuthProvider";
+
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { useAuth } from "@/app/context/AuthProvider";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 
-export default function ProfilePage() {
+const firestore = getFirestore();
+
+export default async function ProfilePage() {
+
+  const router = useRouter();
   const { user } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // Firebase signOut method
+      console.log("User logged out successfully!");
+
+      // Redirect to the login page or home page after logout
+      router.push("/login");
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+    }
+  };
+
+  if (!user) {
+    router.push("/login");
+    return null; // Prevent rendering of ProfilePage if user is null
+  }
+
+  const userRef = doc(firestore, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  const userData = userSnap.data();
+
   return (
     <div className="flex items-center justify-center min-h-screen py-10">
       <div className="bg-[#2c3748] shadow-2xl rounded-3xl p-8 w-11/12 md:w-3/4 lg:w-1/2">
@@ -12,7 +43,7 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row items-center sm:space-x-6 border-b pb-6">
           <div className="w-24 h-24 relative mb-4 sm:mb-0">
             <Image
-              src={"/images/test_avd.jpg"}// Replace with dynamic user avatar
+              src={user.photoURL || "/images/login_pirate.png"}// Replace with dynamic user avatar
               alt="User Avatar"
               layout="fill"
               className="rounded-full border-4 border-yellow-400"
@@ -20,9 +51,9 @@ export default function ProfilePage() {
           </div>
           <div className="text-center sm:text-left">
             <h1 className="text-3xl font-extrabold text-white">
-              {/* {user.displayName} */}Avneesh Deshmukh
+              {user.displayName}
             </h1>
-            <p className="text-white text-sm italic">@avdeshmukh</p>
+            <p className="text-white text-sm italic">@{userData.username}</p>
           </div>
         </div>
 
@@ -52,7 +83,7 @@ export default function ProfilePage() {
           <ul className="mt-4 space-y-3">
             <li className="flex flex-col sm:flex-row justify-between bg-gray-100 p-4 rounded-lg shadow">
               <span className="text-gray-500">Email:</span>
-              <span className="font-semibold text-gray-700">johndoe@example.com</span>
+              <span className="font-semibold text-gray-700">{user.email}</span>
             </li>
             <li className="flex flex-col sm:flex-row justify-between bg-gray-100 p-4 rounded-lg shadow">
               <span className="text-gray-500">Joined:</span>
@@ -69,7 +100,8 @@ export default function ProfilePage() {
             </button>
           </Link>
 
-          <button className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-6 rounded-lg font-bold shadow-md hover:from-red-600 hover:to-red-700 transition">
+          <button className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-6 rounded-lg font-bold shadow-md hover:from-red-600 hover:to-red-700 transition"
+            onClick={handleLogout}>
             Log Out
           </button>
         </div>

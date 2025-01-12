@@ -6,7 +6,7 @@ import {
 import {CreatorSidebar} from "@/components/creatorDashboard/creatorsidebar"
 import { Menu } from "lucide-react"
 
-export const MobileSidebar = () => {
+export const CreatorMobileSidebar = () => {
     return (
         <Sheet>
             <SheetTrigger>
