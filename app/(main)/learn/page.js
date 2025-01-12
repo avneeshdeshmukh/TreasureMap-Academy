@@ -1,5 +1,5 @@
 import { FeedWrapper } from "@/components/feed-wrapper";
-import {Stats} from "./stats";
+import { Stats } from "./stats";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { StreakIcons } from "@/components/streak-icons";
 import { Header } from "./header";
@@ -24,29 +24,29 @@ const learnPage = () => {
         { id: "14", index: 14, totalCount: 14, locked: true, current: false, percentage: 0 },
     ];
     return (
-        <div className="flex flex-row-reverse gap-[48px] px-6" >
-            <StickyWrapper>
-                <StreakIcons streak={39} coins={65} />
-                <Stats/>
-                <LeaderboardPos/>
-            </StickyWrapper>
-            <FeedWrapper>
-                <Header title={"Spanish"} />
-                <div className="relative flex flex-col items-center">
-                    {lessons.map((lesson, idx) => (
-                        <LessonButton
-                            key={lesson.id}
-                            id={lesson.id}
-                            index={lesson.index}
-                            totalCount={lessons.length}
-                            locked={lesson.locked}
-                            current={lesson.current}
-                            percentage={lesson.percentage}
-                        />
-                    ))}
-                </div>
-            </FeedWrapper>
-        </div>
+            <div className="flex flex-row-reverse gap-[48px] px-6" >
+                <StickyWrapper>
+                    <StreakIcons streak={39} coins={65} />
+                    <Stats />
+                    <LeaderboardPos />
+                </StickyWrapper>
+                <FeedWrapper>
+                    <Header title={"Spanish"} />
+                    <div className="relative flex flex-col items-center">
+                        {lessons.map((lesson, idx) => (
+                            <LessonButton
+                                key={lesson.id}
+                                id={lesson.id}
+                                index={lesson.index}
+                                totalCount={lessons.length}
+                                locked={lesson.locked}
+                                current={lesson.current}
+                                percentage={lesson.percentage}
+                            />
+                        ))}
+                    </div>
+                </FeedWrapper>
+            </div>
     )
 }
 

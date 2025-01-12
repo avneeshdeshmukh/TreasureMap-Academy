@@ -6,6 +6,8 @@
 .pnp.js
 .yarn/install-state.gz
 
+/treasure-map-academy-firebase-adminsdk-1gvhx-e2846ec9c9.json
+
 # testing
 /coverage
 

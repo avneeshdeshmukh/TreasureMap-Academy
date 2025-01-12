@@ -3,24 +3,22 @@ import Head from "next/head";
 import Link from "next/link";
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  FaFacebookF,
-  FaLinkedinIn,
   FaGoogle,
   FaEnvelope,
   FaGithub,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
-import Confetti from "react-confetti";
 import TopButton from "@/components/TopButton";
 
 
 const firestore = getFirestore();
 
-export default function LoginPage() {
+export default  function LoginPage() {
+  
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -69,11 +67,34 @@ export default function LoginPage() {
 
   const handleProviderLogin = async (provider) => {
     try {
+
       const result = await signInWithPopup(auth, provider);
-      console.log("User Info:", result.user);
-      router.push("/learn");
-    } catch (error) {
-      console.error("Login Error:", error.message);
+      const user = result.user;
+
+      const userRef = doc(firestore, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        const userData = {
+          uid: user.uid,
+          email: user.email,
+          isAdditionalInfoAdded: false,
+          provider: user.providerData[0]?.providerId,
+          createdAt: new Date(),
+        };
+
+        await setDoc(userRef, userData, { merge: true });
+
+        console.log("New user signed up with provider:", user.providerData[0]?.providerId);
+        router.push("/complete-profile");
+      }
+      else {
+        console.log("Existing user, signed in with provider:", user.providerData[0]?.providerId);
+        router.push("/learn");
+      }
+    }
+    catch (err) {
+      setError(`An error occured ${err.message}`);
     }
   };
 

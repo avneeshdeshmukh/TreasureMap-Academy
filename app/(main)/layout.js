@@ -1,8 +1,13 @@
+'use client'
+
 import { MobileHeader } from "@/components/mobile-header"
+import ProtectedRoute from "@/components/protected-route"
 import { Sidebar } from "@/components/sidebar"
 
 export default function MainLayout({ children }) {
+
     return (
+        <ProtectedRoute>
             <div style={{
                 background: `linear-gradient(
               rgba(0, 0, 0, 0.750), 
@@ -23,5 +28,6 @@ export default function MainLayout({ children }) {
                     </div>
                 </main>
             </div>
+        </ProtectedRoute>
     )
 }
