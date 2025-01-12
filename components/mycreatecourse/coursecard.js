@@ -13,7 +13,7 @@ const CourseCard = ({ course, onDelete, onEdit }) => {
         <div className="flex justify-end mt-4">
           <button
             className="px-4 py-2 bg-yellow-500 text-white rounded mr-2"
-            onClick={onEdit}
+            onClick={() => onEdit(course)}
           >
             Edit
           </button>
@@ -26,7 +26,7 @@ const CourseCard = ({ course, onDelete, onEdit }) => {
         </div>
       </div>
     );
-  };
+  };  
   
   export default CourseCard;
   

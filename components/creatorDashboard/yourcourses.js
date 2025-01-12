@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 const YourCourses = () => {
   return (
@@ -9,7 +10,9 @@ const YourCourses = () => {
           You don’t have any courses yet!
         </p>
         <button className="create-button bg-[#ffc107] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#e0a800]">
+          <Link href="/mycourses">
           Create now
+          </Link>
         </button>
       </div>
     </div>

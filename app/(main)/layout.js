@@ -20,7 +20,7 @@ export default function MainLayout({ children }) {
             }}
                 className="min-h-full"
             >
-                <MobileHeader />
+                <MobileHeader platform={"learner"} />
                 <Sidebar className="hidden lg:flex" />
                 <main className="lg:pl-[360px] h-full pt-[50px] lg:pt-0">
                     <div className="max-w-[1056px] mx-auto h-full">
