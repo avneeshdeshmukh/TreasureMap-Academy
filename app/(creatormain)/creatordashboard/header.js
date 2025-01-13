@@ -9,12 +9,6 @@ export const Header = ({ title }) => {
         {/* Spacer to push the search bar to the right */}
         <div className="flex-grow"></div>
     
-        {/* Search bar aligned to the right */}
-        <input
-          type="text"
-          className="search-bar border rounded-lg px-4 py-2 text-sm"
-          placeholder="Search"
-        />
     </div>
     )
 }

@@ -37,7 +37,7 @@ export default function CreatorMainLayout({ children }) {
 
     return (
         <ProtectedRoute>
-            <div className="min-h-screen bg-[#b1b2b3] pt-5">
+            <div className="min-h-screen bg-[#ede9de] pt-5">
                 <MobileHeader platform={"creator"} />
                 <CreatorSidebar className="hidden lg:flex" />
                 <main className="lg:pl-[360px] h-full pt-[50px] lg:pt-0">
