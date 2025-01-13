@@ -198,3 +198,35 @@ body {
   }
 }
 
+.vjs-big-play-button {
+  background: none !important; /* Remove the default background */
+  border: none !important; /* Remove default border */
+  font-size: 0 !important; /* Hide the default triangle */
+  width: 80px; /* Adjust size */
+  height: 80px; /* Adjust size */
+  border-radius: 50%; /* Make it circular */
+  background-color: rgba(0, 0, 0, 0.7); /* Add a semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* Ensure proper positioning */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+.vjs-big-play-button:hover {
+  background-color: rgba(255, 255, 255, 0.8); /* Change background on hover */
+}
+
+.vjs-big-play-button:before {
+  content: ''; /* Remove default triangle */
+}
+
+.vjs-big-play-button i.fa-play {
+  font-size: 40px; /* Adjust icon size */
+  color: #FFD43B; /* Icon color */
+  transition: transform 0.3s ease; /* Ensure smooth transition for icon size and scaling */
+}
+
+.vjs-big-play-button:hover i.fa-play {
+  transform: scale(1.1); /* Slight zoom on the icon */
+}
