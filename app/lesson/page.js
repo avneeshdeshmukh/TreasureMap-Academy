@@ -26,7 +26,7 @@ const App = () => {
     controls: true,
     responsive: true,
     fluid: true,
-    playbackRates: [0.5, 1, 1.5, 2],
+    playbackRates: [0.5, 1, 1.5, 2,2.5,3],
     sources: videoUrl ? [{ src: videoUrl, type: 'video/mp4' }] : [],
   };
 
