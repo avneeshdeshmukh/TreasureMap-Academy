@@ -1,173 +1,123 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import router for navigation
+import { useRouter, useParams } from "next/navigation";
+import { IconBadge } from "@/components/ui/icons-badge";
+import { TitleForm } from "./title-form";
+import { DescriptionForm } from "./description-form";
+import { DifficultyForm } from "./difficulty-form";
+import AddVideos from "./add-video-form";
+import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Edit3, Trash2 } from "lucide-react";
 
-export default function CourseDetailsForm({ initialData, onNext }) {
-  const [courseDetails, setCourseDetails] = useState(
-    initialData || {
-      category: "",
-      totalLength: "",
-    }
-  );
-  const [videos, setVideos] = useState([]); // Store the list of videos
-  const [isVideoFormOpen, setIsVideoFormOpen] = useState(false); // Track if the video form is open
-  const [currentVideo, setCurrentVideo] = useState({
-    title: "",
-    file: null,
-  });
-  const router = useRouter(); // Initialize the router
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCourseDetails((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+export default function VideoUploadForm({ onNext }) {
+  const router = useRouter();
+  const params = useParams();
+  const courseId = params.id;
 
-  const handleVideoInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "file") {
-      setCurrentVideo((prev) => ({ ...prev, file: files[0] })); // Save file if uploaded
-    } else {
-      setCurrentVideo((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  const [videos, setVideos] = useState([]);
 
-  const handleAddVideo = () => {
-    setIsVideoFormOpen(true); // Show the video form
-  };
-
-  const handleConfirmVideo = () => {
-    if (!currentVideo.title || !currentVideo.file) {
-      alert("Please provide a video title and upload a video file.");
-      return;
-    }
-
-    const newVideo = { ...currentVideo, id: Date.now() }; // Generate a unique video ID
-    setVideos((prev) => [...prev, newVideo]); // Add current video to the list
-    setCurrentVideo({ title: "", file: null }); // Reset the video input form
-    setIsVideoFormOpen(false); // Close the video form
+  const handleAddVideo = (video) => {
+    setVideos((prev) => [...prev, video]);
   };
 
   const handleManageVideo = (videoId) => {
-    // Redirect to the manage video page with the video ID
-    router.push(`/edit-form/${videoId}/edit-video-details`);
+    router.push(
+      `/mycourses/${courseId}/edit-form/${videoId}/edit-video-details`
+    );
+  };
+
+  const handleDeleteVideo = (videoId) => {
+    setVideos((prev) => prev.filter((video) => video.id !== videoId));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!courseDetails.category || !courseDetails.totalLength || videos.length === 0) {
-      alert("Please fill out all fields and add at least one video.");
+    if (videos.length === 0) {
+      alert("Please add at least one video.");
       return;
     }
-
-    // Pass course details and videos to the next component
-    onNext({ ...courseDetails, videos });
+    console.log("Upload to AWS")
   };
 
   return (
-    <form className="bg-white p-6 rounded-lg shadow-md" onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-semibold mb-4">Additional Course Details</h2>
+    <div className="container mx-auto px-6 py-8 space-y-8">
+      <h1 className="text-3xl font-semibold mb-2">Course Setup</h1>
+      <span className="text-sm text-gray-600">Complete all fields (2/5)</span>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Course Category</label>
-        <input
-          type="text"
-          name="category"
-          value={courseDetails.category}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-          placeholder="Enter course category (e.g., Technology, Business, Arts)"
-        />
-      </div>
+      <div className="grid md:grid-cols-1 gap-8">
+        {/* Left Section: Course Customization */}
+        <div className="">
+          <div className="flex items-center gap-x-3 mb-4">
+            <IconBadge icon={LayoutDashboard} />
+            <h2 className="text-xl font-medium">Customize Your Course</h2>
+          </div>
+          <div className="space-y-4">
+            <TitleForm />
+            <DescriptionForm />
+            <DifficultyForm />
+          </div>
+        </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Total Course Length (in hours)</label>
-        <input
-          type="number"
-          name="totalLength"
-          value={courseDetails.totalLength}
-          onChange={handleInputChange}
-          className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-          placeholder="Enter total course length (e.g., 5)"
-        />
-      </div>
+        {/* Right Section: Course Videos */}
+        <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-medium">Course Videos</h2>
+            {/* Pass the handleAddVideo function to AddVideos */}
+            <AddVideos onAdd={handleAddVideo} />
+          </div>
 
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">Videos</h3>
-        {videos.map((video, index) => (
-          <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-100">
-            <h4 className="text-md font-semibold mb-2">{video.title}</h4>
-            <p className="text-sm text-gray-700 mb-2">{video.file.name}</p>
-            <button
-              type="button"
-              onClick={() => handleManageVideo(video.id)} // Navigate with video ID
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+          {videos.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {videos.map((video) => (
+                <div
+                  key={video.id}
+                  className="flex items-center justify-between py-3"
+                >
+                  <div>
+                    <h4 className="font-medium text-gray-800">{video.title}</h4>
+                    <p className="text-sm text-gray-500">{video.file.name}</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-x-1"
+                      onClick={() => handleManageVideo(courseId, video.id)}
+                    >
+                      <Edit3 size={16} />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="flex items-center gap-x-1"
+                      onClick={() => handleDeleteVideo(video.id)}
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center">
+              No videos added yet. Click "Add Video" to get started.
+            </p>
+          )}
+
+          {/* Submit Button */}
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={handleSubmit}
+              variant="ghost"
             >
-              Manage Video
-            </button>
+              Submit Videos
+            </Button>
           </div>
-        ))}
-
-        {isVideoFormOpen ? (
-          <div className="mb-4 p-4 border rounded-lg bg-white shadow-md">
-            <div className="mb-2">
-              <input
-                type="text"
-                name="title"
-                value={currentVideo.title}
-                onChange={handleVideoInputChange}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                placeholder="Video Title"
-              />
-            </div>
-            <div className="mb-2">
-              <input
-                type="file"
-                name="file"
-                accept="video/*"
-                onChange={handleVideoInputChange}
-                className="w-full p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-              />
-            </div>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={handleConfirmVideo}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300"
-              >
-                OK
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsVideoFormOpen(false)}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleAddVideo}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-          >
-            + Add Video
-          </button>
-        )}
+        </div>
       </div>
-
-      <div className="flex justify-end gap-4">
-        <button
-          type="submit"
-          className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 focus:outline-none focus:ring focus:ring-purple-300"
-        >
-          Submit
-        </button>
-      </div>
-    </form>
+    </div>
   );
 }

@@ -1,59 +1,57 @@
-"use client";
+"use client"; 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
+import { useRouter } from "next/navigation";
 import CourseDetailsForm from "@/components/mycreatecourse/course-form-2/course-details-form";
-// import VideoUploadForm from "@/components/mycreatecourse/course-form-2/video-upload-form";
-// import ReviewSubmitForm from "@/components/mycreatecourse/course-form-2/review-submit-form";
 
 export default function EditFormPage() {
-  const router = useRouter(); // Initialize useRouter
-  const [page, setPage] = useState(1); // State to track the current page of the form
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    courseDetails: {}, // Data from CourseDetailsForm
-    videos: [], // Array of videos with timestamps and quizzes
+    courseDetails: {},
+    videos: [],
   });
 
-  const handleNext = (data) => {
-    setFormData((prev) => ({ ...prev, ...data })); // Merge new data with existing
-    setPage((prev) => prev + 1); // Go to the next page
+  // Handle the submit logic
+  const handleSubmit = () => {
+    console.log("Form Data Submitted:", formData); 
+    alert("Form submitted successfully!");
+    router.push("/mycourses"); 
   };
 
-  const handlePrevious = () => {
-    setPage((prev) => prev - 1); // Go to the previous page
+  // Handle going back
+  const handleBack = () => {
+    router.back(); // Navigate to the previous page
   };
 
-  // Final submission logic
-  const handleFinalSubmit = (data) => {
-    console.log("Final form data submitted:", data);
-    // Redirect to the payment page after form submission
-    router.push("/payment"); // Navigate to the payment page
+  const handleNextFromCourseDetails = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      courseDetails: data,
+    }));
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {page === 1 && (
-        <CourseDetailsForm
-          initialData={formData.courseDetails}
-          onNext={(data) => handleNext({ courseDetails: data })}
-        />
-      )}
-      {/* {page === 2 && (
-        <VideoUploadForm
-          totalVideos={formData.courseDetails.totalVideos} // Pass total videos from courseDetails
-          initialData={formData.videos}
-          onNext={(data) => handleNext({ videos: data })}
-          onPrevious={handlePrevious}
-        />
-      )} */}
-      {/* {page === 3 && (
-        <ReviewSubmitForm
-          formData={formData}
-          onSubmit={handleFinalSubmit} // Update this to use handleFinalSubmit
-          onPrevious={handlePrevious}
-        />
-      )} */}
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold mb-4">Edit Course</h1>
 
-      
+      {/* Course Details Form */}
+      <CourseDetailsForm
+      />
+
+      {/* Buttons */}
+      <div className="flex justify-between mt-6">
+        <button
+          className="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300"
+          onClick={handleBack}
+        >
+          Back
+        </button>
+        <button
+          className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700"
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
+      </div>
     </div>
   );
 }
