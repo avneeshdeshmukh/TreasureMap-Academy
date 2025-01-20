@@ -32,6 +32,8 @@ const buttonVariants = cva(
           "bg-indigo-500 text-primary-foreground hover:bg-indigo-500/90 border-indigo-600 border-b-4 active:border-b-0",
         superOutline: "bg-white text-indigo-500 hover:bg-slate-100",
 
+        submit:"bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition-all",
+
         ghost:
           "bg-transparent text-yellow-400 border-transparent border-0 hover:bg-yellow-300 hover:text-yellow-700",
 
