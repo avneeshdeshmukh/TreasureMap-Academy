@@ -8,6 +8,26 @@ body,
   @apply h-full;
 }
 
+/* Custom big play button styles */
+.custom-big-play-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* Ensure it appears above the video player */
+  cursor: pointer;
+  background-color: transparent; /* Optional: Transparent background */
+}
+
+/* Hide the default big play button */
+.vjs-big-play-button {
+  display: none !important;
+}
+
+
 
 /* :root {
   --background: #ffffff;
