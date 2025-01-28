@@ -1,356 +1,352 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Clock, Save, Type, HelpCircle } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Select from "react-select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
+
 
 export default function QuizCreator() {
-  const [quizzes, setQuizzes] = useState([]);
-  const [showForm, setShowForm] = useState(false);
+  const [currentTimestamp, setCurrentTimestamp] = useState(null);
+  const [selectedQuizType, setSelectedQuizType] = useState(null);
+  const [timestamps, setTimestamps] = useState([]);
+  const [currentQuestions, setCurrentQuestions] = useState([]);
 
-  const addQuiz = (newQuiz) => {
-    setQuizzes([...quizzes, { ...newQuiz, id: Date.now() }]);
-    setShowForm(false);
+  const handleAddTimestamp = () => {
+    if (currentTimestamp !== null) {
+      const newTimestampQuiz = {
+        timestamp: currentTimestamp,
+        questions: currentQuestions,
+      };
+      setTimestamps([...timestamps, newTimestampQuiz]);
+      setCurrentTimestamp(null);
+      setCurrentQuestions([]);
+      setSelectedQuizType(null);
+    }
   };
 
-  const removeQuiz = (id) => {
-    setQuizzes(quizzes.filter((quiz) => quiz.id !== id));
+  const handleAddQuestion = (quiz) => {
+    setCurrentQuestions([...currentQuestions, quiz]);
+    setSelectedQuizType(null);
+  };
+
+  const renderQuizTypeForm = () => {
+    switch (selectedQuizType) {
+      case "mcq":
+        return <MultipleChoiceForm onSubmit={handleAddQuestion} />;
+      case "fillBlanks":
+        return <FillBlanksForm onSubmit={handleAddQuestion} />;
+      case "trueFalse":
+        return <TrueFalseForm onSubmit={handleAddQuestion} />;
+      case "slider":
+        return <SliderForm onSubmit={handleAddQuestion} />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">
-            Video Quiz Creator
-          </h1>
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-indigo-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
-          >
-            <Plus className="w-5 h-5" />
-            Add Quiz
-          </Button>
-        </header>
+    <div className="max-w-5xl mx-auto p-6 bg-white">
+      <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
+      <div className="mb-4">
+        <label>Timestamp (seconds)</label>
+        <Input
+          type="number"
+          value={currentTimestamp || ""}
+          onChange={(e) => setCurrentTimestamp(Number(e.target.value))}
+          placeholder="Enter timestamp"
+        />
+      </div>
 
-        {showForm && (
-          <QuizForm onSubmit={addQuiz} onCancel={() => setShowForm(false)} />
-        )}
+      {currentTimestamp !== null && (
+        <>
+          <Tabs>
+            <TabsList className="grid w-full grid-cols-4 mb-4">
+              <TabsTrigger onClick={() => setSelectedQuizType("mcq")}>
+                Multiple Choice
+              </TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}>
+                Fill Blanks
+              </TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}>
+                True/False
+              </TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("slider")}>
+                Slider
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-        {/* Group quizzes by timestamp */}
-        {Object.entries(
-          quizzes.reduce((acc, quiz) => {
-            if (!acc[quiz.timestamp]) acc[quiz.timestamp] = [];
-            acc[quiz.timestamp].push(quiz);
-            return acc;
-          }, {})
-        ).map(([timestamp, quizzesAtTimestamp]) => (
-          <div key={timestamp} className="mb-8">
-            <h3 className="text-slate-300 mb-2">
-              Timestamp: {Math.floor(timestamp / 60)}:
-              {(timestamp % 60).toString().padStart(2, "0")}
-            </h3>
-            <div className="space-y-4">
-              {quizzesAtTimestamp.map((quiz) => (
-                <QuizCard key={quiz.id} quiz={quiz} onRemove={removeQuiz} />
+          {renderQuizTypeForm()}
+
+          {currentQuestions.length > 0 && (
+            <div className="mt-4">
+              <h3 className="font-semibold mb-2">Current Questions</h3>
+              {currentQuestions.map((q, index) => (
+                <div key={index} className="border p-2 mb-2">
+                  <p>{q.question}</p>
+                  <p className="text-sm text-gray-500">{q.type}</p>
+                </div>
               ))}
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+
+          <Button
+            onClick={handleAddTimestamp}
+            disabled={currentQuestions.length === 0}
+            className=" mt-4"
+            variant="ghost"
+          >
+            Save Timestamp
+          </Button>
+        </>
+      )}
+
+      {timestamps.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-xl font-semibold mb-4">Saved Timestamps</h3>
+          {timestamps.map((ts, index) => (
+            <Card key={index} className="mb-4">
+              <CardHeader>
+                <h4>Timestamp: {ts.timestamp} seconds</h4>
+              </CardHeader>
+              <CardContent>
+                {ts.questions.map((q, qIndex) => (
+                  <div key={qIndex} className="border-b py-2">
+                    <p>{q.question}</p>
+                    <p className="text-sm text-gray-500">{q.type}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-const QuizForm = ({ onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({
-    timestamp: "",
-    type: "",
-    question: "",
-    options: [],
-    correctAnswer: "",
-    points: 10,
-  });
+const MultipleChoiceForm = ({ onSubmit }) => {
+  const [question, setQuestion] = useState("");
+  const [options, setOptions] = useState(["", ""]);
+  const [correctAnswer, setCorrectAnswer] = useState(null);
 
-  const quizTypes = [
-    { value: "multipleChoice", label: "Multiple Choice" },
-    { value: "trueFalse", label: "True/False" },
-    { value: "fillBlanks", label: "Fill in the Blanks" },
-    { value: "hotspot", label: "Hotspot" },
-    { value: "dragDrop", label: "Drag and Drop" },
-    { value: "slider", label: "Slider" },
-  ];
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const handleSubmit = () => {
+    if (correctAnswer) {
+      onSubmit({
+        type: "mcq",
+        question,
+        options,
+        correctAnswer,
+      });
+      setQuestion("");
+      setOptions(["", ""]);
+      setCorrectAnswer(null);
+    }
   };
 
-  return (
-    <div className="bg-slate-800 rounded-xl p-6 mb-8">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Timestamp (seconds into video)
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.timestamp}
-              onChange={(e) =>
-                setFormData({ ...formData, timestamp: e.target.value })
-              }
-              className="w-full bg-slate-700 text-white p-3 rounded-lg"
-              placeholder="Enter seconds (e.g., 120)"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Quiz Type
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
-              className="w-full bg-slate-700 text-white p-3 rounded-lg"
-            >
-              <option value="">Select type</option>
-              {quizTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {formData.type && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Question
-              </label>
-              <input
-                type="text"
-                value={formData.question}
-                onChange={(e) =>
-                  setFormData({ ...formData, question: e.target.value })
-                }
-                className="w-full bg-slate-700 text-white p-3 rounded-lg"
-                placeholder="Enter your question"
-              />
-            </div>
-
-            {/* Render specific form based on quiz type */}
-            {formData.type === "multipleChoice" && (
-              <MultipleChoiceForm
-                formData={formData}
-                setFormData={setFormData}
-              />
-            )}
-            {formData.type === "trueFalse" && (
-              <TrueFalseForm formData={formData} setFormData={setFormData} />
-            )}
-            {formData.type === "fillBlanks" && (
-              <FillBlanksForm formData={formData} setFormData={setFormData} />
-            )}
-            {formData.type === "hotspot" && (
-              <HotspotForm formData={formData} setFormData={setFormData} />
-            )}
-            {formData.type === "dragDrop" && (
-              <DragDropForm formData={formData} setFormData={setFormData} />
-            )}
-            {formData.type === "slider" && (
-              <SliderForm formData={formData} setFormData={setFormData} />
-            )}
-          </>
-        )}
-
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 text-slate-300 hover:text-white"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-indigo-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-600"
-          >
-            <Save className="w-5 h-5" />
-            Save Quiz
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-const MultipleChoiceForm = ({ formData, setFormData }) => {
-  const addOption = () => {
-    setFormData({
-      ...formData,
-      options: [...formData.options, ""],
-    });
-  };
-
+  const addOption = () => setOptions([...options, ""]);
   const updateOption = (index, value) => {
-    const updatedOptions = [...formData.options];
-    updatedOptions[index] = value;
-    setFormData({
-      ...formData,
-      options: updatedOptions,
-    });
-  };
-
-  const removeOption = (index) => {
-    const updatedOptions = formData.options.filter((_, i) => i !== index);
-    setFormData({
-      ...formData,
-      options: updatedOptions,
-    });
+    const newOptions = [...options];
+    newOptions[index] = value;
+    setOptions(newOptions);
   };
 
   return (
     <div className="space-y-4">
-      <label className="block text-sm font-medium text-slate-300 mb-2">
-        Options
-      </label>
-      {formData.options.map((option, index) => (
-        <div key={index} className="flex items-center gap-4">
-          <input
-            type="text"
-            value={option}
-            onChange={(e) => updateOption(index, e.target.value)}
-            className="w-full bg-slate-700 text-white p-3 rounded-lg"
-            placeholder={`Option ${index + 1}`}
-          />
-          <button
-            type="button"
-            onClick={() => removeOption(index)}
-            className="text-slate-400 hover:text-slate-300"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      <Input
+        placeholder="Enter question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+      {options.map((opt, index) => (
+        <Input
+          key={index}
+          placeholder={`Option ${index + 1}`}
+          value={opt}
+          onChange={(e) => updateOption(index, e.target.value)}
+        />
       ))}
-      <button
-        type="button"
-        onClick={addOption}
-        className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600"
-      >
-        Add Option
-      </button>
+      <Button onClick={addOption}>Add Option</Button>
+      <Select
+        options={options
+          .filter((opt) => opt.trim() !== "")
+          .map((opt) => ({
+            value: opt,
+            label: opt,
+          }))}
+        onChange={(selectedOption) =>
+          setCorrectAnswer(selectedOption?.value || null)
+        }
+        value={
+          correctAnswer ? { value: correctAnswer, label: correctAnswer } : null
+        }
+        placeholder="Select Correct Answer"
+      />
 
-      <div>
-        <label className="block text-sm font-medium text-slate-300 mt-4 mb-2">
-          Correct Answer
-        </label>
-        <select
-          value={formData.correctAnswer}
-          onChange={(e) =>
-            setFormData({ ...formData, correctAnswer: e.target.value })
-          }
-          className="w-full bg-slate-700 text-white p-3 rounded-lg"
-        >
-          <option value="">Select the correct answer</option>
-          {formData.options.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Button
+        onClick={handleSubmit}
+        disabled={
+          !question ||
+          !correctAnswer ||
+          options.filter((opt) => opt.trim() !== "").length < 2
+        }
+      >
+        Add Question
+      </Button>
     </div>
   );
 };
 
-const FillBlanksForm = ({ formData, setFormData }) => (
-  <div>
-    <label className="block text-sm font-medium text-slate-300 mb-2">
-      Correct Answer
-    </label>
-    <input
-      type="text"
-      value={formData.correctAnswer}
-      onChange={(e) =>
-        setFormData({ ...formData, correctAnswer: e.target.value })
-      }
-      className="w-full bg-slate-700 text-white p-3 rounded-lg"
-      placeholder="Enter the correct answer"
-    />
-  </div>
-);
+const FillBlanksForm = ({ onSubmit }) => {
+  const [question, setQuestion] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
 
-const HotspotForm = ({ formData, setFormData }) => (
-  <div>
-    <label className="block text-sm font-medium text-slate-300 mb-2">
-      Hotspot Area (Describe or provide coordinates)
-    </label>
-    <textarea
-      value={formData.correctAnswer}
-      onChange={(e) =>
-        setFormData({ ...formData, correctAnswer: e.target.value })
-      }
-      className="w-full bg-slate-700 text-white p-3 rounded-lg"
-      placeholder="Enter hotspot description or coordinates"
-    />
-  </div>
-);
+  const handleSubmit = () => {
+    onSubmit({
+      type: "fillBlanks",
+      question,
+      correctAnswer,
+    });
+    setQuestion("");
+    setCorrectAnswer("");
+  };
 
-const DragDropForm = ({ formData, setFormData }) => (
-  <div>
-    <label className="block text-sm font-medium text-slate-300 mb-2">
-      Drag-and-Drop Description
-    </label>
-    <textarea
-      value={formData.correctAnswer}
-      onChange={(e) =>
-        setFormData({ ...formData, correctAnswer: e.target.value })
-      }
-      className="w-full bg-slate-700 text-white p-3 rounded-lg"
-      placeholder="Describe the drag-and-drop interaction"
-    />
-  </div>
-);
-
-const SliderForm = ({ formData, setFormData }) => (
-  <div>
-    <label className="block text-sm font-medium text-slate-300 mb-2">
-      Correct Value for Slider
-    </label>
-    <input
-      type="number"
-      value={formData.correctAnswer}
-      onChange={(e) =>
-        setFormData({ ...formData, correctAnswer: e.target.value })
-      }
-      className="w-full bg-slate-700 text-white p-3 rounded-lg"
-      placeholder="Enter the correct value"
-    />
-  </div>
-);
-
-const QuizCard = ({ quiz, onRemove }) => (
-  <div className="bg-slate-800 rounded-xl p-6 flex items-start justify-between">
-    <div className="space-y-2">
-      <div className="flex items-center gap-3 text-slate-400">
-        <Clock className="w-4 h-4" />
-        <span>
-          {Math.floor(quiz.timestamp / 60)}:
-          {(quiz.timestamp % 60).toString().padStart(2, "0")}
-        </span>
-        <Type className="w-4 h-4" />
-        <span className="capitalize">{quiz.type}</span>
-      </div>
-      <div className="text-white font-medium">{quiz.question}</div>
+  return (
+    <div className="space-y-4">
+      <Input
+        placeholder="Enter question with blank"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+      <Input
+        placeholder="Correct Answer"
+        value={correctAnswer}
+        onChange={(e) => setCorrectAnswer(e.target.value)}
+      />
+      <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
+        Add Question
+      </Button>
     </div>
-    <button
-      onClick={() => onRemove(quiz.id)}
-      className="text-slate-400 hover:text-slate-300"
-    >
-      <X className="w-5 h-5" />
-    </button>
-  </div>
-);
+  );
+};
+
+const TrueFalseForm = ({ onSubmit }) => {
+  const [question, setQuestion] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState(null);
+
+  const handleSubmit = () => {
+    if (correctAnswer) {
+      onSubmit({
+        type: "trueFalse",
+        question,
+        correctAnswer,
+      });
+      setQuestion("");
+      setCorrectAnswer(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Input
+        placeholder="Enter True/False question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+      <Select
+        options={[
+          { value: "true", label: "True" },
+          { value: "false", label: "False" },
+        ]}
+        onChange={(selectedOption) =>
+          setCorrectAnswer(selectedOption?.value || null)
+        }
+        value={
+          correctAnswer ? { value: correctAnswer, label: correctAnswer } : null
+        }
+        placeholder="Select Correct Answer"
+      />
+
+      <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
+        Add Question
+      </Button>
+    </div>
+  );
+};
+
+const SliderForm = ({ onSubmit }) => {
+  const [question, setQuestion] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState(50); // Default to midpoint of range
+  const [min, setMin] = useState(0);
+  const [max, setMax] = useState(100);
+
+  const handleSubmit = () => {
+    onSubmit({
+      type: "slider",
+      question,
+      correctAnswer,
+      min,
+      max,
+    });
+    setQuestion("");
+    setCorrectAnswer(50); // Reset to default midpoint
+    setMin(0);
+    setMax(100);
+  };
+
+  const handleRangeChange = (e) => {
+    const value = Number(e.target.value);
+    setCorrectAnswer(value);
+  };
+
+  return (
+    <div className="space-y-4">
+      <Input
+        placeholder="Enter slider question"
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+      />
+      <div className="flex space-x-2">
+        <Input
+          type="number"
+          placeholder="Min Value"
+          value={min}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            setMin(value);
+            if (correctAnswer < value) setCorrectAnswer(value); // Adjust correctAnswer if out of range
+          }}
+        />
+        <Input
+          type="number"
+          placeholder="Max Value"
+          value={max}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            setMax(value);
+            if (correctAnswer > value) setCorrectAnswer(value); // Adjust correctAnswer if out of range
+          }}
+        />
+      </div>
+      <div className="space-y-2">
+        <label>
+          <span className="font-semibold">Select Correct Answer: {correctAnswer}</span>
+        </label>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={correctAnswer}
+          onChange={handleRangeChange}
+          className="w-full"
+        />
+      </div>
+      <Button onClick={handleSubmit} disabled={!question}>
+        Add Question
+      </Button>
+    </div>
+  );
+};

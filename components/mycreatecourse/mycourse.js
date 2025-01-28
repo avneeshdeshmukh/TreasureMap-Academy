@@ -7,7 +7,7 @@ import Drafts from "./drafts";
 const MyCourses = () => {
   const router = useRouter();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [submittedCourses, setSubmittedCourses] = useState([]);
+  const [drafts, setDrafts] = useState([]);
 
   const courses = [
     { id: 1, title: "React Basics", enrollments: 50 },
@@ -25,16 +25,19 @@ const MyCourses = () => {
   const handleEdit = (courseid) => {
     console.log("Edit course with ID:", courseid);
     // Example: Navigate to an edit page
-    router.push(`/mycourses/${courseid}/edit-form`);
+    router.push(`/create/courses/${courseid}/edit-form`);
   };
 
-  const handleCourseSubmit = (newCourse) => {
-    setSubmittedCourses((prevCourses) => [...prevCourses, newCourse]);
+  const handleCourseSubmit = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("refreshDrafts")); // Custom event to notify Drafts
+    }
+    setIsFormOpen(false);
   };
 
   return (
     <div>
-      <div className="bg-white rounded-lg shadow-md p-6 mt-6 mx-auto max-w-3xl">
+      <div className="bg-white rounded-lg shadow-2xl p-6 mt-6 mx-auto max-w-3xl">
         <h1 className="text-3xl font-bold text-[#5a3b1a] mb-6">My Courses</h1>
 
         {/* Course List */}
@@ -58,13 +61,6 @@ const MyCourses = () => {
         </button>
       </div>
 
-      {/* Drafts Component */}
-      <Drafts
-        courses={submittedCourses}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-      />
-
       {/* Course Form */}
       {isFormOpen && (
         <CourseForm
@@ -72,6 +68,11 @@ const MyCourses = () => {
           onCourseSubmit={handleCourseSubmit}
         />
       )}
+      {/* Drafts Component */}
+      <Drafts
+        onEdit={handleEdit}
+      />
+
     </div>
   );
 };

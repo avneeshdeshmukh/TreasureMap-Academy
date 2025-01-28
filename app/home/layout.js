@@ -1,7 +1,6 @@
 import "../globals.css";
 import Footer from "@/components/homepage/Footer";
 import Homenavbar from "@/components/homepage/Homenavbar";
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 export const metadata = {
@@ -12,7 +11,6 @@ export const metadata = {
 
 export default function HomeLayout({ children }) {
   return (
-
     <>
       <Homenavbar />
       <div className="min-h-screen">

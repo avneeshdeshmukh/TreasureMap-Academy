@@ -1,7 +1,8 @@
-"use client"; 
+"use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import CourseDetailsForm from "@/components/mycreatecourse/course-form-2/course-details-form";
+import { Button } from "@/components/ui/button";
 
 export default function EditFormPage() {
   const router = useRouter();
@@ -12,9 +13,9 @@ export default function EditFormPage() {
 
   // Handle the submit logic
   const handleSubmit = () => {
-    console.log("Form Data Submitted:", formData); 
+    console.log("Form Data Submitted:", formData);
     alert("Form submitted successfully!");
-    router.push("/mycourses"); 
+    router.push("/mycourses");
   };
 
   // Handle going back
@@ -45,12 +46,12 @@ export default function EditFormPage() {
         >
           Back
         </button>
-        <button
-          className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700"
+        <Button
           onClick={handleSubmit}
+          variant="ghost"
         >
-          Submit
-        </button>
+          Publish Course
+        </Button>
       </div>
     </div>
   );

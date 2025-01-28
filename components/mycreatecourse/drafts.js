@@ -1,7 +1,85 @@
 "use client";
+import { getFirestore } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { useAuth } from "@/app/context/AuthProvider";
+import { useState, useEffect } from "react";
 import React from "react";
 
-const Drafts = ({ courses = [], onDelete, onEdit }) => {
+const firestore = getFirestore();
+
+
+const Drafts = ({ onEdit }) => {
+
+  const [courses, setCourses] = useState([]); // State to store courses
+  const [loading, setLoading] = useState(true); // State for loading status
+  const [error, setError] = useState(null); // State for error handling
+  const { user } = useAuth(); // Get the current user
+  const userRef = doc(firestore, "users", user.uid);
+
+  const fetchUserCourses = async () => {
+    try {
+      if (!user) {
+        throw new Error("User is not logged in.");
+      }
+
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
+      // Reference the 'courses' collection
+      const coursesRef = collection(firestore, "courses");
+
+      // Query courses where username matches the current user's username
+      const q = query(coursesRef, where("creator", "==", userData.username));
+
+      // Fetch the query snapshot
+      const querySnapshot = await getDocs(q);
+
+      // Extract course data
+      const userCourses = querySnapshot.docs.map((doc) => doc.data());
+      console.log("User's courses:", userCourses);
+      return userCourses; // Return the array of courses
+    } catch (error) {
+      console.error("Error fetching user courses:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    // Fetch courses on component mount
+    const loadCourses = async () => {
+      try {
+        setLoading(true); // Set loading to true before fetching
+        const userCourses = await fetchUserCourses();
+        setCourses(userCourses); // Update state with fetched courses
+      } catch (err) {
+        setError(err.message); // Handle errors
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+
+    loadCourses();
+
+    const handleRefresh = () => {
+      loadCourses();
+    };
+    window.addEventListener("refreshDrafts", handleRefresh);
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener("refreshDrafts", handleRefresh);
+    };
+  }, [user]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+
   if (!courses || courses.length === 0) {
     return (
       <div className="max-w-3xl mx-auto mt-8 mb-8">
@@ -32,24 +110,24 @@ const Drafts = ({ courses = [], onDelete, onEdit }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {courses.map((course) => (
             <div
-              key={course.id}
+              key={course.courseId}
               className="bg-gray-100 p-4 rounded-lg shadow flex flex-col justify-between"
             >
               <div>
                 <h3 className="text-lg font-semibold text-gray-800">
-                  {course.courseTitle}
+                  {course.title}
                 </h3>
                 <p className="text-sm text-gray-600">{course.description}</p>
               </div>
               <div className="flex justify-end mt-4 space-x-2">
                 <button
-                  onClick={() => onEdit(course.id)}
+                  onClick={() => onEdit(course.courseId)}
                   className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => onDelete(course.id)}
+                  onClick={() => onDelete(course.courseId)}
                   className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                 >
                   Delete
