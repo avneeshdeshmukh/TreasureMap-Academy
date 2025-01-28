@@ -12,13 +12,13 @@ export const CreatorSidebar = ({ className }) => {
                     <SidebarItem
                         variant={"sidebarOutlineActive"}
                         icon={"house"}
-                        href={"/creatordashboard"}
+                        href={"/create/creatordashboard"}
                         label={"Dashboard"}
                     />
                     <SidebarItem
                         variant={"sidebarOutline"}
                         icon={"book"}
-                        href={"/mycourses"}
+                        href={"/create/mycourses"}
                         label={"My Courses"}
                     />
                     <SidebarItem
