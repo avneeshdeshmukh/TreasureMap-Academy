@@ -1,114 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
-import { getFirestore, doc, updateDoc, getDoc, deleteField } from "firebase/firestore";
-import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 export default function QuizCreator() {
-  const firestore = getFirestore();
-  const { videoId } = useParams();
-
-  const videoRef = doc(firestore, "videos", videoId);
-
-  const [videoDoc, setVideoDoc] = useState(null);
   const [currentTimestamp, setCurrentTimestamp] = useState(null);
   const [selectedQuizType, setSelectedQuizType] = useState(null);
   const [timestamps, setTimestamps] = useState([]);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [editingTimestampIndex, setEditingTimestampIndex] = useState(null);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
-  const [previousTimestamp, setPreviousTimestamp] = useState(null);
 
-  useEffect(() => {
-    const fetchVideo = async () => {
-      const vid = await getDoc(videoRef);
-      if (vid.exists()) {
-        const videoData = vid.data();
-        setVideoDoc(videoData);
-
-        // If quizzes already exist, update the state
-        if (videoData.quizzes) {
-          const fetchedQuizzes = Object.values(videoData.quizzes);
-          setTimestamps(fetchedQuizzes);
-        }
-      } else {
-        console.log("Video not found");
-      }
-    };
-
-    fetchVideo();
-  }, [videoId]);
-
-  const handleAddTimestamp = async () => {
+  const handleAddTimestamp = () => {
     if (currentTimestamp !== null) {
-      const newQuestion = {
+      const newTimestampQuiz = {
         timestamp: currentTimestamp,
         questions: currentQuestions,
       };
-  
+      
       if (editingTimestampIndex !== null) {
-        // If we're editing an existing timestamp, compare the new timestamp with the previous one
+        // Update existing timestamp
         const updatedTimestamps = [...timestamps];
-        const updatedTimestamp = updatedTimestamps[editingTimestampIndex];
-  
-        if (currentTimestamp !== previousTimestamp) {
-          // If the timestamp has changed, update Firestore with the new timestamp key
-          await updateDoc(videoRef, {
-            [`quizzes.${currentTimestamp}`]: newQuestion, // Update Firestore with the new timestamp
-          });
-  
-          // Remove the old timestamp from Firestore
-          await updateDoc(videoRef, {
-            [`quizzes.${previousTimestamp}`]: deleteField(), // Remove old timestamp
-          });
-  
-          // Update the state locally
-          updatedTimestamp.timestamp = currentTimestamp;  // Change to the new timestamp value
-          updatedTimestamp.questions = currentQuestions;  // Update the questions
-          updatedTimestamps[editingTimestampIndex] = updatedTimestamp;
-        } else {
-          // If the timestamp has not changed, just update the questions
-          updatedTimestamp.questions = currentQuestions;
-          updatedTimestamps[editingTimestampIndex] = updatedTimestamp;
-  
-          // Update Firestore with the same timestamp key but updated questions
-          await updateDoc(videoRef, {
-            [`quizzes.${previousTimestamp}`]: updatedTimestamp,
-          });
-        }
-  
-        setTimestamps(updatedTimestamps); // Update local state
-        setEditingTimestampIndex(null); // Reset editing state
-        setPreviousTimestamp(null); // Clear previous timestamp
-  
+        updatedTimestamps[editingTimestampIndex] = newTimestampQuiz;
+        setTimestamps(updatedTimestamps);
+        setEditingTimestampIndex(null);
       } else {
-        // If it's a new timestamp, add it to the state and Firestore
-        setTimestamps((prevTimestamps) => [...prevTimestamps, newQuestion]);
-  
-        await updateDoc(videoRef, {
-          [`quizzes.${currentTimestamp}`]: newQuestion, // Add new timestamp to Firestore
-        });
-  
-        setPreviousTimestamp(null); // Clear previous timestamp when adding a new one
+        // Add new timestamp
+        setTimestamps([...timestamps, newTimestampQuiz]);
       }
-  
-      // Clear input fields after saving or updating
+      
       setCurrentTimestamp(null);
       setCurrentQuestions([]);
       setSelectedQuizType(null);
     }
   };
-  
 
   const handleEditTimestamp = (index) => {
     const timestampToEdit = timestamps[index];
-    setPreviousTimestamp(timestampToEdit.timestamp);
     setCurrentTimestamp(timestampToEdit.timestamp);
     setCurrentQuestions([...timestampToEdit.questions]);
     setEditingTimestampIndex(index);
@@ -118,39 +51,45 @@ export default function QuizCreator() {
     setTimestamps(timestamps.filter((_, i) => i !== index));
   };
 
+  const handleAddQuestion = (quiz) => {
+    setCurrentQuestions([...currentQuestions, quiz]);
+    setSelectedQuizType(null);
+  };
+
+  const handleDeleteQuestion = (index) => {
+    setCurrentQuestions(currentQuestions.filter((_, i) => i !== index));
+  };
+
   const handleDragEnd = (result) => {
     if (!result.destination) return;
-
+    
     const items = Array.from(currentQuestions);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
+    
     setCurrentQuestions(items);
     console.log(items);
   };
 
   const handleEditQuestion = (index) => {
     const questionToEdit = currentQuestions[index];
-    setSelectedQuizType(questionToEdit.type);
-    setEditingQuestionIndex(currentQuestions[index]);
-
-  };
-
-  const handleAddQuestion = (quiz) => {
-    setCurrentQuestions([...currentQuestions, quiz]);
-    setSelectedQuizType(null);
+    setSelectedQuizType(questionToEdit.type); 
+    setEditingQuestionIndex(currentQuestions[index]); 
+    
   };
 
   const renderQuizTypeForm = () => {
     if (!selectedQuizType) return null;
-
+  
+    
+  
     switch (selectedQuizType) {
       case "mcq":
         return <MultipleChoiceForm onSubmit={handleAddQuestion} />;
       case "fillBlanks":
         return <FillBlanksForm onSubmit={handleAddQuestion} />;
       case "trueFalse":
-        return <TrueFalseForm onSubmit={handleAddQuestion} />;
+        return <TrueFalseForm onSubmit={handleAddQuestion}  />;
       case "slider":
         return <SliderForm onSubmit={handleAddQuestion} />;
       default:
@@ -187,8 +126,8 @@ export default function QuizCreator() {
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="questions">
               {(provided) => (
-                <div
-                  {...provided.droppableProps}
+                <div 
+                  {...provided.droppableProps} 
                   ref={provided.innerRef}
                   className="mt-4"
                 >
@@ -207,20 +146,20 @@ export default function QuizCreator() {
                             <p className="text-sm text-gray-500">{q.type}</p>
                           </div>
                           <div>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleEditQuestion(index)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteQuestion(index)}
-                            >
-                              Delete
-                            </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleEditQuestion(index)}
+                          >
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleDeleteQuestion(index)}
+                          >
+                            Delete
+                          </Button>
                           </div>
                         </div>
                       )}
@@ -243,7 +182,7 @@ export default function QuizCreator() {
         </>
       )}
 
-      {videoDoc && timestamps.length > 0 && (
+      {timestamps.length > 0 && (
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-4">Saved Timestamps</h3>
           {timestamps.map((ts, index) => (
