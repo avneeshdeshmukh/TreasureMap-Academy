@@ -42,7 +42,7 @@ export default function CompleteProfile() {
             }
         }
         checkAddInfoFlag();
-    },[user, router]);
+    }, [user, router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -70,14 +70,14 @@ export default function CompleteProfile() {
                 const error = new Error("The username is already taken.");
                 error.code = "username-taken"; // Custom error code
                 throw error;
-              }
+            }
 
             const userRef = doc(firestore, "users", user.uid);
             await updateProfile(user, { displayName: name });
 
             const additionalData = {
                 name,
-                isAdditionalInfoAdded : true,
+                isAdditionalInfoAdded: true,
                 username: username.toLowerCase(),
                 dob: parsedDob,
                 occupation,
@@ -88,10 +88,10 @@ export default function CompleteProfile() {
             router.push("/learn");
 
         } catch (err) {
-            if(err.code === "username-taken"){
+            if (err.code === "username-taken") {
                 setError("Username already taken. Please try something else.")
             }
-            else{
+            else {
                 setError(err.message)
             }
         }
