@@ -145,7 +145,7 @@ export default function VideoUploadForm({ onNext }) {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-x-1"
-                        onClick={() => handleManageVideo(courseId, video.id)}
+                        onClick={() => handleManageVideo( video.videoId)}
                       >
                         <Edit3 size={16} />
                         Edit
