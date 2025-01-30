@@ -132,8 +132,15 @@ export default function QuizCreator() {
   const handleEditQuestion = (index) => {
     const questionToEdit = currentQuestions[index];
     setSelectedQuizType(questionToEdit.type);
-    setEditingQuestionIndex(currentQuestions[index]);
+    setEditingQuestionIndex(index);
+  };
 
+  const handleUpdateQuestion = (updatedQuiz) => {
+    const updatedQuestions = [...currentQuestions];
+    updatedQuestions[editingQuestionIndex] = updatedQuiz;
+    setCurrentQuestions(updatedQuestions);
+    setEditingQuestionIndex(null);
+    setSelectedQuizType(null);
   };
 
   const handleAddQuestion = (quiz) => {
@@ -144,15 +151,17 @@ export default function QuizCreator() {
   const renderQuizTypeForm = () => {
     if (!selectedQuizType) return null;
 
+    const existingQuestion = editingQuestionIndex !== null ? currentQuestions[editingQuestionIndex] : null;
+
     switch (selectedQuizType) {
       case "mcq":
-        return <MultipleChoiceForm onSubmit={handleAddQuestion} />;
+        return <MultipleChoiceForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
       case "fillBlanks":
-        return <FillBlanksForm onSubmit={handleAddQuestion} />;
+        return <FillBlanksForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
       case "trueFalse":
-        return <TrueFalseForm onSubmit={handleAddQuestion} />;
+        return <TrueFalseForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
       case "slider":
-        return <SliderForm onSubmit={handleAddQuestion} />;
+        return <SliderForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
       default:
         return null;
     }
@@ -161,7 +170,7 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
-      <div className="mb-4">
+      <div className="py-2">
         <label>Timestamp (seconds)</label>
         <Input
           type="number"
@@ -173,12 +182,29 @@ export default function QuizCreator() {
 
       {currentTimestamp !== null && (
         <>
+        <p className="text-slate-500 text-sm mb-2">(Select the type of quiz you want to add)</p>
           <Tabs>
             <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger onClick={() => setSelectedQuizType("mcq")}>Multiple Choice</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}>Fill Blanks</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}>True/False</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("slider")}>Slider</TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("mcq")}
+                className={`${
+                  selectedQuizType === "mcq" ? "font-bold bg-gray-200" : ""
+                }`}
+                >Multiple Choice</TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}
+                className={`${
+                  selectedQuizType === "fillBlanks" ? "font-bold bg-gray-200" : ""
+                }`}
+                >Fill Blanks</TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}
+                className={`${
+                  selectedQuizType === "trueFalse" ? "font-bold bg-gray-200" : ""
+                }`}
+                >True/False</TabsTrigger>
+              <TabsTrigger onClick={() => setSelectedQuizType("slider")}
+                className={`${
+                  selectedQuizType === "slider" ? "font-bold bg-gray-200" : ""
+                }`}
+                >Slider</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -283,10 +309,25 @@ export default function QuizCreator() {
   );
 }
 
-const MultipleChoiceForm = ({ onSubmit }) => {
+const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
+  // Initialize with empty array if existingQuestion is null/undefined
   const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState(["", ""]);
+  const [options, setOptions] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
+
+
+  useEffect(() => {
+    if (existingQuestion) {
+      setQuestion(existingQuestion.question || "");
+      setOptions(existingQuestion.options || ["", ""]);
+      setCorrectAnswer(existingQuestion.correctAnswer || null);
+    } else {
+      // Reset to default state when not editing
+      setQuestion("");
+      setOptions(["", ""]);  // Initialize with two empty options
+      setCorrectAnswer(null);
+    }
+  }, [existingQuestion]);
 
   const handleSubmit = () => {
     if (correctAnswer) {
@@ -296,17 +337,32 @@ const MultipleChoiceForm = ({ onSubmit }) => {
         options,
         correctAnswer,
       });
-      setQuestion("");
-      setOptions(["", ""]);
-      setCorrectAnswer(null);
+      // Only reset if we're not editing
+      if (!existingQuestion) {
+        setQuestion("");
+        setOptions(["", ""]);
+        setCorrectAnswer(null);
+      }
     }
   };
 
   const addOption = () => setOptions([...options, ""]);
+
   const updateOption = (index, value) => {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+  };
+
+  const deleteOption = (index) => {
+    if (options.length > 2) {  // Maintain minimum of 2 options
+      const newOptions = options.filter((_, i) => i !== index);
+      setOptions(newOptions);
+      // Reset correct answer if deleted option was the correct one
+      if (correctAnswer === options[index]) {
+        setCorrectAnswer(null);
+      }
+    }
   };
 
   return (
@@ -317,14 +373,30 @@ const MultipleChoiceForm = ({ onSubmit }) => {
         onChange={(e) => setQuestion(e.target.value)}
       />
       {options.map((opt, index) => (
-        <Input
-          key={index}
-          placeholder={`Option ${index + 1}`}
-          value={opt}
-          onChange={(e) => updateOption(index, e.target.value)}
-        />
+        <div key={index} className="flex gap-2">
+          <Input
+            placeholder={`Option ${index + 1}`}
+            value={opt}
+            onChange={(e) => updateOption(index, e.target.value)}
+          />
+          {options.length > 2 && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => deleteOption(index)}
+            >
+              X
+            </Button>
+          )}
+        </div>
       ))}
-      <Button onClick={addOption}>Add Option</Button>
+      <Button 
+        variant="outline"
+        onClick={addOption}
+      >
+        Add Option
+      </Button>
+      
       <Select
         options={options
           .filter((opt) => opt.trim() !== "")
@@ -341,23 +413,32 @@ const MultipleChoiceForm = ({ onSubmit }) => {
         placeholder="Select Correct Answer"
       />
 
-      <Button
-        onClick={handleSubmit}
-        disabled={
-          !question ||
-          !correctAnswer ||
-          options.filter((opt) => opt.trim() !== "").length < 2
-        }
-      >
-        Add Question
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            !question ||
+            !correctAnswer ||
+            options.filter((opt) => opt.trim() !== "").length < 2
+          }
+        >
+          {existingQuestion ? 'Update Question' : 'Add Question'}
+        </Button>
+      </div>
     </div>
   );
 };
 
-const FillBlanksForm = ({ onSubmit }) => {
-  const [question, setQuestion] = useState("");
-  const [correctAnswer, setCorrectAnswer] = useState("");
+const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
+  const [question, setQuestion] = useState(existingQuestion?.question || "");
+  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || "");
+
+  useEffect(() => {
+    if (existingQuestion) {
+      setQuestion(existingQuestion.question);
+      setCorrectAnswer(existingQuestion.correctAnswer);
+    }
+  }, [existingQuestion]);
 
   const handleSubmit = () => {
     onSubmit({
@@ -382,18 +463,25 @@ const FillBlanksForm = ({ onSubmit }) => {
         onChange={(e) => setCorrectAnswer(e.target.value)}
       />
       <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
-        Add Question
+        {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
     </div>
   );
 };
 
-const TrueFalseForm = ({ onSubmit }) => {
-  const [question, setQuestion] = useState("");
-  const [correctAnswer, setCorrectAnswer] = useState(null);
+const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
+  const [question, setQuestion] = useState(existingQuestion?.question || "");
+  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || null);
+
+  useEffect(() => {
+    if (existingQuestion) {
+      setQuestion(existingQuestion.question);
+      setCorrectAnswer(existingQuestion.correctAnswer);
+    }
+  }, [existingQuestion]);
 
   const handleSubmit = () => {
-    if (correctAnswer) {
+    if (correctAnswer !== null) {
       onSubmit({
         type: "trueFalse",
         question,
@@ -424,19 +512,27 @@ const TrueFalseForm = ({ onSubmit }) => {
         }
         placeholder="Select Correct Answer"
       />
-
-      <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
-        Add Question
+      <Button onClick={handleSubmit} disabled={!question || correctAnswer === null}>
+        {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
     </div>
   );
 };
 
-const SliderForm = ({ onSubmit }) => {
-  const [question, setQuestion] = useState("");
-  const [correctAnswer, setCorrectAnswer] = useState(50); // Default to midpoint of range
-  const [min, setMin] = useState(0);
-  const [max, setMax] = useState(100);
+const SliderForm = ({ onSubmit, existingQuestion }) => {
+  const [question, setQuestion] = useState(existingQuestion?.question || "");
+  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || 50);
+  const [min, setMin] = useState(existingQuestion?.min || 0);
+  const [max, setMax] = useState(existingQuestion?.max || 100);
+
+  useEffect(() => {
+    if (existingQuestion) {
+      setQuestion(existingQuestion.question);
+      setCorrectAnswer(existingQuestion.correctAnswer);
+      setMin(existingQuestion.min);
+      setMax(existingQuestion.max);
+    }
+  }, [existingQuestion]);
 
   const handleSubmit = () => {
     onSubmit({
@@ -447,7 +543,7 @@ const SliderForm = ({ onSubmit }) => {
       max,
     });
     setQuestion("");
-    setCorrectAnswer(50); // Reset to default midpoint
+    setCorrectAnswer(50);
     setMin(0);
     setMax(100);
   };
@@ -472,7 +568,7 @@ const SliderForm = ({ onSubmit }) => {
           onChange={(e) => {
             const value = Number(e.target.value);
             setMin(value);
-            if (correctAnswer < value) setCorrectAnswer(value); // Adjust correctAnswer if out of range
+            if (correctAnswer < value) setCorrectAnswer(value);
           }}
         />
         <Input
@@ -482,7 +578,7 @@ const SliderForm = ({ onSubmit }) => {
           onChange={(e) => {
             const value = Number(e.target.value);
             setMax(value);
-            if (correctAnswer > value) setCorrectAnswer(value); // Adjust correctAnswer if out of range
+            if (correctAnswer > value) setCorrectAnswer(value);
           }}
         />
       </div>
@@ -500,7 +596,7 @@ const SliderForm = ({ onSubmit }) => {
         />
       </div>
       <Button onClick={handleSubmit} disabled={!question}>
-        Add Question
+        {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
     </div>
   );
