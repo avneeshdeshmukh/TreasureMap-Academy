@@ -145,7 +145,7 @@ export default function VideoUploadForm({ onNext }) {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-x-1"
-                        onClick={() => handleManageVideo( video.videoId)}
+                        onClick={() => handleManageVideo(video.videoId)}
                       >
                         <Edit3 size={16} />
                         Edit
@@ -154,7 +154,7 @@ export default function VideoUploadForm({ onNext }) {
                         variant="destructive"
                         size="sm"
                         className="flex items-center gap-x-1"
-                        onClick={() => handleDeleteVideo(video.id)}
+                        onClick={() => handleDeleteVideo(video.videoId)}
                       >
                         <Trash2 size={16} />
                         Delete
