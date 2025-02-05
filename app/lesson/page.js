@@ -44,7 +44,7 @@ const savedSliderTimeRef = useRef(0);
   const tfQuizData = {
     timestamp: 10,
     type: "truefalse",
-    question: "The Earth is flat.",
+    question: "The Oranges are blue.",
     correctAnswer: "False",
   };
 
@@ -56,10 +56,10 @@ const savedSliderTimeRef = useRef(0);
   });
 
   const sliderQuizData = {
-    timestamp: 30, // Set your desired timestamp
+    timestamp: 30, 
     type: "slider",
     question: "What percentage of people read English newspapers?",
-    correctRange: [40, 60] // Acceptable answer range
+    correctRange: [40, 60] 
   };
 
   const generateAsterisks = (correctAnswer) => "*".repeat(correctAnswer.length);
@@ -110,8 +110,8 @@ const savedSliderTimeRef = useRef(0);
           "border-radius": "50%",
           background: "#FACC15",
           position: "absolute",
-          bottom: "-2px", // Moves the dot down closer to the progress bar
-          transform: "translateX(-50%)", // Centers the dot exactly at the timestamp
+          bottom: "-2px", 
+          transform: "translateX(-50%)", 
         },
         markers: [
           { time: mcqQuizData.timestamp },
