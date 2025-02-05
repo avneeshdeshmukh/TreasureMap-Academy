@@ -8,6 +8,7 @@ import VideoPlayer from "@/components/video-player";
 import MCQModal from "@/components/modals/MCQModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
+import SliderQuizModal from "@/components/modals/SliderQuizModal";
 
 const LessonPage = () => {
   const [videoUrl, setVideoUrl] = useState(null);
@@ -26,6 +27,11 @@ const LessonPage = () => {
   const savedMCQTimeRef = useRef(0);
   const savedTFTimeRef = useRef(0);
   const savedFIBTimeRef = useRef(0);
+
+const [showSlider, setShowSlider] = useState(false);
+const [sliderCompleted, setSliderCompleted] = useState(false);
+const savedSliderTimeRef = useRef(0);
+
 
   const mcqQuizData = {
     timestamp: 3,
@@ -48,6 +54,13 @@ const LessonPage = () => {
     question: "The national animal of India is ____.\n",
     correctAnswer: "Tiger",
   });
+
+  const sliderQuizData = {
+    timestamp: 30, // Set your desired timestamp
+    type: "slider",
+    question: "What percentage of people read English newspapers?",
+    correctRange: [40, 60] // Acceptable answer range
+  };
 
   const generateAsterisks = (correctAnswer) => "*".repeat(correctAnswer.length);
 
@@ -104,6 +117,7 @@ const LessonPage = () => {
           { time: mcqQuizData.timestamp },
           { time: tfQuizData.timestamp },
           { time: fibQuizData.timestamp },
+          { time: sliderQuizData.timestamp }
         ],
       });
       
@@ -128,6 +142,13 @@ const LessonPage = () => {
           player.pause();
           setShowFIB(true);
         }
+
+        if (!sliderCompleted && Math.floor(currentTime) === sliderQuizData.timestamp) {
+          savedSliderTimeRef.current = currentTime;
+          player.pause();
+          setShowSlider(true);
+        }
+      
       };
 
       player.on("timeupdate", handleTimeUpdate);
@@ -213,6 +234,25 @@ const LessonPage = () => {
           }}
         />
       )}
+      {showSlider && (
+  <SliderQuizModal
+    questionData={sliderQuizData}
+    onSubmit={(isCorrect) => {
+      setSliderCompleted(true);
+      setShowSlider(false);
+      if(isCorrect) {
+        // Handle correct answer logic
+        console.log("Correct slider answer!");
+      }
+      resumeVideo(savedSliderTimeRef);
+    }}
+    onClose={() => {
+      setShowSlider(false);
+      resumeVideo(savedSliderTimeRef);
+    }}
+  />
+)}
+
     </div>
   );
 };
