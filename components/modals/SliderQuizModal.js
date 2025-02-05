@@ -9,12 +9,12 @@ const SliderQuizModal = ({ questionData, onSubmit, onClose }) => {
   const [isCorrect, setIsCorrect] = useState(false);
 
   const handleSubmit = () => {
-    const correct = selectedValue >= questionData.correctRange[0] && 
-                    selectedValue <= questionData.correctRange[1];
+    const correct =
+      selectedValue >= questionData.correctRange[0] &&
+      selectedValue <= questionData.correctRange[1];
     setIsCorrect(correct);
     setShowResult(true);
-    
-    
+
     setTimeout(() => {
       onSubmit(correct);
       onClose();
@@ -24,9 +24,20 @@ const SliderQuizModal = ({ questionData, onSubmit, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Percentage Quiz</h2>
-        <p className="mb-4">{questionData.question}</p>
-        
+        {/* Title */}
+        <h2 className="text-xl font-bold mb-2 text-center">Percentage Quiz</h2>
+
+        {/* Pirate Image */}
+        <img
+          src="/images/solo4.png"
+          alt="Pirate kid"
+          className="w-24 h-24 object-contain mx-auto mb-3"
+        />
+
+        {/* Quiz Question */}
+        <p className="mb-4 text-center">{questionData.question}</p>
+
+        {/* Slider Input */}
         <div className="w-full mb-4">
           <div className="flex justify-between mb-2">
             <span>0%</span>
@@ -43,12 +54,18 @@ const SliderQuizModal = ({ questionData, onSubmit, onClose }) => {
           />
         </div>
 
+        {/* Result Message */}
         {showResult && (
-          <div className={`mt-4 p-2 rounded text-center ${isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+          <div
+            className={`mt-4 p-2 rounded text-center ${
+              isCorrect ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+            }`}
+          >
             {isCorrect ? "Correct! 🎉" : "Incorrect 😞"}
           </div>
         )}
 
+        {/* Submit Button */}
         <button
           onClick={handleSubmit}
           className="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600"
