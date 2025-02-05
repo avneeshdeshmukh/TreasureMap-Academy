@@ -1,116 +1,220 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {auth} from "@/lib/firebase" // Your Firebase client config
+import { useEffect, useState, useRef, useCallback } from "react";
+import videojs from "video.js";
+import "videojs-markers"; 
+import { auth } from "@/lib/firebase";
 import VideoPlayer from "@/components/video-player";
+import MCQModal from "@/components/modals/MCQModal";
+import TrueFalseModal from "@/components/modals/TrueFalseModal";
+import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 
 const LessonPage = () => {
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchVideoUrl = async (filepath) => {
-    try {
-      // Get Firebase ID token of the logged-in user
-      const idToken = await auth.currentUser.getIdToken();
-      console.log(idToken);
+  const [showMCQ, setShowMCQ] = useState(false);
+  const [showTF, setShowTF] = useState(false);
+  const [showFIB, setShowFIB] = useState(false);
 
-      const response = await fetch("/api/getPresignedUrl", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`, // Include the token in the request
-        },
-        body: JSON.stringify({ filepath }), // Send the filepath as the payload
-      });
+  const [mcqCompleted, setMCQCompleted] = useState(false);
+  const [tfCompleted, setTFCompleted] = useState(false);
+  const [fibCompleted, setFIBCompleted] = useState(false);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch video URL");
+  const playerRef = useRef(null);
+  const savedMCQTimeRef = useRef(0);
+  const savedTFTimeRef = useRef(0);
+  const savedFIBTimeRef = useRef(0);
+
+  const mcqQuizData = {
+    timestamp: 3,
+    type: "mcq",
+    question: "What is the capital of France?",
+    options: ["Berlin", "Paris", "Madrid", "Rome"],
+    correctAnswer: "Paris",
+  };
+
+  const tfQuizData = {
+    timestamp: 10,
+    type: "truefalse",
+    question: "The Earth is flat.",
+    correctAnswer: "False",
+  };
+
+  const [fibQuizData, setFibQuizData] = useState({
+    timestamp: 20,
+    type: "fillInTheBlanks",
+    question: "The national animal of India is ____.\n",
+    correctAnswer: "Tiger",
+  });
+
+  const generateAsterisks = (correctAnswer) => "*".repeat(correctAnswer.length);
+
+  useEffect(() => {
+    setFibQuizData((prev) => ({
+      ...prev,
+      question: `The national animal of India is ____.\n ${generateAsterisks(prev.correctAnswer)}`,
+    }));
+  }, []);
+
+  useEffect(() => {
+    const fetchVideoUrl = async () => {
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        const response = await fetch("/api/getPresignedUrl", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ filepath: "Course1/lesson3.mp4" }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch video URL");
+
+        const data = await response.json();
+        setVideoUrl(data.videoUrl);
+      } catch (err) {
+        console.error("Error fetching video URL:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const data = await response.json();
-      return data.videoUrl;
-    } catch (err) {
-      console.error("Error fetching video URL:", err);
-      throw err;
+    fetchVideoUrl();
+  }, []);
+
+  const handlePlayerReady = useCallback(
+    (player) => {
+      playerRef.current = player;
+
+      player.markers({
+        markerStyle: {
+          width: "7px",
+          height: "7px",
+          "border-radius": "50%",
+          background: "#FACC15",
+          position: "absolute",
+          bottom: "-2px", // Moves the dot down closer to the progress bar
+          transform: "translateX(-50%)", // Centers the dot exactly at the timestamp
+        },
+        markers: [
+          { time: mcqQuizData.timestamp },
+          { time: tfQuizData.timestamp },
+          { time: fibQuizData.timestamp },
+        ],
+      });
+      
+
+      const handleTimeUpdate = () => {
+        const currentTime = player.currentTime();
+
+        if (!mcqCompleted && Math.floor(currentTime) === mcqQuizData.timestamp) {
+          savedMCQTimeRef.current = currentTime;
+          player.pause();
+          setShowMCQ(true);
+        }
+
+        if (!tfCompleted && Math.floor(currentTime) === tfQuizData.timestamp) {
+          savedTFTimeRef.current = currentTime;
+          player.pause();
+          setShowTF(true);
+        }
+
+        if (!fibCompleted && Math.floor(currentTime) === fibQuizData.timestamp) {
+          savedFIBTimeRef.current = currentTime;
+          player.pause();
+          setShowFIB(true);
+        }
+      };
+
+      player.on("timeupdate", handleTimeUpdate);
+
+      return () => {
+        player.off("timeupdate", handleTimeUpdate);
+      };
+    },
+    [mcqCompleted, tfCompleted, fibCompleted]
+  );
+
+  const resumeVideo = (savedTimeRef) => {
+    if (playerRef.current) {
+      const resumeTime = savedTimeRef.current + 1;
+      playerRef.current.currentTime(resumeTime);
+      playerRef.current.one("seeked", () => {
+        playerRef.current.play().catch((err) => console.error("Error resuming video:", err));
+      });
     }
   };
 
-  useEffect(() => {
-    const filepath = "Course1/lesson3.mp4"; // Replace with your desired video path
-    fetchVideoUrl(filepath)
-      .then((url) => {
-        setVideoUrl(url);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return(
-    <div className="flex space-x-2 items-center justify-center h-screen bg-[#2c3748] p-0 m-0">
-      <div className="bg-yellow-500 w-4 h-16 animate-wave"></div>
-      <div className="bg-yellow-500 w-4 h-16 animate-wave" style={{ animationDelay: '0.1s' }}></div>
-      <div className="bg-yellow-500 w-4 h-16 animate-wave" style={{ animationDelay: '0.2s' }}></div>
-      <div className="bg-yellow-500 w-4 h-16 animate-wave" style={{ animationDelay: '0.3s' }}></div>
-      <div className="bg-yellow-500 w-4 h-16 animate-wave" style={{ animationDelay: '0.4s' }}></div>
-    </div>
-    );
-}
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  const videoJsOptions = {
-    autoplay: false,
-    controls: true,
-    responsive: true,
-    fluid: true,
-    playbackRates: [0.5, 1, 1.5, 2, 2.5, 3],
-    sources: videoUrl,
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.videoWrapper}>
-        {loading ? (
-          <p>Loading video...</p>
-        ) : error ? (
-          <p style={styles.error}>{error}</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-4/5 max-w-4xl aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
+        {videoUrl ? (
+          <VideoPlayer
+            options={{
+              autoplay: false,
+              controls: true,
+              responsive: true,
+              fluid: true,
+              playbackRates: [0.5, 1, 1.5, 2, 2.5, 3],
+              sources: [{ src: videoUrl, type: "video/mp4" }],
+            }}
+            onPlayerReady={handlePlayerReady}
+          />
         ) : (
-          <VideoPlayer options={videoJsOptions} />
+          <p className="text-white text-center p-4">Loading video...</p>
         )}
       </div>
+
+      {showMCQ && (
+        <MCQModal
+          questionData={mcqQuizData}
+          onSubmit={() => {
+            setMCQCompleted(true);
+            setShowMCQ(false);
+            resumeVideo(savedMCQTimeRef);
+          }}
+          onClose={() => {
+            setShowMCQ(false);
+            resumeVideo(savedMCQTimeRef);
+          }}
+        />
+      )}
+
+      {showTF && (
+        <TrueFalseModal
+          questionData={tfQuizData}
+          onSubmit={() => {
+            setTFCompleted(true);
+            setShowTF(false);
+            resumeVideo(savedTFTimeRef);
+          }}
+          onClose={() => {
+            setShowTF(false);
+            resumeVideo(savedTFTimeRef);
+          }}
+        />
+      )}
+
+      {showFIB && (
+        <FillInTheBlanksModal
+          questionData={fibQuizData}
+          onSubmit={() => {
+            setFIBCompleted(true);
+            setShowFIB(false);
+            resumeVideo(savedFIBTimeRef);
+          }}
+          onClose={() => {
+            setShowFIB(false);
+            resumeVideo(savedFIBTimeRef);
+          }}
+        />
+      )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    margin: 0,
-    backgroundColor: "#f9f9f9",
-  },
-  videoWrapper: {
-    width: "80%",
-    maxWidth: "1200px",
-    aspectRatio: "16/9",
-    borderRadius: "20px",
-    overflow: "hidden",
-    boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)",
-    backgroundColor: "#000",
-  },
-  error: {
-    color: "red",
-    textAlign: "center",
-  },
 };
 
 export default LessonPage;

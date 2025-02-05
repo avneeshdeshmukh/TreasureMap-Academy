@@ -1,59 +1,69 @@
-import React, { useEffect, useRef } from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css'; // Default Video.js styles
-// import './material-skin.css'; // Your Material Design-inspired skin
-import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome styles
+import React, { useEffect, useRef, useState } from "react";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
-const VideoPlayer = ({ options }) => {
+const VideoPlayer = ({ options, onPlayerReady }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
+  const [quizCompleted, setQuizCompleted] = useState(false);
 
   useEffect(() => {
     if (videoRef.current && !playerRef.current) {
-      // Initialize Video.js player
-      playerRef.current = videojs(videoRef.current, options, function () {
-        console.log('Player is ready!');
+      const player = videojs(videoRef.current, options, () => {
+        console.log("Player is ready!");
+        if (onPlayerReady) onPlayerReady(player);
       });
-  
-      // Get the container for the player
-      const playerContainer = playerRef.current.el();
-  
-      // Create a custom big play button
-      const customBigPlayButton = document.createElement('div');
-      customBigPlayButton.className = 'custom-big-play-button';
-      customBigPlayButton.innerHTML = `
+
+      playerRef.current = player;
+      const playerContainer = player.el();
+
+      /*** Custom Big Play Button ***/
+      const customPlayButton = document.createElement("div");
+      customPlayButton.className = "custom-big-play-button";
+      customPlayButton.innerHTML = `
         <i class="fa-solid fa-circle-play" style="color: #FFD43B; font-size: 60px;"></i>
       `;
-  
-      // Add click functionality to play the video
-      customBigPlayButton.onclick = () => {
-        playerRef.current.play();
-      };
-  
-      // Append the custom button to the player container
-      playerContainer.appendChild(customBigPlayButton);
-  
-      // Add event listeners to show/hide the custom button
-      playerRef.current.on('play', () => {
-        customBigPlayButton.style.display = 'none'; // Hide when playing
+
+      customPlayButton.onclick = () => player.play();
+      playerContainer.appendChild(customPlayButton);
+
+      player.on("play", () => (customPlayButton.style.display = "none"));
+      player.on("pause", () => (customPlayButton.style.display = "flex"));
+      customPlayButton.style.display = "flex";
+
+      /*** Custom Current Time Display ***/
+      const controlBar = player.getChild("controlBar");
+      const volumePanel = controlBar.getChild("volumePanel");
+
+      const timeDisplay = document.createElement("div");
+      timeDisplay.className = "vjs-current-time-display vjs-time-control";
+      timeDisplay.style.marginLeft = "8px";
+      timeDisplay.innerHTML = "0:00";
+
+      if (volumePanel) {
+        controlBar.el().insertBefore(timeDisplay, volumePanel.el().nextSibling);
+      }
+
+      player.on("timeupdate", () => {
+        timeDisplay.innerHTML = videojs.time.formatTime(player.currentTime());
       });
-  
-      playerRef.current.on('pause', () => {
-        customBigPlayButton.style.display = 'flex'; // Show when paused
-      });
-  
-      // Ensure button is visible initially
-      customBigPlayButton.style.display = 'flex';
     }
-  
+
     return () => {
-      // Cleanup player on unmount
       if (playerRef.current) {
-        playerRef.current.dispose();
-        playerRef.current = null;
+        console.log("Stopping player instead of disposing to prevent black screen.");
+        playerRef.current.pause(); // Pause instead of dispose
       }
     };
-  }, [options]);
+  }, [options, onPlayerReady]);
+
+  const handleQuizSubmit = () => {
+    setQuizCompleted(true);
+    if (playerRef.current) {
+      playerRef.current.play(); // Resume video after quiz is submitted
+    }
+  };
 
   return (
     <div>
