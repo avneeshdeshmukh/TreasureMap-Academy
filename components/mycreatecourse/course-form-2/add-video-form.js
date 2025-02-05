@@ -135,6 +135,7 @@ export default function AddVideos({onAdd}) {
     };
 
     await setDoc(videoRef, newVideo, { merge: true });
+    setStatus("")
 
     // Call the parent function to add the video
     onAdd(newVideo);

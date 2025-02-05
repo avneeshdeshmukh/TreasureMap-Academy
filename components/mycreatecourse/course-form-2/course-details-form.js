@@ -8,7 +8,8 @@ import { DifficultyForm } from "./difficulty-form";
 import AddVideos from "./add-video-form";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Edit3, Trash2 } from "lucide-react";
-import { getFirestore, doc, getDoc, getDocs, collection, query, where, } from "firebase/firestore";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
 
 export default function VideoUploadForm({ onNext }) {
   const firestore = getFirestore();
@@ -32,8 +33,64 @@ export default function VideoUploadForm({ onNext }) {
     );
   };
 
-  const handleDeleteVideo = (videoId) => {
-    setVideos((prev) => prev.filter((video) => video.id !== videoId));
+  const generateDeleteUrl = async (filepath) => {
+    try {
+      const idToken = await auth.currentUser.getIdToken();
+      const response = await fetch("/api/deleteVideo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ filepath }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to generate delete URL");
+      }
+  
+      const data = await response.json();
+      return data.deleteUrl;
+    } catch (err) {
+      console.error("Error generating delete URL:", err);
+      return null;
+    }
+  };
+
+  const deleteFile = async (url) => {
+    if (!url) {
+      return;
+    }
+  
+    try {
+      const response = await fetch(url, { method: "DELETE" });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete file");
+      }
+      return response;
+    } catch (err) {
+      console.error("Error deleting file:", err);
+    }
+  };
+
+  const handleDeleteVideo = async (videoId) => {
+    const videoRef = doc(firestore, "videos", videoId);
+    const videoSnap = await getDoc(videoRef);
+    const filepath = videoSnap.data().videoURL;
+
+    const deleteURL = await generateDeleteUrl(filepath);
+
+    if(deleteURL){
+      const isConfirmed = window.confirm("Are you sure you want to delete this video?");
+      if (!isConfirmed) return;
+
+      const response = await deleteFile(deleteURL);
+      if(response.ok){
+        await deleteDoc(videoRef);
+        setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
+      }
+    }
   };
 
   const handleSubmit = (e) => {

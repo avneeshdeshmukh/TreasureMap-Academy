@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
-import { getFirestore, doc, updateDoc, getDoc, deleteField } from "firebase/firestore";
+import { getFirestore, doc, updateDoc, getDoc, deleteField, arrayRemove } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -51,23 +51,23 @@ export default function QuizCreator() {
         timestamp: currentTimestamp,
         questions: currentQuestions,
       };
-  
+
       if (editingTimestampIndex !== null) {
         // If we're editing an existing timestamp, compare the new timestamp with the previous one
         const updatedTimestamps = [...timestamps];
         const updatedTimestamp = updatedTimestamps[editingTimestampIndex];
-  
+
         if (currentTimestamp !== previousTimestamp) {
           // If the timestamp has changed, update Firestore with the new timestamp key
           await updateDoc(videoRef, {
             [`quizzes.${currentTimestamp}`]: newQuestion, // Update Firestore with the new timestamp
           });
-  
+
           // Remove the old timestamp from Firestore
           await updateDoc(videoRef, {
             [`quizzes.${previousTimestamp}`]: deleteField(), // Remove old timestamp
           });
-  
+
           // Update the state locally
           updatedTimestamp.timestamp = currentTimestamp;  // Change to the new timestamp value
           updatedTimestamp.questions = currentQuestions;  // Update the questions
@@ -76,35 +76,34 @@ export default function QuizCreator() {
           // If the timestamp has not changed, just update the questions
           updatedTimestamp.questions = currentQuestions;
           updatedTimestamps[editingTimestampIndex] = updatedTimestamp;
-  
+
           // Update Firestore with the same timestamp key but updated questions
           await updateDoc(videoRef, {
             [`quizzes.${previousTimestamp}`]: updatedTimestamp,
           });
         }
-  
+
         setTimestamps(updatedTimestamps); // Update local state
         setEditingTimestampIndex(null); // Reset editing state
         setPreviousTimestamp(null); // Clear previous timestamp
-  
+
       } else {
         // If it's a new timestamp, add it to the state and Firestore
         setTimestamps((prevTimestamps) => [...prevTimestamps, newQuestion]);
-  
+
         await updateDoc(videoRef, {
           [`quizzes.${currentTimestamp}`]: newQuestion, // Add new timestamp to Firestore
         });
-  
+
         setPreviousTimestamp(null); // Clear previous timestamp when adding a new one
       }
-  
+
       // Clear input fields after saving or updating
       setCurrentTimestamp(null);
       setCurrentQuestions([]);
       setSelectedQuizType(null);
     }
   };
-  
 
   const handleEditTimestamp = (index) => {
     const timestampToEdit = timestamps[index];
@@ -114,8 +113,29 @@ export default function QuizCreator() {
     setEditingTimestampIndex(index);
   };
 
-  const handleDeleteTimestamp = (index) => {
+  const handleDeleteTimestamp = async (index) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this?");
+    if (!isConfirmed) return;
+
+    const timestampToDelete = timestamps[index].timestamp;
+    await updateDoc(videoRef, {
+      [`quizzes.${timestampToDelete}`]: deleteField(),
+    });
     setTimestamps(timestamps.filter((_, i) => i !== index));
+  };
+
+  const handleDeleteQuestion = async (index) => {
+    const question = currentQuestions[index];
+    const ts = timestamps[index].timestamp;
+    const isConfirmed = window.confirm("Are you sure you want to delete this question?");
+    console.log(isConfirmed)
+    if (isConfirmed) {
+      await updateDoc(videoRef, {
+        [`quizzes.${ts}.questions`]: arrayRemove(question),
+      });
+      const updatedQuestions = currentQuestions.filter((_, i) => i !== index);
+      setCurrentQuestions(updatedQuestions);
+    }
   };
 
   const handleDragEnd = (result) => {
@@ -182,29 +202,25 @@ export default function QuizCreator() {
 
       {currentTimestamp !== null && (
         <>
-        <p className="text-slate-500 text-sm mb-2">(Select the type of quiz you want to add)</p>
+          <p className="text-slate-500 text-sm mb-2">(Select the type of quiz you want to add)</p>
           <Tabs>
             <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger onClick={() => setSelectedQuizType("mcq")}
-                className={`${
-                  selectedQuizType === "mcq" ? "font-bold bg-gray-200" : ""
-                }`}
-                >Multiple Choice</TabsTrigger>
+                className={`${selectedQuizType === "mcq" ? "font-bold bg-gray-200" : ""
+                  }`}
+              >Multiple Choice</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}
-                className={`${
-                  selectedQuizType === "fillBlanks" ? "font-bold bg-gray-200" : ""
-                }`}
-                >Fill Blanks</TabsTrigger>
+                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-gray-200" : ""
+                  }`}
+              >Fill Blanks</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}
-                className={`${
-                  selectedQuizType === "trueFalse" ? "font-bold bg-gray-200" : ""
-                }`}
-                >True/False</TabsTrigger>
+                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-gray-200" : ""
+                  }`}
+              >True/False</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("slider")}
-                className={`${
-                  selectedQuizType === "slider" ? "font-bold bg-gray-200" : ""
-                }`}
-                >Slider</TabsTrigger>
+                className={`${selectedQuizType === "slider" ? "font-bold bg-gray-200" : ""
+                  }`}
+              >Slider</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -277,15 +293,15 @@ export default function QuizCreator() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <h4>Timestamp: {ts.timestamp} seconds</h4>
                 <div className="space-x-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
                     onClick={() => handleEditTimestamp(index)}
                   >
                     Edit
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="destructive"
                     onClick={() => handleDeleteTimestamp(index)}
                   >
@@ -380,8 +396,8 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
             onChange={(e) => updateOption(index, e.target.value)}
           />
           {options.length > 2 && (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               size="sm"
               onClick={() => deleteOption(index)}
             >
@@ -390,13 +406,13 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
           )}
         </div>
       ))}
-      <Button 
+      <Button
         variant="outline"
         onClick={addOption}
       >
         Add Option
       </Button>
-      
+
       <Select
         options={options
           .filter((opt) => opt.trim() !== "")
