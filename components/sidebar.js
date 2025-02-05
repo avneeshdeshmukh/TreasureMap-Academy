@@ -58,7 +58,7 @@ export const Sidebar = ({ className }) => {
                     <SidebarItem
                         variant={"sidebarOutline"}
                         icon={"wand"}
-                        href={"/creatordashboard"}
+                        href={"/create/creatordashboard"}
                         label={"Creator"}
                     />
                 </div>
