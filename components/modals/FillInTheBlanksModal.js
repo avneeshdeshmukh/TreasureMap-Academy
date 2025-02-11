@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { Button } from "../ui/button";
 
 const FillInTheBlanksModal = ({ questionData, onSubmit, onClose }) => {
   const [userAnswer, setUserAnswer] = useState("");
@@ -41,13 +42,13 @@ const FillInTheBlanksModal = ({ questionData, onSubmit, onClose }) => {
             placeholder="Enter your answer here"
             className="w-full border border-gray-300 rounded px-3 py-2 mb-4"
           />
-          <button
+          <Button
+            variant="sidebarOutline"
             onClick={handleSubmit}
             disabled={!userAnswer}
-            className="w-full bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
           >
             Submit
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -59,12 +60,12 @@ const FillInTheBlanksModal = ({ questionData, onSubmit, onClose }) => {
         >
           <div className="bg-white p-4 rounded shadow-md w-80 text-center">
             <p className="mb-4">Incorrect answer, try again.</p>
-            <button
+            <Button
+              variant="danger"
               onClick={() => setShowError(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}

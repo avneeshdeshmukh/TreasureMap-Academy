@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import videojs from "video.js";
-import "videojs-markers"; 
+import "videojs-markers";
 import { auth } from "@/lib/firebase";
 import VideoPlayer from "@/components/video-player";
 import MCQModal from "@/components/modals/MCQModal";
@@ -28,9 +28,9 @@ const LessonPage = () => {
   const savedTFTimeRef = useRef(0);
   const savedFIBTimeRef = useRef(0);
 
-const [showSlider, setShowSlider] = useState(false);
-const [sliderCompleted, setSliderCompleted] = useState(false);
-const savedSliderTimeRef = useRef(0);
+  const [showSlider, setShowSlider] = useState(false);
+  const [sliderCompleted, setSliderCompleted] = useState(false);
+  const savedSliderTimeRef = useRef(0);
 
 
   const mcqQuizData = {
@@ -56,10 +56,10 @@ const savedSliderTimeRef = useRef(0);
   });
 
   const sliderQuizData = {
-    timestamp: 30, 
+    timestamp: 30,
     type: "slider",
     question: "What percentage of people read English newspapers?",
-    correctRange: [40, 60] 
+    correctRange: [40, 60]
   };
 
   const generateAsterisks = (correctAnswer) => "*".repeat(correctAnswer.length);
@@ -110,8 +110,8 @@ const savedSliderTimeRef = useRef(0);
           "border-radius": "50%",
           background: "#FACC15",
           position: "absolute",
-          bottom: "-2px", 
-          transform: "translateX(-50%)", 
+          bottom: "-2px",
+          transform: "translateX(-50%)",
         },
         markers: [
           { time: mcqQuizData.timestamp },
@@ -120,7 +120,7 @@ const savedSliderTimeRef = useRef(0);
           { time: sliderQuizData.timestamp }
         ],
       });
-      
+
 
       const handleTimeUpdate = () => {
         const currentTime = player.currentTime();
@@ -148,7 +148,7 @@ const savedSliderTimeRef = useRef(0);
           player.pause();
           setShowSlider(true);
         }
-      
+
       };
 
       player.on("timeupdate", handleTimeUpdate);
@@ -235,23 +235,23 @@ const savedSliderTimeRef = useRef(0);
         />
       )}
       {showSlider && (
-  <SliderQuizModal
-    questionData={sliderQuizData}
-    onSubmit={(isCorrect) => {
-      setSliderCompleted(true);
-      setShowSlider(false);
-      if(isCorrect) {
-        // Handle correct answer logic
-        console.log("Correct slider answer!");
-      }
-      resumeVideo(savedSliderTimeRef);
-    }}
-    onClose={() => {
-      setShowSlider(false);
-      resumeVideo(savedSliderTimeRef);
-    }}
-  />
-)}
+        <SliderQuizModal
+          questionData={sliderQuizData}
+          onSubmit={(isCorrect) => {
+            setSliderCompleted(true);
+            setShowSlider(false);
+            if (isCorrect) {
+              // Handle correct answer logic
+              console.log("Correct slider answer!");
+            }
+            resumeVideo(savedSliderTimeRef);
+          }}
+          onClose={() => {
+            setShowSlider(false);
+            resumeVideo(savedSliderTimeRef);
+          }}
+        />
+      )}
 
     </div>
   );
