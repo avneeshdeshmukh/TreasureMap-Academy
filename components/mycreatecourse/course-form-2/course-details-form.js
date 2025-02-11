@@ -7,8 +7,8 @@ import { DescriptionForm } from "./description-form";
 import { DifficultyForm } from "./difficulty-form";
 import AddVideos from "./add-video-form";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Edit3, Trash2 } from "lucide-react";
-import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, } from "firebase/firestore";
+import { LayoutDashboard, Edit3, Trash2, Edit } from "lucide-react";
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, updateDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
@@ -22,9 +22,13 @@ export default function VideoUploadForm({ onNext }) {
 
   const [videos, setVideos] = useState([]);
   const [courseData, setCourseData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [originalVideos, setOriginalVideos] = useState([]);
+  const [numOfVideos, setNumOfVideos] = useState(0);
 
   const handleAddVideo = (video) => {
     setVideos((prev) => [...prev, video]);
+    setOriginalVideos((prev) => [...prev, video]);
   };
 
   const handleManageVideo = (videoId) => {
@@ -44,11 +48,11 @@ export default function VideoUploadForm({ onNext }) {
         },
         body: JSON.stringify({ filepath }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to generate delete URL");
       }
-  
+
       const data = await response.json();
       return data.deleteUrl;
     } catch (err) {
@@ -61,10 +65,10 @@ export default function VideoUploadForm({ onNext }) {
     if (!url) {
       return;
     }
-  
+
     try {
       const response = await fetch(url, { method: "DELETE" });
-  
+
       if (!response.ok) {
         throw new Error("Failed to delete file");
       }
@@ -81,14 +85,15 @@ export default function VideoUploadForm({ onNext }) {
 
     const deleteURL = await generateDeleteUrl(filepath);
 
-    if(deleteURL){
+    if (deleteURL) {
       const isConfirmed = window.confirm("Are you sure you want to delete this video?");
       if (!isConfirmed) return;
 
       const response = await deleteFile(deleteURL);
-      if(response.ok){
+      if (response.ok) {
         await deleteDoc(videoRef);
         setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
+        setOriginalVideos((prev) => prev.filter((video) => video.videoId !== videoId));
       }
     }
   };
@@ -120,7 +125,7 @@ export default function VideoUploadForm({ onNext }) {
     fetchCourseData(); // Call the async function
   }, [courseId]);
 
-  const fetchCourseVideos= async () => {
+  const fetchCourseVideos = async () => {
     try {
       const courseSnap = await getDoc(courseRef);
       const cd = courseSnap.data();
@@ -136,6 +141,8 @@ export default function VideoUploadForm({ onNext }) {
 
       // Extract course data
       const courseVideos = querySnapshot.docs.map((doc) => doc.data());
+      courseVideos.sort((a, b) => a.sequence - b.sequence);
+      setNumOfVideos(courseVideos.length);
       return courseVideos; // Return the array of courses
     } catch (error) {
       console.error("Error fetching course videos:", error);
@@ -148,14 +155,49 @@ export default function VideoUploadForm({ onNext }) {
       try {
         const courseVideos = await fetchCourseVideos();
         setVideos(courseVideos); // State update triggers re-render
+        setOriginalVideos(courseVideos);
       } catch (err) {
         setError(err.message);
       }
     };
-  
+
     loadVideos();
   }, []); // No dependency needed
-  
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+
+    const reorderedVideos = [...videos];
+    const [movedItem] = reorderedVideos.splice(result.source.index, 1);
+    reorderedVideos.splice(result.destination.index, 0, movedItem);
+
+    setVideos(reorderedVideos);
+  };
+
+  const handleUpdateOrder = async () => {
+    try {
+      const batchUpdates = videos.map((video, index) =>
+        updateDoc(doc(firestore, "videos", video.videoId), { sequence: index + 1 })
+      );
+
+      await Promise.all(batchUpdates);
+      setIsEditing(false);
+      alert("Video order updated!");
+    } catch (error) {
+      console.error("Error updating video order:", error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setVideos(originalVideos);
+    setIsEditing(false);
+  };
+
+  const handleEditButton = () => {
+    setVideos(originalVideos);
+    setIsEditing(!isEditing);
+  };
+
 
 
   if (courseData) {
@@ -183,71 +225,106 @@ export default function VideoUploadForm({ onNext }) {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium">Course Videos</h2>
               {/* Pass the handleAddVideo function to AddVideos */}
-              <AddVideos onAdd={handleAddVideo} />
+              <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} />
+            </div>
+            <div className="w-full flex">
+              <Button
+                size="sm"
+                className="flex items-center gap-x-1"
+                onClick={handleEditButton}
+              >
+                <Edit size={16} />
+                {isEditing ? "Cancel" : "Edit Order"}
+              </Button>
             </div>
 
 
-          {/* Use DragDropContext to wrap the videos list */}
-          {videos.length > 0 ? (
-            <DragDropContext >
-              <Droppable droppableId="videosList">
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="divide-y divide-gray-200"
-                  >
-                    {videos.map((video, index) => (
-                      <Draggable key={video.videoId} draggableId={video.videoId} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="flex items-center justify-between py-3"
+            {isEditing && (
+              <p className="text-sm text-gray-500">Drag and drop videos to reorder, then click "Update".</p>
+            )}
+            {/* Use DragDropContext to wrap the videos list */}
+            {videos.length > 0 ? (
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="videosList" isDropDisabled={!isEditing}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="divide-y divide-gray-200"
+                    >
+                      {videos.map((video, index) => (
+                        <Draggable key={video.videoId} draggableId={video.videoId} index={index} isDragDisabled={!isEditing}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className="flex items-center justify-between py-3"
+                            >
+                              <div>{/* Serial number */}
+                                <h4 className="font-medium text-gray-800">{index + 1}. {video.title}</h4>
+                                <p className="text-sm text-gray-500">{video.file.name}</p>
+                              </div>
+                              {!isEditing && (
+                                <div className="flex space-x-3">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-x-1"
+                                    onClick={() => handleManageVideo(video.videoId)}
+                                  >
+                                    <Edit3 size={16} />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="flex items-center gap-x-1"
+                                    onClick={() => handleDeleteVideo(video.videoId)}
+                                  >
+                                    <Trash2 size={16} />
+                                    Delete
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                      {isEditing && (
+
+                        <div className="w-full flex justify-end">
+                          <Button variant="danger"
+                            size="sm"
+                            className="mt-4 mr-2"
+                            onClick={handleCancelEdit}
                           >
-                            <div>
-                              <span className="mr-2">{index + 1}.</span> {/* Serial number */}
-                              <h4 className="font-medium text-gray-800">{video.title}</h4>
-                              <p className="text-sm text-gray-500">{video.file.name}</p>
-                            </div>
-                            <div className="flex space-x-3">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex items-center gap-x-1"
-                                onClick={() => handleManageVideo(video.videoId)}
-                              >
-                                <Edit3 size={16} />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex items-center gap-x-1"
-                                onClick={() => handleDeleteVideo(video.videoId)}
-                              >
-                                <Trash2 size={16} />
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          ) : (
-            <p className="text-sm text-gray-500 text-center">
-              No videos added yet. Click "Add Video" to get started.
-            </p>
-          )}
+                            Cancel
+                          </Button>
+
+                          <Button variant="ghost"
+                            size="sm"
+                            className="mt-4 text-yellow-600"
+                            onClick={handleUpdateOrder}
+                          >
+                            Update Sequence
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+            ) : (
+              <p className="text-sm text-gray-500 text-center">
+                No videos added yet. Click "Add Video" to get started.
+              </p>
+            )}
 
             {/* Submit Button */}
-            
+
           </div>
         </div>
       </div>

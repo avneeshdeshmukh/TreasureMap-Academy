@@ -1,8 +1,0 @@
-quizzes - 
-        videoID
-        110 -
-            - timestamp
-            - Questions[]
-
-
-quizzes(videoID = videoID).{time}.question[0].correctAnswer

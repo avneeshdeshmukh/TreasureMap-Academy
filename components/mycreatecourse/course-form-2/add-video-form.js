@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 
-export default function AddVideos({onAdd}) {
+export default function AddVideos({onAdd, numOfVideos}) {
   const firestore = getFirestore();
   const router = useRouter();
   const params = useParams();
@@ -132,6 +132,7 @@ export default function AddVideos({onAdd}) {
       creator: userData.username,
       course: courseData.courseId,
       uploadedAt: new Date(),
+      sequence : numOfVideos + 1,
     };
 
     await setDoc(videoRef, newVideo, { merge: true });

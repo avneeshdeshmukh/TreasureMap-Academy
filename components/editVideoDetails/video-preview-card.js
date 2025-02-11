@@ -7,7 +7,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from 
 import VideoPlayer from "@/components/video-player"; 
 import VideoQuiz from "@/components/video-quiz";
 
-export default function VideoPreviewCard({ courseId, videoId}) {
+export default function VideoPreviewCard({ videoData}) {
     const [open, setOpen] = useState(false);
 
    
@@ -19,15 +19,15 @@ export default function VideoPreviewCard({ courseId, videoId}) {
                         🎬
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-gray-800">Video Title</p>
+                        <p className="text-sm font-medium text-gray-800">{videoData.title}</p>
                         <p className="text-xs text-gray-800">Preview</p>
                     </div>
                 </div>
 
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="w-5 h-8" onClick={() => setOpen(true)}>
-                            <ArrowUpRight className="h-4" />
+                        <Button variant="ghost" size="icon" className="w-10 h-8" onClick={() => setOpen(true)}>
+                            <ArrowUpRight className="h-7" />
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-3xl"> {/* Ensures the modal is wide enough */}
@@ -35,7 +35,7 @@ export default function VideoPreviewCard({ courseId, videoId}) {
                             <DialogTitle>Video Preview</DialogTitle>
                         </DialogHeader>
                         <div className="mt-4 flex justify-center">
-                            <VideoQuiz courseId={courseId} videoId={videoId}/>
+                            <VideoQuiz courseId={videoData.course} videoId={videoData.videoId}/>
                         </div>
                     </DialogContent>
                 </Dialog>
