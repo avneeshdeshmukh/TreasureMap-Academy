@@ -13,7 +13,7 @@ import  VideoPreviewCard  from "./video-preview-card"
 
 export default function QuizCreator() {
   const firestore = getFirestore();
-  const { videoId } = useParams();
+  const { courseId, videoId } = useParams();
 
   const videoRef = doc(firestore, "videos", videoId);
 
@@ -193,7 +193,7 @@ export default function QuizCreator() {
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
 
       <div>
-        <VideoPreviewCard/>
+        <VideoPreviewCard courseId={courseId} videoId={videoId} />
       </div>
 
       <div className="py-2">
