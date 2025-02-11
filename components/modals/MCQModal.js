@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { Button } from "../ui/button";
 
 const MCQModal = ({ questionData, onSubmit, onClose }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -47,13 +48,13 @@ const MCQModal = ({ questionData, onSubmit, onClose }) => {
               </div>
             ))}
           </div>
-          <button
+          <Button
+            variant = "primary"
             onClick={handleSubmit}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
             disabled={selectedOption === null}
           >
             Submit
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -65,12 +66,12 @@ const MCQModal = ({ questionData, onSubmit, onClose }) => {
         >
           <div className="bg-white p-4 rounded shadow-md w-80 text-center">
             <p className="mb-4">Incorrect answer, try again.</p>
-            <button
+            <Button
+              variant="danger"
               onClick={() => setShowError(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}

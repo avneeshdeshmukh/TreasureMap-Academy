@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { Button } from "../ui/button";
 
 const TrueFalseModal = ({ questionData, onSubmit, onClose }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -36,22 +37,22 @@ const TrueFalseModal = ({ questionData, onSubmit, onClose }) => {
                   type="radio"
                   id={`tf-option-${index}`}
                   name="trueFalse"
-                  value={option}
-                  checked={selectedOption === option}
-                  onChange={() => setSelectedOption(option)}
+                  value={option.toLowerCase()}
+                  checked={selectedOption === option.toLowerCase()}
+                  onChange={() => setSelectedOption(option.toLowerCase())}
                   className="form-radio"
                 />
                 <label htmlFor={`tf-option-${index}`}>{option}</label>
               </div>
             ))}
           </div>
-          <button
+          <Button
+            variant="sidebarOutline"
             onClick={handleSubmit}
             disabled={selectedOption === null}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
           >
             Submit
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -63,12 +64,12 @@ const TrueFalseModal = ({ questionData, onSubmit, onClose }) => {
         >
           <div className="bg-white p-4 rounded shadow-md w-80 text-center">
             <p className="mb-4">Incorrect answer, try again.</p>
-            <button
+            <Button
               onClick={() => setShowError(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              variant = "danger"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}
