@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Edit3, Trash2 } from "lucide-react";
 import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 export default function VideoUploadForm({ onNext }) {
   const firestore = getFirestore();
@@ -21,7 +22,6 @@ export default function VideoUploadForm({ onNext }) {
 
   const [videos, setVideos] = useState([]);
   const [courseData, setCourseData] = useState(null);
-
 
   const handleAddVideo = (video) => {
     setVideos((prev) => [...prev, video]);
@@ -186,45 +186,65 @@ export default function VideoUploadForm({ onNext }) {
               <AddVideos onAdd={handleAddVideo} />
             </div>
 
-            {videos.length > 0 ? (
-              <div className="divide-y divide-gray-200">
-                {videos.map((video) => (
+
+          {/* Use DragDropContext to wrap the videos list */}
+          {videos.length > 0 ? (
+            <DragDropContext >
+              <Droppable droppableId="videosList">
+                {(provided) => (
                   <div
-                    key={video.id}
-                    className="flex items-center justify-between py-3"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="divide-y divide-gray-200"
                   >
-                    <div>
-                      <h4 className="font-medium text-gray-800">{video.title}</h4>
-                      <p className="text-sm text-gray-500">{video.file.name}</p>
-                    </div>
-                    <div className="flex space-x-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-x-1"
-                        onClick={() => handleManageVideo(video.videoId)}
-                      >
-                        <Edit3 size={16} />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex items-center gap-x-1"
-                        onClick={() => handleDeleteVideo(video.videoId)}
-                      >
-                        <Trash2 size={16} />
-                        Delete
-                      </Button>
-                    </div>
+                    {videos.map((video, index) => (
+                      <Draggable key={video.videoId} draggableId={video.videoId} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="flex items-center justify-between py-3"
+                          >
+                            <div>
+                              <span className="mr-2">{index + 1}.</span> {/* Serial number */}
+                              <h4 className="font-medium text-gray-800">{video.title}</h4>
+                              <p className="text-sm text-gray-500">{video.file.name}</p>
+                            </div>
+                            <div className="flex space-x-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-x-1"
+                                onClick={() => handleManageVideo(video.videoId)}
+                              >
+                                <Edit3 size={16} />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex items-center gap-x-1"
+                                onClick={() => handleDeleteVideo(video.videoId)}
+                              >
+                                <Trash2 size={16} />
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 text-center">
-                No videos added yet. Click "Add Video" to get started.
-              </p>
-            )}
+                )}
+              </Droppable>
+            </DragDropContext>
+          ) : (
+            <p className="text-sm text-gray-500 text-center">
+              No videos added yet. Click "Add Video" to get started.
+            </p>
+          )}
 
             {/* Submit Button */}
             

@@ -5,24 +5,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import VideoPlayer from "@/components/video-player"; 
+import VideoQuiz from "@/components/video-quiz";
 
-export default function VideoPreviewCard() {
+export default function VideoPreviewCard({ courseId, videoId}) {
     const [open, setOpen] = useState(false);
 
-    // Video.js options
-    const videoOptions = {
-        controls: true,
-        autoplay: false,
-        responsive: true,
-        fluid: true,
-        sources: [
-            {
-                src: "/test-video/quiztrialv1.mp4", 
-                type: "video/mp4",
-            },
-        ],
-    };
-
+   
     return (
         <div>
             <Card className="flex items-center justify-between p-4 w-1/3">
@@ -46,8 +34,8 @@ export default function VideoPreviewCard() {
                         <DialogHeader>
                             <DialogTitle>Video Preview</DialogTitle>
                         </DialogHeader>
-                        <div className="mt-4">
-                            <VideoPlayer options={videoOptions} />
+                        <div className="mt-4 flex justify-center">
+                            <VideoQuiz courseId={courseId} videoId={videoId}/>
                         </div>
                     </DialogContent>
                 </Dialog>

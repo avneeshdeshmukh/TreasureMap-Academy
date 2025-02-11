@@ -164,7 +164,7 @@ export default function VideoQuiz({courseId, videoId}) {
     const currentQuestion = currentQuiz ? currentQuiz[currentQuestionIndex] : null;
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <>
             <div className="w-4/5 max-w-4xl aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
                 {videoUrl ? (
                     <VideoPlayer
@@ -198,6 +198,6 @@ export default function VideoQuiz({courseId, videoId}) {
             {currentQuestion && currentQuestion.type === "slider" && (
                 <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
             )}
-        </div>
+        </>
     );
 }
