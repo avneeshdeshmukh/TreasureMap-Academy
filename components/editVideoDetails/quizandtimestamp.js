@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { getFirestore, doc, updateDoc, getDoc, deleteField, arrayRemove } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import  VideoPreviewCard  from "./video-preview-card"
+import VideoPreviewCard from "./video-preview-card"
 
 export default function QuizCreator() {
   const firestore = getFirestore();
@@ -191,10 +191,11 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
+      
+      {videoDoc && (<div>
+        <VideoPreviewCard videoData={videoDoc} />
+      </div>)}
 
-      <div>
-        <VideoPreviewCard courseId={courseId} videoId={videoId} />
-      </div>
 
       <div className="py-2">
         <label>Timestamp (seconds)</label>
@@ -327,7 +328,7 @@ export default function QuizCreator() {
           ))}
         </div>
       )}
-     
+
     </div>
   );
 }
