@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ export default function QuizCreator() {
   const { courseId, videoId } = useParams();
 
   const videoRef = doc(firestore, "videos", videoId);
+  const timestampInputRef = useRef(null);
 
   const [videoDoc, setVideoDoc] = useState(null);
   const [currentTimestamp, setCurrentTimestamp] = useState(null);
@@ -112,6 +113,21 @@ export default function QuizCreator() {
     setCurrentTimestamp(timestampToEdit.timestamp);
     setCurrentQuestions([...timestampToEdit.questions]);
     setEditingTimestampIndex(index);
+
+    setTimeout(() => {
+      if (timestampInputRef.current) {
+        timestampInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  
+        // Optional: Add a slight background highlight for better visibility
+        timestampInputRef.current.style.transition = "background-color 0.5s ease-in-out";
+        timestampInputRef.current.style.backgroundColor = "#fff3cd"; // Light yellow highlight
+  
+        // Remove highlight after a delay
+        setTimeout(() => {
+          timestampInputRef.current.style.backgroundColor = "white";
+        }, 1000);
+      }
+    }, 100);
   };
 
   const handleDeleteTimestamp = async (index) => {
@@ -191,7 +207,6 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
-      
       {videoDoc && (<div>
         <VideoPreviewCard videoData={videoDoc} />
       </div>)}
@@ -201,6 +216,7 @@ export default function QuizCreator() {
         <label>Timestamp (seconds)</label>
         <Input
           type="number"
+          ref={timestampInputRef}
           value={currentTimestamp || ""}
           onChange={(e) => setCurrentTimestamp(Number(e.target.value))}
           placeholder="Enter timestamp"
@@ -213,19 +229,19 @@ export default function QuizCreator() {
           <Tabs>
             <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger onClick={() => setSelectedQuizType("mcq")}
-                className={`${selectedQuizType === "mcq" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "mcq" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : ""
                   }`}
               >Multiple Choice</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}
-                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : ""
                   }`}
               >Fill Blanks</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}
-                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : ""
                   }`}
               >True/False</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("slider")}
-                className={`${selectedQuizType === "slider" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "slider" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : ""
                   }`}
               >Slider</TabsTrigger>
             </TabsList>
