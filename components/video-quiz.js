@@ -9,7 +9,7 @@ import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
 
-export default function VideoQuiz({ courseId, videoId }) {
+export default function VideoQuiz({ courseId, videoId, preview }) {
     const firestore = getFirestore();
     const videoRef = doc(firestore, "videos", videoId);
 
@@ -175,11 +175,12 @@ export default function VideoQuiz({ courseId, videoId }) {
         };
 
         player.on("timeupdate", handleTimeUpdate);
-        player.on("seeking", handleSeeking);
+
+        if(!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
-            player.off("seeking", handleSeeking);
+            if (!preview) player.off("seeking", handleSeeking);
         };
     }, [quizMarkers, quizzes]);
 
