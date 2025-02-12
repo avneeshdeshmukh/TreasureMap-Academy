@@ -31,15 +31,17 @@ export default function VideoQuiz({courseId, videoId}) {
             try {
                 const videoSnap = await getDoc(videoRef);
                 const vid = videoSnap.data();
-                const quiz = vid.quizzes;
-
-                const markers = Object.keys(quiz).map((key) => ({
-                    time: quiz[key].timestamp,
-                }));
+                const quiz = vid.quizzes || [];
+                
+                if(quiz.length > 0){
+                    const markers = Object.keys(quiz).map((key) => ({
+                        time: quiz[key].timestamp,
+                    }));
+                    setQuizzes(quiz);
+                    setQuizMarkers(markers);
+                }
 
                 setVideo(vid);
-                setQuizzes(quiz);
-                setQuizMarkers(markers);
             } catch (err) {
                 setError(err.message);
             }
@@ -123,7 +125,7 @@ export default function VideoQuiz({courseId, videoId}) {
                 bottom: "-2px",
                 transform: "translateX(-50%)",
             },
-            markers: quizMarkers,
+            markers: quizMarkers || [],
         });
 
         const handleTimeUpdate = () => {

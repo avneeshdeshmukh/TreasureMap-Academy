@@ -6,7 +6,6 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 const VideoPlayer = ({ options, onPlayerReady }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-  const [quizCompleted, setQuizCompleted] = useState(false);
 
   useEffect(() => {
     if (videoRef.current && !playerRef.current) {
@@ -58,12 +57,6 @@ const VideoPlayer = ({ options, onPlayerReady }) => {
     };
   }, [options, onPlayerReady]);
 
-  const handleQuizSubmit = () => {
-    setQuizCompleted(true);
-    if (playerRef.current) {
-      playerRef.current.play(); // Resume video after quiz is submitted
-    }
-  };
 
   return (
     <div>
