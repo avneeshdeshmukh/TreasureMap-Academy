@@ -35,7 +35,7 @@ export default function VideoPreviewCard({ videoData}) {
                             <DialogTitle>Video Preview</DialogTitle>
                         </DialogHeader>
                         <div className="mt-4 flex justify-center">
-                            <VideoQuiz courseId={videoData.course} videoId={videoData.videoId}/>
+                            <VideoQuiz courseId={videoData.course} videoId={videoData.videoId} preview={true}/>
                         </div>
                     </DialogContent>
                 </Dialog>
