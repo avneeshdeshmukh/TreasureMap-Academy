@@ -9,7 +9,7 @@ import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
 
-export default function VideoQuiz({courseId, videoId}) {
+export default function VideoQuiz({ courseId, videoId, preview }) {
     const firestore = getFirestore();
     const videoRef = doc(firestore, "videos", videoId);
 
@@ -25,6 +25,7 @@ export default function VideoQuiz({courseId, videoId}) {
 
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
+    const lastAllowedTimeRef = useRef(0);
 
     useEffect(() => {
         const getVideo = async () => {
@@ -33,13 +34,16 @@ export default function VideoQuiz({courseId, videoId}) {
                 const vid = videoSnap.data();
                 const quiz = vid.quizzes;
 
-                const markers = Object.keys(quiz).map((key) => ({
-                    time: quiz[key].timestamp,
-                }));
+                if (quiz) {
+                    const markers = Object.keys(quiz).map((key) => ({
+                        time: quiz[key].timestamp,
+                    }));
+                    setQuizzes(quiz);
+                    setQuizMarkers(markers);
+                }
+
 
                 setVideo(vid);
-                setQuizzes(quiz);
-                setQuizMarkers(markers);
             } catch (err) {
                 setError(err.message);
             }
@@ -112,6 +116,8 @@ export default function VideoQuiz({courseId, videoId}) {
     const handlePlayerReady = useCallback((player) => {
         playerRef.current = player;
 
+        const quizTimes = quizMarkers.map(marker => marker.time);
+
         // Add markers for quiz timestamps
         player.markers({
             markerStyle: {
@@ -128,6 +134,10 @@ export default function VideoQuiz({courseId, videoId}) {
 
         const handleTimeUpdate = () => {
             const currentTime = player.currentTime();
+
+            if (currentTime > lastAllowedTimeRef.current) {
+                lastAllowedTimeRef.current = currentTime;
+            }
 
             quizMarkers.forEach(marker => {
                 if (
@@ -153,10 +163,24 @@ export default function VideoQuiz({courseId, videoId}) {
             });
         };
 
+
+
+        const handleSeeking = () => {
+            const seekTime = player.currentTime();
+            const nextQuizTime = quizTimes.find(time => time > savedTimeRef.current);
+
+            if (nextQuizTime !== undefined && seekTime > nextQuizTime) {
+                player.currentTime(lastAllowedTimeRef.current); // Return to last allowed time
+            }
+        };
+
         player.on("timeupdate", handleTimeUpdate);
+
+        if(!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
+            if (!preview) player.off("seeking", handleSeeking);
         };
     }, [quizMarkers, quizzes]);
 
