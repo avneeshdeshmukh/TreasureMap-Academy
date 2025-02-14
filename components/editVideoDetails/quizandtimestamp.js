@@ -110,6 +110,11 @@ export default function QuizCreator() {
   }, [videoId]);
 
   const handleAddTimestamp = async () => {
+    if (currentTimestamp >= videoDoc.duration || currentTimestamp === 0) {
+      alert("Please enter a valid timestamp");
+      return;
+    }
+
     if (currentTimestamp !== null) {
       const newQuestion = {
         timestamp: currentTimestamp,
@@ -233,11 +238,12 @@ export default function QuizCreator() {
     console.log(items);
   };
 
-  const handleCancel = () =>{
+  const handleCancel = () => {
     setCurrentTimestamp(0);
     setCurrentHour("00");
     setCurrentMinute("00");
     setCurrentSecond("00");
+    setCurrentQuestions([]);
   }
 
   const handleEditQuestion = (index) => {
@@ -490,7 +496,13 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
     }
   };
 
-  const addOption = () => setOptions([...options, ""]);
+  const addOption = () => {
+    if (options.length + 1 > 4) {
+      alert("You can add maximum of 4 options");
+      return;
+    }
+    setOptions([...options, ""]);
+  }
 
   const updateOption = (index, value) => {
     const newOptions = [...options];
