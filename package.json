@@ -29,6 +29,7 @@
     "firebase": "^11.0.2",
     "firebase-admin": "^13.0.2",
     "flowbite-react": "^0.10.2",
+    "framer-motion": "^12.4.3",
     "lucide-react": "^0.451.0",
     "next": "14.2.14",
     "react": "^18",
