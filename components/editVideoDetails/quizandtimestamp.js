@@ -100,6 +100,7 @@ export default function QuizCreator() {
         if (videoData.quizzes) {
           const fetchedQuizzes = Object.values(videoData.quizzes);
           setTimestamps(fetchedQuizzes);
+          console.log(fetchedQuizzes);
         }
       } else {
         console.log("Video not found");
@@ -111,7 +112,14 @@ export default function QuizCreator() {
 
   const handleAddTimestamp = async () => {
     if (currentTimestamp >= videoDoc.duration || currentTimestamp === 0) {
+      handleCancel();
       alert("Please enter a valid timestamp");
+      return;
+    }
+
+    if (timestamps.some(item => item.timestamp === currentTimestamp)) {
+      handleCancel();
+      alert("The timestamp already exists. Please update the same.");
       return;
     }
 
@@ -171,6 +179,7 @@ export default function QuizCreator() {
       setCurrentTimestamp(null);
       setCurrentQuestions([]);
       setSelectedQuizType(null);
+      handleCancel();
     }
   };
 
@@ -244,6 +253,7 @@ export default function QuizCreator() {
     setCurrentMinute("00");
     setCurrentSecond("00");
     setCurrentQuestions([]);
+    setEditingTimestampIndex(null);
   }
 
   const handleEditQuestion = (index) => {
