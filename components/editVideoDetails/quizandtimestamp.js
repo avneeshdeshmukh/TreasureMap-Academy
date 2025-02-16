@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,20 +11,83 @@ import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import VideoPreviewCard from "./video-preview-card"
 
+const MAX_HOURS = 23;
+
 export default function QuizCreator() {
   const firestore = getFirestore();
   const { courseId, videoId } = useParams();
 
   const videoRef = doc(firestore, "videos", videoId);
+  const timestampInputRef = useRef(null);
 
   const [videoDoc, setVideoDoc] = useState(null);
-  const [currentTimestamp, setCurrentTimestamp] = useState(null);
+  const [currentHour, setCurrentHour] = useState("00");
+  const [currentMinute, setCurrentMinute] = useState("00");
+  const [currentSecond, setCurrentSecond] = useState("00");
+  const [currentTimestamp, setCurrentTimestamp] = useState(0);
   const [selectedQuizType, setSelectedQuizType] = useState(null);
   const [timestamps, setTimestamps] = useState([]);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [editingTimestampIndex, setEditingTimestampIndex] = useState(null);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
   const [previousTimestamp, setPreviousTimestamp] = useState(null);
+
+  const convertSecondsToHMS = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return {
+      hours: String(hours).padStart(2, "0"),  // Ensures 2-digit format
+      minutes: String(minutes).padStart(2, "0"),
+      seconds: String(seconds).padStart(2, "0"),
+    };
+  };
+
+  const displayTime = (totalSeconds) => {
+    const { hours, minutes, seconds } = convertSecondsToHMS(totalSeconds);
+
+    // Convert to numbers to remove leading zeros
+    const h = Number(hours);
+    const m = Number(minutes);
+    const s = Number(seconds);
+
+    // Build time parts with correct singular/plural wording
+    const parts = [];
+    if (h > 0) parts.push(`${h} ${h === 1 ? "hour" : "hours"}`);
+    if (m > 0) parts.push(`${m} ${m === 1 ? "minute" : "minutes"}`);
+    if (s > 0 || parts.length === 0) parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
+
+    return parts.join(" ");
+  };
+
+  const handleTimeChange = (type, value) => {
+    if (isNaN(value) || value < 0) return; // Prevent invalid or negative inputs
+
+    let h = parseInt(currentHour, 10);
+    let m = parseInt(currentMinute, 10);
+    let s = parseInt(currentSecond, 10);
+
+    if (type === "hour") h = Math.min(value, MAX_HOURS);
+    if (type === "minute") m = value;
+    if (type === "second") s = value;
+
+    // Convert to total seconds
+    let totalSeconds = h * 3600 + m * 60 + s;
+
+    // Auto-fix overflow (seconds > 59 → add to minutes, etc.)
+    h = Math.min(Math.floor(totalSeconds / 3600), MAX_HOURS);
+    m = Math.floor((totalSeconds % 3600) / 60);
+    s = totalSeconds % 60;
+
+    // Update total timestamp
+    setCurrentTimestamp(totalSeconds);
+
+    // Update UI with two-digit formatting
+    setCurrentHour(String(h).padStart(2, "0"));
+    setCurrentMinute(String(m).padStart(2, "0"));
+    setCurrentSecond(String(s).padStart(2, "0"));
+  };
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -47,6 +110,11 @@ export default function QuizCreator() {
   }, [videoId]);
 
   const handleAddTimestamp = async () => {
+    if (currentTimestamp >= videoDoc.duration || currentTimestamp === 0) {
+      alert("Please enter a valid timestamp");
+      return;
+    }
+
     if (currentTimestamp !== null) {
       const newQuestion = {
         timestamp: currentTimestamp,
@@ -108,10 +176,29 @@ export default function QuizCreator() {
 
   const handleEditTimestamp = (index) => {
     const timestampToEdit = timestamps[index];
+    const inHours = convertSecondsToHMS(timestampToEdit.timestamp);
+    setCurrentHour(inHours.hours);
+    setCurrentMinute(inHours.minutes);
+    setCurrentSecond(inHours.seconds);
     setPreviousTimestamp(timestampToEdit.timestamp);
     setCurrentTimestamp(timestampToEdit.timestamp);
     setCurrentQuestions([...timestampToEdit.questions]);
     setEditingTimestampIndex(index);
+
+    setTimeout(() => {
+      if (timestampInputRef.current) {
+        timestampInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Optional: Add a slight background highlight for better visibility
+        timestampInputRef.current.style.transition = "background-color 0.5s ease-in-out";
+        timestampInputRef.current.style.backgroundColor = "#fff3cd"; // Light yellow highlight
+
+        // Remove highlight after a delay
+        setTimeout(() => {
+          timestampInputRef.current.style.backgroundColor = "white";
+        }, 1000);
+      }
+    }, 100);
   };
 
   const handleDeleteTimestamp = async (index) => {
@@ -123,6 +210,7 @@ export default function QuizCreator() {
       [`quizzes.${timestampToDelete}`]: deleteField(),
     });
     setTimestamps(timestamps.filter((_, i) => i !== index));
+    handleCancel();
   };
 
   const handleDeleteQuestion = async (index) => {
@@ -149,6 +237,14 @@ export default function QuizCreator() {
     setCurrentQuestions(items);
     console.log(items);
   };
+
+  const handleCancel = () => {
+    setCurrentTimestamp(0);
+    setCurrentHour("00");
+    setCurrentMinute("00");
+    setCurrentSecond("00");
+    setCurrentQuestions([]);
+  }
 
   const handleEditQuestion = (index) => {
     const questionToEdit = currentQuestions[index];
@@ -191,41 +287,64 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
-      
       {videoDoc && (<div>
         <VideoPreviewCard videoData={videoDoc} />
       </div>)}
 
 
-      <div className="py-2">
-        <label>Timestamp (seconds)</label>
+      <div className="p-2 my-3 flex gap-2 items-center border rounded-lg" ref={timestampInputRef}>
+        <label>Timestamp (HH:MM:SS)</label>
+
         <Input
           type="number"
-          value={currentTimestamp || ""}
-          onChange={(e) => setCurrentTimestamp(Number(e.target.value))}
-          placeholder="Enter timestamp"
+          value={currentHour}
+          onChange={(e) => handleTimeChange("hour", Number(e.target.value))}
+          placeholder="HH"
+          className="w-16 text-center"
         />
+
+        <span>:</span>
+
+        <Input
+          type="number"
+          value={currentMinute}
+          onChange={(e) => handleTimeChange("minute", Number(e.target.value))}
+          placeholder="MM"
+          className="w-16 text-center"
+        />
+
+        <span>:</span>
+
+        <Input
+          type="number"
+          value={currentSecond}
+          onChange={(e) => handleTimeChange("second", Number(e.target.value))}
+          placeholder="SS"
+          className="w-16 text-center"
+        />
+
       </div>
 
-      {currentTimestamp !== null && (
+
+      {currentTimestamp !== 0 && (
         <>
           <p className="text-slate-500 text-sm mb-2">(Select the type of quiz you want to add)</p>
           <Tabs>
             <TabsList className="grid w-full grid-cols-4 mb-4">
               <TabsTrigger onClick={() => setSelectedQuizType("mcq")}
-                className={`${selectedQuizType === "mcq" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "mcq" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
                   }`}
               >Multiple Choice</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}
-                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
                   }`}
               >Fill Blanks</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}
-                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
                   }`}
               >True/False</TabsTrigger>
               <TabsTrigger onClick={() => setSelectedQuizType("slider")}
-                className={`${selectedQuizType === "slider" ? "font-bold bg-gray-200" : ""
+                className={`${selectedQuizType === "slider" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
                   }`}
               >Slider</TabsTrigger>
             </TabsList>
@@ -249,7 +368,7 @@ export default function QuizCreator() {
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className="border p-2 mb-2 bg-white cursor-move flex justify-between items-center"
+                          className="border rounded-lg p-2 mb-2 bg-white cursor-move flex justify-between items-center"
                         >
                           <div>
                             <p>{q.question}</p>
@@ -289,6 +408,14 @@ export default function QuizCreator() {
           >
             {editingTimestampIndex !== null ? 'Update Timestamp' : 'Save Timestamp'}
           </Button>
+
+          <Button
+            onClick={handleCancel}
+            className="mt-4"
+            variant="danger"
+          >
+            Cancel
+          </Button>
         </>
       )}
 
@@ -298,7 +425,7 @@ export default function QuizCreator() {
           {timestamps.map((ts, index) => (
             <Card key={index} className="mb-4">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h4>Timestamp: {ts.timestamp} seconds</h4>
+                <h4>Timestamp: {displayTime(ts.timestamp)}</h4>
                 <div className="space-x-2">
                   <Button
                     size="sm"
@@ -339,7 +466,6 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
   const [options, setOptions] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
 
-
   useEffect(() => {
     if (existingQuestion) {
       setQuestion(existingQuestion.question || "");
@@ -370,7 +496,13 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
     }
   };
 
-  const addOption = () => setOptions([...options, ""]);
+  const addOption = () => {
+    if (options.length + 1 > 4) {
+      alert("You can add maximum of 4 options");
+      return;
+    }
+    setOptions([...options, ""]);
+  }
 
   const updateOption = (index, value) => {
     const newOptions = [...options];

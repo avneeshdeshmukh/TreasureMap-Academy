@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 
-export default function AddVideos({onAdd, numOfVideos}) {
+export default function AddVideos({ onAdd, numOfVideos }) {
   const firestore = getFirestore();
   const router = useRouter();
   const params = useParams();
@@ -117,36 +117,58 @@ export default function AddVideos({onAdd, numOfVideos}) {
       await uploadFile(url); // Pass the URL directly to uploadFile
     }
 
-    const videoId = uuidv4();
-    const videoRef = doc(firestore, "videos", videoId);
+    const getVideoDuration = (file) => {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement("video");
+        video.preload = "metadata";
 
-    const newVideo = {
-      videoId,
-      title: videoTitle,
-      file: {
-        name: videoFile.name,
-        size: videoFile.size,
-        type: videoFile.type,
-      },
-      videoURL: `${userData.username}/${courseData.courseId}/videos/${videoTitle}.mp4`,
-      creator: userData.username,
-      course: courseData.courseId,
-      uploadedAt: new Date(),
-      sequence : numOfVideos + 1,
+        video.onloadedmetadata = () => {
+          window.URL.revokeObjectURL(video.src);
+          resolve(video.duration);
+        };
+
+        video.onerror = (error) => {
+          reject(error);
+        };
+
+        video.src = URL.createObjectURL(file);
+      });
     };
 
-    await setDoc(videoRef, newVideo, { merge: true });
-    setStatus("")
+    try {
+      const duration = await getVideoDuration(videoFile); // Extract video duration
 
-    // Call the parent function to add the video
-    onAdd(newVideo);
+      const videoId = uuidv4();
+      const videoRef = doc(firestore, "videos", videoId);
 
+      const newVideo = {
+        videoId,
+        title: videoTitle,
+        file: {
+          name: videoFile.name,
+          size: videoFile.size,
+          type: videoFile.type,
+        },
+        videoURL: `${userData.username}/${courseData.courseId}/videos/${videoTitle}.mp4`,
+        creator: userData.username,
+        course: courseData.courseId,
+        uploadedAt: new Date(),
+        sequence: numOfVideos + 1,
+        duration: Math.round(duration), // Store duration in seconds
+      };
 
-    setVideoTitle("");
-    setVideoFile(null);
+      await setDoc(videoRef, newVideo, { merge: true });
 
+      setStatus("");
+      onAdd(newVideo);
 
-    document.getElementById("videoFileInput").value = "";
+      setVideoTitle("");
+      setVideoFile(null);
+      document.getElementById("videoFileInput").value = "";
+    } catch (error) {
+      console.error("Error getting video duration:", error);
+      setStatus("Error processing video duration.");
+    }
   };
 
   return (
