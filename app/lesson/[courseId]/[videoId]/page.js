@@ -20,50 +20,120 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { auth } from "@/lib/firebase";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { doc, getDoc, getFirestore, updateDoc, setDoc, arrayUnion } from "firebase/firestore";
 
 export default function LessonPage() {
     const firestore = getFirestore();
     const { courseId, videoId } = useParams();
+    const userId = auth.currentUser.uid;
+
+    const videoRef = doc(firestore, "videos", videoId);
+    const VIRef = doc(firestore, "videoInteraction", videoId);
+
     const [video, setVideo] = useState(null);
+    const [videoInt, setVideoInt] = useState(null);
     const [likes, setLikes] = useState(0);
     const [dislikes, setDislikes] = useState(0);
+    const [userFeedback, setUserFeedback] = useState(null);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState([]);
     const [notes, setNotes] = useState("");
     const [savedNotes, setSavedNotes] = useState([]);
+    const [editingNoteIndex, setEditingNoteIndex] = useState(null);
     const [showNotesSection, setShowNotesSection] = useState(true);
     const [showCommentsSection, setShowCommentsSection] = useState(true);
     const [editingNoteId, setEditingNoteId] = useState(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState("");
-    
+
+    const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${userId}`);
+
+    const showTemporaryFeedback = (message) => {
+        console.log(message);
+    };
+
+    const fetchSavedNotes = async () => {
+        const docSnap = await getDoc(videoNotesRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            setSavedNotes(data.notes || []);  // Default to an empty array if no notes
+        } else {
+            // Document does not exist, create it with an empty notes array
+            await setDoc(videoNotesRef, {
+                videoId,
+                userId,
+                notes: [],
+            });
+            setSavedNotes([]); // No notes, so start with an empty array
+        }
+    };
 
     useEffect(() => {
-      const fetchVideo = async () =>{
-        const videoRef = doc(firestore, "videos", videoId);
-        const vid = await getDoc(videoRef);
-        if(vid.exists()){
-            const videoData = vid.data();
-            setVideo(videoData);
-        }
-        else{
-            console.log("Video not found")
-        }
-      }
-    
-      fetchVideo();
-    }, [videoId])
-    
+        fetchSavedNotes();
+    }, [videoId, userId]);
 
-    // Feedback handler
-    const showTemporaryFeedback = (message) => {
-        setFeedbackMessage(message);
-        setShowFeedback(true);
-        setTimeout(() => setShowFeedback(false), 3000);
+    const handleLike = async () => {
+        if (userFeedback === "like") {
+            setLikes(0);
+            setUserFeedback(null);
+            await updateDoc(VIRef, {
+                likes: likes - 1,
+            });
+        } else {
+            setLikes(1);
+            setDislikes(0);
+            setUserFeedback("like");
+            showTemporaryFeedback("Thanks for your feedback!");
+            await updateDoc(VIRef, {
+                likes: likes + 1,
+                dislikes: dislikes > 0 ? dislikes - 1 : dislikes,
+            });
+        }
     };
+
+    const handleDislike = async () => {
+        if (userFeedback === "dislike") {
+            setDislikes(0);
+            setUserFeedback(null);
+            await updateDoc(VIRef, {
+                dislikes: dislikes - 1,
+            });
+        } else {
+            setDislikes(1);
+            setLikes(0);
+            setUserFeedback("dislike");
+            showTemporaryFeedback("Thanks for your feedback!");
+            await updateDoc(VIRef, {
+                dislikes: dislikes + 1,
+                likes: likes > 0 ? likes - 1 : likes,
+            });
+        }
+    };
+
+
+    useEffect(() => {
+        const fetchVideo = async () => {
+            const vid = await getDoc(videoRef);
+            const VI = await getDoc(VIRef);
+            if (vid.exists() && VI.exists()) {
+                const videoData = vid.data();
+                const VIData = VI.data();
+                setVideo(videoData);
+                setVideoInt(VIData);
+                setLikes(VIData.likes);
+                setDislikes(VIData.dislikes);
+            }
+            else {
+                console.log("Video not found")
+            }
+        }
+
+        fetchVideo();
+    }, [videoId])
+
 
     // Handle Comment Submission
     const handleCommentSubmit = () => {
@@ -83,43 +153,46 @@ export default function LessonPage() {
     };
 
     // Handle Notes Submission
-    const handleSaveNotes = () => {
+    const handleSaveNotes = async () => {
         if (notes.trim()) {
-            if (editingNoteId) {
-                setSavedNotes(
-                    savedNotes.map((note) =>
-                        note.id === editingNoteId
-                            ? { ...note, text: notes, editedAt: new Date().toLocaleString() }
-                            : note
-                    )
-                );
-                setEditingNoteId(null);
-                showTemporaryFeedback("Note updated successfully!");
+            const newNote = {
+                timestamp: new Date().toLocaleString(),
+                text: notes,
+            };
+
+            if (editingNoteIndex !== null) {
+                // If editing, update the note in the array
+                const updatedNotes = [...savedNotes];
+                updatedNotes[editingNoteIndex] = newNote;
+                await updateDoc(videoNotesRef, {
+                    notes: updatedNotes,
+                });
+                setEditingNoteIndex(null);  // Clear editing state
             } else {
-                setSavedNotes([
-                    ...savedNotes,
-                    {
-                        id: Date.now(),
-                        text: notes,
-                        timestamp: new Date().toLocaleString(),
-                    },
-                ]);
-                showTemporaryFeedback("Note saved successfully!");
+                // If saving a new note, append to the array
+                await updateDoc(videoNotesRef, {
+                    notes: arrayUnion(newNote),
+                });
             }
-            setNotes("");
+
+            setNotes(""); // Clear the text area
+            fetchSavedNotes();  // Re-fetch saved notes after saving or updating
         }
     };
 
     // Handle Note Deletion
-    const handleDeleteNote = (noteId) => {
-        setSavedNotes(savedNotes.filter((note) => note.id !== noteId));
-        showTemporaryFeedback("Note deleted successfully!");
+    const handleDeleteNote = async (index) => {
+        const updatedNotes = savedNotes.filter((_, i) => i !== index);
+        await updateDoc(videoNotesRef, {
+            notes: updatedNotes,
+        });
+        fetchSavedNotes();  // Re-fetch saved notes after deletion
     };
 
     // Handle Note Editing
-    const handleEditNote = (note) => {
-        setNotes(note.text);
-        setEditingNoteId(note.id);
+    const handleEditNote = (index) => {
+        setNotes(savedNotes[index].text);
+        setEditingNoteIndex(index);
     };
 
     return (
@@ -134,8 +207,8 @@ export default function LessonPage() {
 
             {/* Video Title */}
             {video ? (
-            <div className="text-2xl font-semibold mt-6 ml-8"> {video.title}</div>
-            ): <></>}
+                <div className="text-2xl font-semibold mt-6 ml-8"> {video.title}</div>
+            ) : <></>}
 
 
             {/* Main Layout */}
@@ -143,16 +216,13 @@ export default function LessonPage() {
                 {/* Left Column */}
                 <div className="flex-grow space-y-6">
                     {/* Video Player & Quiz */}
-                        <VideoQuiz courseId={courseId} videoId={videoId} className="w-full h-auto aspect-video" />
+                    <VideoQuiz courseId={courseId} videoId={videoId} className="w-full h-auto aspect-video" />
 
                     {/* Interaction Buttons */}
                     <div className="flex space-x-4">
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                setLikes((prev) => prev + 1);
-                                showTemporaryFeedback("Thanks for your feedback!");
-                            }}
+                            onClick={handleLike}
                             className="flex items-center space-x-2 hover:bg-blue-50 transition-colors"
                         >
                             <ThumbsUp
@@ -163,10 +233,7 @@ export default function LessonPage() {
                         </Button>
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                setDislikes((prev) => prev + 1);
-                                showTemporaryFeedback("Thanks for your feedback!");
-                            }}
+                            onClick={handleDislike}
                             className="flex items-center space-x-2 hover:bg-red-50 transition-colors"
                         >
                             <ThumbsDown
@@ -181,91 +248,82 @@ export default function LessonPage() {
                     <Card className="shadow-lg">
                         <div
                             className="p-4 border-b flex justify-between items-center cursor-pointer"
-                            onClick={() => setShowNotesSection(!showNotesSection)}
                         >
                             <div className="flex items-center gap-2">
                                 <BookOpen size={20} />
                                 <h3 className="text-lg font-semibold">Notes</h3>
                             </div>
-                            {showNotesSection ? (
+                            {savedNotes.length > 0 ? (
                                 <ChevronUp size={20} />
                             ) : (
                                 <ChevronDown size={20} />
                             )}
                         </div>
 
-                        {showNotesSection && (
-                            <CardContent className="p-4 space-y-4">
-                                <div className="space-y-3">
-                                    <Textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        placeholder="Take notes for this video..."
-                                        className="min-h-32 resize-y"
-                                    />
-                                    <Button
-                                        onClick={handleSaveNotes}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <Save size={16} />
-                                        {editingNoteId ? "Update Note" : "Save Note"}
-                                    </Button>
-                                </div>
+                        <CardContent className="p-4 space-y-4">
+                            {/* Add/Update Note Form */}
+                            <div className="space-y-3">
+                                <Textarea
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    placeholder="Take notes for this video..."
+                                    className="min-h-32 resize-y"
+                                />
+                                <Button
+                                    onClick={handleSaveNotes}
+                                    className="flex items-center gap-2"
+                                >
+                                    <Save size={16} />
+                                    {editingNoteIndex !== null ? "Update Note" : "Save Note"}
+                                </Button>
+                            </div>
 
-                                <div className="space-y-3">
-                                    <h4 className="font-medium flex items-center gap-2">
-                                        <MessageCircle size={16} />
-                                        Saved Notes ({savedNotes.length})
-                                    </h4>
-                                    {savedNotes.length === 0 ? (
-                                        <p className="text-gray-500 text-center py-4">
-                                            No saved notes yet. Start taking notes!
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {savedNotes.map((note) => (
-                                                <div
-                                                    key={note.id}
-                                                    className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                                                >
-                                                    <div className="flex justify-between items-start">
-                                                        <p className="whitespace-pre-wrap flex-grow">
-                                                            {note.text}
-                                                        </p>
-                                                        <div className="flex gap-2 ml-4">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleEditNote(note)}
-                                                                className="text-blue-500 hover:text-blue-700"
-                                                            >
-                                                                <Edit2 size={16} />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleDeleteNote(note.id)}
-                                                                className="text-red-500 hover:text-red-700"
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </Button>
-                                                        </div>
+                            {/* Saved Notes */}
+                            <div className="space-y-3">
+                                <h4 className="font-medium">Saved Notes ({savedNotes.length})</h4>
+                                {savedNotes.length === 0 ? (
+                                    <p className="text-gray-500 text-center py-4">
+                                        No saved notes yet. Start taking notes!
+                                    </p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {savedNotes.map((note, index) => (
+                                            <div
+                                                key={index}
+                                                className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                                            >
+                                                <div className="flex justify-between items-start">
+                                                    <p className="whitespace-pre-wrap flex-grow">
+                                                        {note.text}
+                                                    </p>
+                                                    <div className="flex gap-2 ml-4">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleEditNote(index)}
+                                                            className="text-blue-500 hover:text-blue-700"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteNote(index)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </Button>
                                                     </div>
-                                                    <div className="text-xs text-gray-500 mt-2">
-                                                        {note.timestamp}
-                                                    </div>
-                                                    {note.editedAt && (
-                                                        <div className="text-xs text-gray-500">
-                                                            Edited: {note.editedAt}
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        )}
+                                                <div className="text-xs text-gray-500 mt-2">
+                                                    {note.timestamp}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
                     </Card>
                 </div>
 
