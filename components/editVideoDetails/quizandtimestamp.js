@@ -116,11 +116,13 @@ export default function QuizCreator() {
       alert("Please enter a valid timestamp");
       return;
     }
-
-    if (timestamps.some(item => item.timestamp === currentTimestamp)) {
-      handleCancel();
-      alert("The timestamp already exists. Please update the same.");
-      return;
+    
+    if (editingTimestampIndex === null) {
+      if (timestamps.some(item => item.timestamp === currentTimestamp)) {
+        handleCancel();
+        alert("The timestamp already exists. Please update the same.");
+        return;
+      }
     }
 
     if (currentTimestamp !== null) {

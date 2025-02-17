@@ -8,7 +8,7 @@ export default function MainLayout({ children }) {
 
     return (
         <ProtectedRoute>
-            <div 
+            <div
                 className="min-h-full"
             >
                 <MobileHeader platform={"learner"} />
