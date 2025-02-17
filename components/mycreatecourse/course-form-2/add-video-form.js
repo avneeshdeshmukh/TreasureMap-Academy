@@ -140,6 +140,7 @@ export default function AddVideos({ onAdd, numOfVideos }) {
 
       const videoId = uuidv4();
       const videoRef = doc(firestore, "videos", videoId);
+      const videoInteractionRef = doc(firestore, "videoInteraction", videoId);
 
       const newVideo = {
         videoId,
@@ -157,7 +158,15 @@ export default function AddVideos({ onAdd, numOfVideos }) {
         duration: Math.round(duration), // Store duration in seconds
       };
 
+      const newVI = {
+        videoId,
+        likes : 0,
+        dislikes : 0,
+        comments : []
+      }
+
       await setDoc(videoRef, newVideo, { merge: true });
+      await setDoc(videoInteractionRef, newVI, { merge: true });
 
       setStatus("");
       onAdd(newVideo);
