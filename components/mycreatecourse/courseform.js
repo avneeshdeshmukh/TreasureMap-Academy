@@ -2,7 +2,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button"
-import { courseCategories } from "@/lib/data";
+import { courseCategories, courseLanguages } from "@/lib/data";
 import Select from "react-select";
 import { getFirestore, getDoc, setDoc, doc } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
@@ -18,6 +18,8 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
     courseTitle: "",
     description: "",
     category: "",
+    price: "",
+    language: "",
     difficulty: "",
     thumbnail: null,
   });
@@ -133,6 +135,9 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
       newErrors.category = "At least one category is required.";
     if (!courseDetails.difficulty) newErrors.difficulty = "Difficulty is required.";
     if (!courseDetails.thumbnail) newErrors.thumbnail = "Thumbnail is required.";
+    if (!courseDetails.price || parseFloat(courseDetails.price) < 0) newErrors.price = "Please enter a valid price.";
+    if (!courseDetails.language) newErrors.language = "Please select a language.";
+
 
     // Set errors if any and exit early
     if (Object.keys(newErrors).length > 0) {
@@ -157,10 +162,12 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
       // Create a new course object
       const newCourse = {
         courseId,
-        creator : userData.username,
+        creator: userData.username,
         title: courseDetails.courseTitle,
         description: courseDetails.description,
         category: courseDetails.category,
+        price: parseFloat(courseDetails.price),
+        language: courseDetails.language,
         difficulty: courseDetails.difficulty,
         thumbnailURL: `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`,
       };
@@ -296,6 +303,56 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
           <p className="text-red-500 text-sm">{errors.category}</p>
         )}
       </div>
+
+      {/* Price */}
+      <div className="mb-6">
+        <label className="block font-medium text-gray-700 mb-2">Price (₹)</label>
+        <input
+          type="number"
+          placeholder="Enter course price"
+          value={courseDetails.price}
+          onChange={(e) =>
+            setCourseDetails((prev) => ({
+              ...prev,
+              price: e.target.value,
+            }))
+          }
+          className="border rounded-lg p-3 w-full focus:ring focus:ring-blue-300 focus:outline-none"
+          min="0"
+        />
+        {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
+      </div>
+
+      {/* Language */}
+      <div className="mb-6">
+        <label className="block font-medium text-gray-700 mb-2">Language</label>
+        <Select
+          options={courseLanguages}
+          value={courseLanguages.find((option) => option.value === courseDetails.language)}
+          onChange={(selectedOption) =>
+            setCourseDetails((prev) => ({
+              ...prev,
+              language: selectedOption ? selectedOption.value : "",
+            }))
+          }
+          placeholder="Select language..."
+          className="w-full"
+          styles={{
+            control: (base) => ({
+              ...base,
+              border: "1px solid #d1d5db", // Matches the style of other inputs
+              borderRadius: "0.375rem",
+              padding: "3px",
+              boxShadow: "none",
+              "&:hover": {
+                borderColor: "#a0aec0",
+              },
+            }),
+          }}
+        />
+        {errors.language && <p className="text-red-500 text-sm">{errors.language}</p>}
+      </div>
+
 
       {/* Difficulty */}
       <div className="mb-6">

@@ -4,11 +4,20 @@ import { MobileHeader } from "@/components/mobile-header"
 import ProtectedRoute from "@/components/protected-route"
 import { Sidebar } from "@/components/sidebar"
 
-export default function MainLayout({ children }) {
+export default function LearnLayout({ children }) {
 
     return (
         <ProtectedRoute>
-            <div
+            <div style={{
+                background: `linear-gradient(
+              rgba(0, 0, 0, 0.750), 
+              rgba(0, 0, 0, 0.750)
+            ), url('/images/bg-17.jpg')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundAttachment: 'fixed'
+            }}
                 className="min-h-full"
             >
                 <MobileHeader platform={"learner"} />
