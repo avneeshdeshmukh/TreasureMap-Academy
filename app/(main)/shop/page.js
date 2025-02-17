@@ -1,31 +1,19 @@
 'use client'
-import { CourseCard } from "@/components/shop/course-card";
 import { ShopHeader } from "@/components/shop/shop-header";
-
+import  EnrolledCourses  from "@/components/shop/enrolledCourses"
+import NewCourses from "@/components/shop/newCourses";
 const shopPage =  () => {
+    
     return (
-            <div className="py-5">
-                <div className="flex items-center justify-center mb-4">
+            <div className="">
+                <div className="flex items-center justify-center">
                     <ShopHeader />
                 </div>
-                <div className="flex flex-wrap gap-10 p-6 items-center justify-center">
-
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-                    <CourseCard title={"Title"} imgUrl={"/images/background.jpg"} description={"This is some detail text about the card. It can include brief information or a description"} />
-
-
+                <div className="flex">
+                    <EnrolledCourses/>
+                </div>
+                <div className="flex">
+                    <NewCourses/>
                 </div>
 
             </div>

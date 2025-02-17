@@ -26,7 +26,6 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 
 export default function LessonPage() {
     const firestore = getFirestore();
-
     const { courseId, videoId } = useParams();
     const [video, setVideo] = useState(null);
     const [likes, setLikes] = useState(0);

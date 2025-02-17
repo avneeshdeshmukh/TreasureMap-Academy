@@ -1,5 +1,4 @@
 "use client"
-
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { Stats } from "./stats";
 import { StickyWrapper } from "@/components/sticky-wrapper";
@@ -69,7 +68,6 @@ const learnPage = () => {
     }, [courseId])
 
 
-
     const lessons = [
         { id: "1", index: 0, totalCount: 14, locked: false, current: false, percentage: 100 },
         { id: "2", index: 1, totalCount: 14, locked: false, current: false, percentage: 100 },
@@ -114,5 +112,4 @@ const learnPage = () => {
         </div>
     )
 }
-
 export default learnPage;
