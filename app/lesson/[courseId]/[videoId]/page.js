@@ -35,8 +35,13 @@ export default function LessonPage() {
 
     const [video, setVideo] = useState(null);
     const [videoInt, setVideoInt] = useState(null);
-    const [likes, setLikes] = useState(0);
-    const [dislikes, setDislikes] = useState(0);
+
+    const [liked, setLiked] = useState(0);
+    const [disliked, setDisliked] = useState(0);
+
+    const [likeCount, setLikeCount] = useState(0);
+    const [dislikeCount, setDislikeCount] = useState(0);
+
     const [userFeedback, setUserFeedback] = useState(null);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState([]);
@@ -59,13 +64,23 @@ export default function LessonPage() {
         const docSnap = await getDoc(videoNotesRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
-            setSavedNotes(data.notes || []);  // Default to an empty array if no notes
+            setSavedNotes(data.notes || []);
+            switch(data.likeStatus){
+                case 1 :
+                    setLiked(1);
+                    break;
+                
+                case -1 :
+                    setDisliked(1);
+                    break;
+            }
         } else {
             // Document does not exist, create it with an empty notes array
             await setDoc(videoNotesRef, {
                 videoId,
                 userId,
                 notes: [],
+                likeStatus : 0,
             });
             setSavedNotes([]); // No notes, so start with an empty array
         }
@@ -76,40 +91,82 @@ export default function LessonPage() {
     }, [videoId, userId]);
 
     const handleLike = async () => {
-        if (userFeedback === "like") {
-            setLikes(0);
+        if (liked) {
+            setLiked(0);
             setUserFeedback(null);
             await updateDoc(VIRef, {
-                likes: likes - 1,
+                likes: likeCount - 1,
             });
-        } else {
-            setLikes(1);
-            setDislikes(0);
+            await updateDoc(videoNotesRef, {
+                likeStatus: 0,
+            });
+            setLikeCount(likeCount - 1);
+        } else if (disliked) {
+            setLiked(1);
+            setUserFeedback("like");
+            showTemporaryFeedback("Thanks for your feedback!");
+            setDisliked(0);
+            await updateDoc(VIRef, {
+                likes: likeCount + 1,
+                dislikes: dislikeCount - 1,
+            });
+            await updateDoc(videoNotesRef, {
+                likeStatus: 1,
+            });
+            setLikeCount(likeCount + 1);
+            setDislikeCount(dislikeCount - 1);
+        }
+        else {
+            setLiked(1);
             setUserFeedback("like");
             showTemporaryFeedback("Thanks for your feedback!");
             await updateDoc(VIRef, {
-                likes: likes + 1,
-                dislikes: dislikes > 0 ? dislikes - 1 : dislikes,
+                likes: likeCount + 1,
             });
+            await updateDoc(videoNotesRef, {
+                likeStatus: 1,
+            });
+            setLikeCount(likeCount + 1);
         }
     };
 
     const handleDislike = async () => {
-        if (userFeedback === "dislike") {
-            setDislikes(0);
+        if (disliked) {
+            setDisliked(0);
             setUserFeedback(null);
             await updateDoc(VIRef, {
-                dislikes: dislikes - 1,
+                dislikes: dislikeCount - 1,
             });
-        } else {
-            setDislikes(1);
-            setLikes(0);
+            await updateDoc(videoNotesRef, {
+                likeStatus: 0,
+            });
+            setDislikeCount(dislikeCount - 1);
+        } else if (liked) {
+            setDisliked(1);
+            setUserFeedback("dislike");
+            showTemporaryFeedback("Thanks for your feedback!");
+            setLiked(0);
+            await updateDoc(VIRef, {
+                dislikes: dislikeCount + 1,
+                likes: likeCount - 1,
+            });
+            await updateDoc(videoNotesRef, {
+                likeStatus: -1,
+            });
+            setDislikeCount(dislikeCount + 1);
+            setLikeCount(likeCount - 1);
+        }
+        else {
+            setDisliked(1);
             setUserFeedback("dislike");
             showTemporaryFeedback("Thanks for your feedback!");
             await updateDoc(VIRef, {
-                dislikes: dislikes + 1,
-                likes: likes > 0 ? likes - 1 : likes,
+                dislikes: dislikeCount + 1,
             });
+            await updateDoc(videoNotesRef, {
+                likeStatus: -1,
+            });
+            setDislikeCount(dislikeCount + 1);
         }
     };
 
@@ -123,8 +180,8 @@ export default function LessonPage() {
                 const VIData = VI.data();
                 setVideo(videoData);
                 setVideoInt(VIData);
-                setLikes(VIData.likes);
-                setDislikes(VIData.dislikes);
+                setLikeCount(VIData.likes);
+                setDislikeCount(VIData.dislikes);
             }
             else {
                 console.log("Video not found")
@@ -227,9 +284,9 @@ export default function LessonPage() {
                         >
                             <ThumbsUp
                                 size={20}
-                                className={likes > 0 ? "text-blue-500" : ""}
+                                className={liked && "text-blue-500"}
                             />
-                            <span>{likes}</span>
+                            <span>{likeCount}</span>
                         </Button>
                         <Button
                             variant="outline"
@@ -238,9 +295,9 @@ export default function LessonPage() {
                         >
                             <ThumbsDown
                                 size={20}
-                                className={dislikes > 0 ? "text-red-500" : ""}
+                                className={disliked && "text-red-500"}
                             />
-                            <span>{dislikes}</span>
+                            <span>{dislikeCount}</span>
                         </Button>
                     </div>
 
