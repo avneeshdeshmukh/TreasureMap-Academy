@@ -18,6 +18,8 @@ export const LessonButton = ({
     locked,
     current,
     percentage,
+    link,
+    courseId
 }) => {
     const cycleLength = 8;
     const cycleIndex = index % cycleLength;
@@ -41,7 +43,7 @@ export const LessonButton = ({
 
     return (
         <Link
-            href={'/courses'}
+            href={`/lesson/${courseId}/${link}`}
             aria-disabled={locked}
             style={{ pointerEvents: locked ? "none" : "auto" }}
         >
