@@ -5,7 +5,7 @@ import Image from "next/image"
 import SidebarItem from "./sidebar-item"
 import { usePathname } from "next/navigation"
 
-export const Sidebar = ({ className }) => {
+export const Sidebar = ({ className }) => { //#2c3748
     const pathname = usePathname(); // Get the current path
 
     // Determine the active item based on the pathname
@@ -21,7 +21,7 @@ export const Sidebar = ({ className }) => {
     const activeItem = getActiveItem();
     return (
         <div className={cn("flex h-full lg:w-[360px] lg:fixed top-0 left-0 px-4  flex-col",
-            className)} style={{ backgroundColor: '#2c3748' }}>
+            className)} style={{ backgroundColor: '#092247' }}> 
             <div className="flex flex-col items-center">
                 <h2 className="text-2xl font-bold my-2.5 text-center"><Image src="/images/logo.png" width={75} height={50} /></h2>
                 <div className="container text-center my-10">

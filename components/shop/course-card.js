@@ -1,32 +1,42 @@
-import Image from 'next/image';
-import { Button } from '../ui/button';
+import { Button } from "@/components/ui/button";
 
-export const CourseCard = ({ title, imgUrl, description }) => {
+const CourseCard = ({ title, thumbnail, enrolledDate, courseLink, buttonLabel }) => {
+    const formattedDate = new Date(enrolledDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+
     return (
-        <div className="flex flex-col border rounded-lg shadow-lg bg-[#2c3748] w-full sm:w-1/2 md:w-1/4">
-            <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-200 ">{title}</h2>
-            </div>
+        <div className="flex-none w-72 bg-[#092247] rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+            {/* Thumbnail */}
             <div className="relative w-full h-40">
-                <Image
-                    src={imgUrl}
+                <img
+                    src={thumbnail || "/api/placeholder/400/320"}
                     alt={title}
-                    layout="fill"
-                    objectFit="cover"
-                    className="p-4"
+                    className="w-full h-full object-cover"
                 />
             </div>
 
-            <div className="p-4 border-t">
-                <p className="text-sm text-gray-300">{description}</p>
-            </div>
-            <div className="p-4 border-t text-center">
+            {/* Content */}
+            <div className="p-4 space-y-4">
+                {/* Title */}
+                <h3 className="text-lg font-semibold text-white truncate">{title}</h3>
+
+                {/* Enrolled Date */}
+                <div className="text-sm text-gray-400">Enrolled on: {formattedDate}</div>
+
+                {/* Action Button */}
                 <Button
-                    variant='ghost'
-                    className="w-full"
-                >Details
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => (window.location.href = courseLink)}
+                >
+                    {buttonLabel}
                 </Button>
             </div>
         </div>
     );
-}
+};
+
+export default CourseCard;

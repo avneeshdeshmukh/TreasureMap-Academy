@@ -29,7 +29,7 @@ export default function Details() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Banner Section */}
-        <div className="relative bg-yellow-500 text-white p-8 h-[280px] rounded-lg flex items-center">
+        <div className="relative bg-yellow-500 text-white p-8 min-h-[360px] rounded-lg flex items-center">
           <div className="max-w-[calc(100%-320px)]">
             <h1 className="text-4xl font-extrabold tracking-tight leading-snug font-serif">
               {course.title}

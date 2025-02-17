@@ -8,16 +8,7 @@ export default function MainLayout({ children }) {
 
     return (
         <ProtectedRoute>
-            <div style={{
-                background: `linear-gradient(
-              rgba(0, 0, 0, 0.750), 
-              rgba(0, 0, 0, 0.750)
-            ), url('/images/bg-17.jpg')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundAttachment: 'fixed'
-            }}
+            <div 
                 className="min-h-full"
             >
                 <MobileHeader platform={"learner"} />
