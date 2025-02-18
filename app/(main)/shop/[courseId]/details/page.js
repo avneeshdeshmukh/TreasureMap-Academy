@@ -8,6 +8,7 @@ import { User, Clock, BookOpen, BarChart } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { doc, getDoc, getFirestore, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
+import { setLatestCourse } from "@/lib/utils";
 
 export default function Details() {
   const firestore = getFirestore();
@@ -45,6 +46,7 @@ export default function Details() {
 
       const usrData = usr.data();
       setUserData(usrData);
+      console.log(usrData.enrolledCourses.length)
 
       // Check if enrolledCourses exist and if it includes courseId
       setEnrolled(usrData.enrolledCourses?.includes(courseId) || false);
@@ -53,7 +55,7 @@ export default function Details() {
 
     fetchCourseDetails();
     fetchUserDetails();
-  }, [courseId, user])
+  }, [courseId, user, enrolled])
 
   useEffect(() => {
     if (!course) return;
@@ -120,8 +122,13 @@ export default function Details() {
     setEnrolled(true);
   };
 
-  const handleGoToCourse = () => {
-    router.push('/learn')
+  const handleGoToCourse = async () => {
+    console.log(userData.enrolledCourses)
+    const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
+    await updateDoc(userRef, {
+      enrolledCourses : latestCourses
+    })
+    router.push('/learn');
   }
 
   if (course) {
@@ -156,7 +163,7 @@ export default function Details() {
                   className="rounded-t-lg object-cover"
                 />
               ) : (
-                <p className="text-center p-4">Loading thumbnail...</p>
+                <div className="h-[300px] w-[320px] text-center p-4">Loading thumbnail...</div>
               )}
               <CardContent className="p-5 space-y-4">
                 <div className="flex justify-between items-center">
