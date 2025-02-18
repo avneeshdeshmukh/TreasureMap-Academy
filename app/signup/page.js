@@ -155,150 +155,122 @@ export default function SignUpPage() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen py-2 "
-      style={{ backgroundColor: "#efebe2" }}
-    >
-      <Head>
-        <title>TMA</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    className="flex flex-col items-center justify-center min-h-screen py-2 px-4 md:px-0"
+    style={{ backgroundColor: "#efebe2" }}
+  >
+    <Head>
+      <title>TMA</title>
+      <link rel="icon" href="/favicon.ico" />
+    </Head>
 
-      <TopButton href={'/home'} right="30px" type={'x'} color={'none'} outline={'gray'} />
+    <TopButton href={'/home'} right="30px" type={'x'} color={'none'} outline={'gray'} />
 
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <div className="bg-white rounded-2xl shadow-2xl flex w-2/3 max-w-4xl">
-          {/* Left Section */}
-          <div className="w-3/5 p-5">
-            <div className="text-left font-bold">
-              <span className="text-blue-800">Treasure</span>
-              <span className="text-yellow-400">Map</span>
-              <span className="text-blue-800">Academy</span>
-            </div>
-            <div className="py-10">
-              <h2 className="text-3xl font-bold text-blue-800 mb-2">
-                Create an account
-              </h2>
-              <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
-              <div className="flex justify-center my-2">
-                <p
-                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer"
-                >
-                  <FaFacebookF className="text-sm" />
-                </p>
-                <p
-                  onClick={() => handleProviderSignUp(new GoogleAuthProvider())}
-                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer"
-                >
-                  <FaGoogle className="text-sm" />
-                </p>
-              </div>
-              {/* Taking Credentials */}
-              <p className="text-gray-400">or sign up with an email</p>
-              <form onSubmit={handleEmailSignUp}>
-                <div className="flex flex-col items-center mt-2">
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <FaUser className="text-gray-500 m-2" />
-                    <input
-                      type="text"
-                      placeholder="Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <FaEnvelope className="text-gray-500 m-2" />
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <FaAddressCard className="text-gray-500 m-2" />
-                    <input
-                      type="username"
-                      placeholder="Username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <FaCalendarAlt className="text-gray-500 m-2" />
-                    <input
-                      type="date"
-                      placeholder="Date of Birth"
-                      value={dob}
-                      onChange={(e) => setDob(e.target.value)}
-                      required
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <FaBriefcase className="text-gray-500 m-2" />
-                    <select
-                      value={occupation}
-                      onChange={(e) => setOccupation(e.target.value)}
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                      required
-                    >
-                      <option value="">Select Occupation</option>
-                      <option value="student">Student</option>
-                      <option value="working">Working Professional</option>
-                    </select>
-                  </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
-                    <MdLock className="text-gray-500 m-2" />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="bg-gray-200 outline-none text-sm flex-1"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
-                  >
-                    Sign Up with Email
-                  </button>
-                  {error && <p>{error}</p>}
-                </div>
-              </form>
-            </div>
+    <main className="flex flex-col items-center justify-center w-full flex-1 md:px-20 text-center">
+      <div className="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full md:w-2/3 max-w-4xl">
+        {/* Left Section */}
+        <div className="w-full md:w-3/5 p-5">
+          <div className="text-left font-bold">
+            <span className="text-blue-800">Treasure</span>
+            <span className="text-yellow-400">Map</span>
+            <span className="text-blue-800">Academy</span>
           </div>
-
-          {/* Right Section */}
-          <div className="w-2/5 bg-blue-800 text-yellow-400 rounded-tr-2xl rounded-br-2xl py-36 px-12 flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center justify-center -mt-10">
-              {" "}
-              {/* Added a flex container with negative margin */}
-              <img
-                src="/images/signup_pirate.png"
-                alt="Pirate"
-                className="w-45 h-45 mb-4" // Maintain the size as in the login section
-              />
-              <h2 className="text-3xl font-bold mb-2">Join Our Crew, Treasure Seeker!</h2>
-              <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
-              <p className="mb-5">Already have an account?</p>
-              <Link
-                href="/login"
-                className="border-2 border-yellow-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-yellow-400 hover:text-blue-800"
-              >
-                Login Here
-              </Link>
+          <div className="py-10">
+            <h2 className="text-3xl font-bold text-blue-800 mb-2">
+              Create an account
+            </h2>
+            <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
+            <div className="flex justify-center my-2">
+              <p className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer">
+                <FaFacebookF className="text-sm" />
+              </p>
+              <p className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer">
+                <FaGoogle className="text-sm" />
+              </p>
             </div>
+            <p className="text-gray-400">or sign up with an email</p>
+            <form className="mt-2">
+              <div className="flex flex-col items-center">
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <FaUser className="text-gray-500 m-2" />
+                  <input
+                    type="text"
+                    placeholder="Name"
+                    className="bg-gray-200 outline-none text-sm flex-1"
+                  />
+                </div>
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <FaEnvelope className="text-gray-500 m-2" />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    className="bg-gray-200 outline-none text-sm flex-1"
+                  />
+                </div>
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <FaAddressCard className="text-gray-500 m-2" />
+                  <input
+                    type="username"
+                    placeholder="Username"
+                    className="bg-gray-200 outline-none text-sm flex-1"
+                  />
+                </div>
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <FaCalendarAlt className="text-gray-500 m-2" />
+                  <input
+                    type="date"
+                    placeholder="Date of Birth"
+                    className="bg-gray-200 outline-none text-sm flex-1"
+                  />
+                </div>
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <FaBriefcase className="text-gray-500 m-2" />
+                  <select className="bg-gray-200 outline-none text-sm flex-1">
+                    <option value="">Select Occupation</option>
+                    <option value="student">Student</option>
+                    <option value="working">Working Professional</option>
+                  </select>
+                </div>
+                <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                  <MdLock className="text-gray-500 m-2" />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    className="bg-gray-200 outline-none text-sm flex-1"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
+                >
+                  Sign Up with Email
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Right Section */}
+        <div className="w-full md:w-2/5 bg-blue-800 text-yellow-400 rounded-b-2xl md:rounded-b-none md:rounded-r-2xl py-8 md:py-36 px-6 md:px-12">
+          <div className="flex flex-col items-center justify-center md:-mt-10">
+            <img
+              src="/images/signup_pirate.png"
+              alt="Pirate"
+              className="w-32 md:w-45 h-32 md:h-45 mb-4"
+            />
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Join Our Crew, Treasure Seeker!</h2>
+            <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
+            <p className="mb-5">Already have an account?</p>
+            <Link
+              href="/login"
+              className="border-2 border-yellow-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-yellow-400 hover:text-blue-800"
+            >
+              Login Here
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+);
 }
