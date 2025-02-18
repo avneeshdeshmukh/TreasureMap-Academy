@@ -17,8 +17,10 @@ const learnPage = () => {
     const userRef = doc(firestore, "users", user.uid);
 
     const [courseId, setCourseId] = useState(null);
+    const [topCourses, setTopCourses] = useState([]);
     const [userData, setUserData] = useState(null);
     const [videos, setVideos] = useState([]);
+
 
 
 
@@ -32,10 +34,16 @@ const learnPage = () => {
 
             const usrData = usr.data();
             setUserData(usrData);
+            console.log("Enrolled Courses:", usrData.enrolledCourses);
+
 
             // Check if enrolledCourses exist and if it includes courseId
             console.log(usrData.enrolledCourses?.[0]);
             setCourseId(usrData.enrolledCourses?.[0] || null);
+            if (usrData.enrolledCourses?.length <= 3)
+                setTopCourses(usrData.enrolledCourses)
+            else if (usrData.enrolledCourses?.length > 3)
+                setTopCourses(usrData.enrolledCourses.slice(0, 3))
         };
 
         fetchUserDetails();
@@ -84,32 +92,36 @@ const learnPage = () => {
         { id: "13", index: 12, totalCount: 14, locked: true, current: false, percentage: 0 },
         { id: "14", index: 14, totalCount: 14, locked: true, current: false, percentage: 0 },
     ];
-    return (
-        <div className="flex flex-row-reverse gap-[48px] px-6" >
-            <StickyWrapper>
-                <StreakIcons streak={39} coins={65} />
-                <Stats />
-                <LeaderboardPos />
-            </StickyWrapper>
-            <FeedWrapper>
-                <Header title={"Spanish"} />
-                <div className="relative flex flex-col items-center">
-                    {videos.map((lesson, idx) => (
-                        <LessonButton
-                            key={lesson.videoId}
-                            id={lesson.videoId}
-                            index={idx}
-                            totalCount={videos.length}
-                            locked={false}
-                            current={false}
-                            percentage={0}
-                            link={lesson.videoId}
-                            courseId={courseId}
-                        />
-                    ))}
-                </div>
-            </FeedWrapper>
-        </div>
-    )
+
+    if (topCourses.length !== 0 ) {
+        return (
+            <div className="flex flex-row-reverse gap-[48px] px-6" >
+                <StickyWrapper>
+                    <StreakIcons streak={39} coins={65} />
+                    <Stats />
+                    <LeaderboardPos />
+                </StickyWrapper>
+                <FeedWrapper>
+                    <Header topCourses={topCourses} />
+                    <div className="relative flex flex-col items-center">
+                        {videos.map((lesson, idx) => (
+                            <LessonButton
+                                key={lesson.videoId}
+                                id={lesson.videoId}
+                                index={idx}
+                                totalCount={videos.length}
+                                locked={false}
+                                current={false}
+                                percentage={0}
+                                link={lesson.videoId}
+                                courseId={courseId}
+                            />
+                        ))}
+                    </div>
+                </FeedWrapper>
+            </div>
+        )
+    }
+
 }
 export default learnPage;
