@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 
-export const Header = ({ topCourses }) => {
+export const Header = ({ topCourses, onCourseSelect, afterSelect }) => {
     const firestore = getFirestore();
+    const router = useRouter();
 
     const [courses, setCourses] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +67,11 @@ export const Header = ({ topCourses }) => {
                             <div key={index}>
                                 <div
                                     className="px-4 py-2 hover:bg-[#11151c] cursor-pointer transition-colors text-center"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={() => {
+                                        onCourseSelect(course.courseId);
+                                        afterSelect(); // Call the function from learnPage
+                                        setIsOpen(false);
+                                    }}
                                 >
                                     {course.title}
                                 </div>
@@ -77,7 +83,7 @@ export const Header = ({ topCourses }) => {
                         <div className="border-t border-dotted border-gray-500" />
                         <div
                             className="px-4 py-2 text-center text-blue-400 hover:text-blue-300 cursor-pointer hover:bg-[#11151c] transition-colors"
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => router.push('/shop')}
                         >
                             View More
                         </div>
