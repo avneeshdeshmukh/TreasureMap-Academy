@@ -107,6 +107,11 @@ export default function AddVideos({ onAdd, numOfVideos }) {
           setStatus("File uploaded successfully!");
           setUploadProgress(0);
 
+          // Hide the status message after 2 seconds
+          setTimeout(() => {
+            setStatus("");
+          }, 2000);
+
           // Only add video after upload is complete
           onAdd(newVideo);
 
@@ -117,7 +122,7 @@ export default function AddVideos({ onAdd, numOfVideos }) {
         } else {
           setStatus("Error uploading file.");
         }
-        setIsUploading(false); // Set upload to false when done
+        setIsUploading(false);
       };
 
       xhr.onerror = () => {
@@ -225,22 +230,21 @@ export default function AddVideos({ onAdd, numOfVideos }) {
           as={motion.button}
           onClick={handleAdd}
           variant="plain"
-          className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ml-4" 
-          whileHover={{ scale: 1.05 }} 
-          whileTap={{ scale: 0.95 }} 
-          disabled={isUploading || !videoTitle.trim() || !videoFile} 
+          className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ml-4"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={isUploading || !videoTitle.trim() || !videoFile}
         >
           {isUploading ? "Uploading..." : "Upload"}
         </Button>
 
         {uploadProgress > 0 && (
-         <div className="w-full bg-gray-200 rounded-full h-4 mt-4 ">
-         <div
-           className="h-4 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-600"
-           style={{ width: `${uploadProgress}%` }}
-         ></div>
-       </div>
-       
+          <div className="w-full bg-gray-200 rounded-full h-4 mt-4 ">
+            <div
+              className="h-4 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-600"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
         )}
         {uploadProgress > 0 && (
           <div className="mt-2 text-center">{uploadProgress}%</div>
