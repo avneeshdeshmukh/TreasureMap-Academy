@@ -102,7 +102,7 @@ export default  function LoginPage() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen py-2"
+      className="flex flex-col items-center justify-center min-h-screen py-2 px-4 md:px-0"
       style={{ backgroundColor: "#efebe2" }}
     >
       <Head>
@@ -112,17 +112,17 @@ export default  function LoginPage() {
 
       <TopButton href={'/home'} right="30px" type={'x'} color={'none'} outline={'gray'} />
 
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-        <div className="bg-white rounded-2xl shadow-2xl flex w-2/3 max-w-4xl">
+      <main className="flex flex-col items-center justify-center w-full flex-1 md:px-20 text-center">
+        <div className="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full md:w-2/3 max-w-4xl">
           {/* Left Section */}
-          <div className="w-3/5 p-5">
+          <div className="w-full md:w-3/5 p-5">
             <div className="text-left font-bold">
               <span className="text-blue-800">Treasure</span>
               <span className="text-yellow-400">Map</span>
               <span className="text-blue-800">Academy</span>
             </div>
             <div className="py-10">
-              <h2 className="text-3xl font-bold text-blue-800 mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-blue-800 mb-2">
                 Sign in to account
               </h2>
               <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
@@ -136,10 +136,9 @@ export default  function LoginPage() {
               </div>
               <p className="text-gray-400">or login with an email account</p>
 
-
               <form onSubmit={handleEmailLogin}>
                 <div className="flex flex-col items-center mt-2">
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                  <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
                     <FaEnvelope className="text-gray-500 m-2" />
                     <input
                       type="email"
@@ -149,7 +148,7 @@ export default  function LoginPage() {
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
-                  <div className="bg-gray-200 w-64 p-2 flex items-center mb-3">
+                  <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
                     <MdLock className="text-gray-500 m-2" />
                     <input
                       type="password"
@@ -160,10 +159,10 @@ export default  function LoginPage() {
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
-                  <div className="flex w-64 mb-5 justify-between">
+                  <div className="flex w-full max-w-xs mb-5 justify-between px-2">
                     <label className="flex items-center text-xs">
                       <input type="checkbox" name="remember" className="mr-1" />
-                      Remember me for 2 weeks
+                      Remember me
                     </label>
                     <a href="#" className="text-xs">
                       Forgot Password
@@ -175,21 +174,21 @@ export default  function LoginPage() {
                   >
                     Login
                   </button>
-                  {error && <p>{error}</p>}
+                  {error && <p className="mt-3 text-red-500 text-sm">{error}</p>}
                 </div>
               </form>
             </div>
           </div>
 
           {/* Right Section */}
-          <div className="w-2/5 bg-blue-800 text-yellow-400 rounded-tr-2xl rounded-br-2xl py-36 px-12 flex flex-col items-center justify-center">
-            <div className="flex flex-col items-center justify-center -mt-10">
+          <div className="w-full md:w-2/5 bg-blue-800 text-yellow-400 rounded-b-2xl md:rounded-b-none md:rounded-r-2xl py-8 md:py-36 px-6 md:px-12">
+            <div className="flex flex-col items-center justify-center md:-mt-10">
               <img
                 src="/images/login_pirate.png"
                 alt="Pirate"
-                className="w-45 h-45 mb-4"
+                className="w-32 md:w-45 h-32 md:h-45 mb-4"
               />
-              <h2 className="text-3xl font-bold mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">
                 Ahoy, Fearless Buccaneer!
               </h2>
               <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
@@ -203,27 +202,7 @@ export default  function LoginPage() {
             </div>
           </div>
         </div>
-      </main >
-
-      {/* {showGif && (
-        <div className="fixed top-0 left-0 w-full h-full bg-transparent flex items-center justify-center z-50">
-          <img
-            src="/images/treasure3.gif"
-            alt="Treasure Chest Opening"
-            className="w-1/2 h-auto max-w-2xl"
-          />
-        </div>
-      )
-      } */}
-
-      {/* Fullscreen Confetti */}
-      {/* {
-        showConfetti && (
-          <div className="fixed top-0 left-0 w-full h-full z-50">
-            <Confetti numberOfPieces={1000} />
-          </div>
-        )
-      } */}
-    </div >
+      </main>
+    </div>
   );
 }

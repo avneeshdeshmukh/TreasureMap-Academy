@@ -24,6 +24,7 @@ import { auth } from "@/lib/firebase";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
 import { doc, getDoc, getFirestore, updateDoc, setDoc, arrayUnion } from "firebase/firestore";
+import { comment } from "postcss";
 
 export default function LessonPage() {
     const firestore = getFirestore();
@@ -43,8 +44,10 @@ export default function LessonPage() {
     const [dislikeCount, setDislikeCount] = useState(0);
 
     const [userFeedback, setUserFeedback] = useState(null);
+
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState([]);
+
     const [notes, setNotes] = useState("");
     const [savedNotes, setSavedNotes] = useState([]);
     const [editingNoteIndex, setEditingNoteIndex] = useState(null);
@@ -182,6 +185,7 @@ export default function LessonPage() {
                 setVideoInt(VIData);
                 setLikeCount(VIData.likes);
                 setDislikeCount(VIData.dislikes);
+                setComments(VIData.comments || []); 
             }
             else {
                 console.log("Video not found")
@@ -193,19 +197,31 @@ export default function LessonPage() {
 
 
     // Handle Comment Submission
-    const handleCommentSubmit = () => {
+    const handleCommentSubmit = async () => {
         if (comment.trim()) {
-            setComments([
-                ...comments,
-                {
-                    id: Date.now(),
+            const userRef = doc(firestore, "users", userId);
+            const userSnap = await getDoc(userRef);
+
+            if(userSnap.exists()) {
+                const userData = userSnap.data();
+                const username = userData.username;
+
+                const newComment = {
+                    userId,
+                    username,
                     text: comment,
-                    timestamp: new Date().toLocaleString(),
-                    user: "User",
-                },
-            ]);
-            setComment("");
-            showTemporaryFeedback("Comment posted successfully!");
+                    timestamp: new Date().toISOString(),
+                };
+                await updateDoc(VIRef, {
+                    comments: arrayUnion(newComment),
+                });
+
+                setComments([...comments, newComment]);
+                setComment(""); //clear input
+                showTemporaryFeedback("Comment posted Successfully!");
+            } else {
+                console.log("User not found");
+            }
         }
     };
 
@@ -429,15 +445,15 @@ export default function LessonPage() {
                                         No comments yet. Be the first to comment!
                                     </p>
                                 ) : (
-                                    comments.map((cmt) => (
+                                    comments.map((cmt, index) => (
                                         <div
-                                            key={cmt.id}
+                                            key={index}
                                             className="bg-gray-50 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
                                         >
                                             <div className="flex justify-between">
-                                                <span className="font-semibold">{cmt.user}</span>
+                                                <span className="font-semibold">{cmt.username}</span>
                                                 <span className="text-xs text-gray-500">
-                                                    {cmt.timestamp}
+                                                    {new Date(cmt.timestamp).toLocaleString()}
                                                 </span>
                                             </div>
                                             <p className="mt-1">{cmt.text}</p>
