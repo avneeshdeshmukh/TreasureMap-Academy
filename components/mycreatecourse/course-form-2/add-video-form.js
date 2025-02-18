@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
+import { motion } from "framer-motion";
 
 export default function AddVideos({ onAdd, numOfVideos }) {
   const firestore = getFirestore();
@@ -17,9 +18,10 @@ export default function AddVideos({ onAdd, numOfVideos }) {
   const [uploadUrl, setUploadUrl] = useState(null);
   const [status, setStatus] = useState("");
   const [courseData, setCourseData] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false); // New state for upload progress
 
   useEffect(() => {
-    // Define an async function inside useEffect
     const fetchCourseData = async () => {
       try {
         const courseRef = doc(firestore, "courses", courseId);
@@ -34,7 +36,7 @@ export default function AddVideos({ onAdd, numOfVideos }) {
       }
     };
 
-    fetchCourseData(); // Call the async function
+    fetchCourseData();
   }, [courseId]);
 
   const handleVideoChange = (e) => {
@@ -69,8 +71,8 @@ export default function AddVideos({ onAdd, numOfVideos }) {
       }
 
       const data = await response.json();
-      setStatus("Upload URL generated successfully!");
-      return { url: data.uploadUrl, userData }; // Return the URL instead of relying solely on state
+      setStatus("");
+      return { url: data.uploadUrl, userData };
     } catch (err) {
       console.error("Error generating upload URL:", err);
       setStatus("Error generating upload URL.");
@@ -78,44 +80,72 @@ export default function AddVideos({ onAdd, numOfVideos }) {
     }
   };
 
-  const uploadFile = async (url) => {
+  const uploadFile = async (url, newVideo) => {
     if (!url || !videoFile) {
       setStatus("No file selected or upload URL missing.");
       return;
     }
 
     try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": videoFile.type,
-        },
-        body: videoFile,
-      });
+      setIsUploading(true); // Set upload to true when starting
 
-      if (response.ok) {
-        setStatus("File uploaded successfully!");
-      } else {
-        throw new Error("Failed to upload file");
-      }
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader("Content-Type", videoFile.type);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100
+          );
+          setUploadProgress(percentComplete);
+        }
+      };
+
+      xhr.onload = async () => {
+        if (xhr.status === 200) {
+          setStatus("File uploaded successfully!");
+          setUploadProgress(0);
+
+          // Hide the status message after 2 seconds
+          setTimeout(() => {
+            setStatus("");
+          }, 2000);
+
+          // Only add video after upload is complete
+          onAdd(newVideo);
+
+          // Reset input fields
+          setVideoTitle("");
+          setVideoFile(null);
+          document.getElementById("videoFileInput").value = "";
+        } else {
+          setStatus("Error uploading file.");
+        }
+        setIsUploading(false);
+      };
+
+      xhr.onerror = () => {
+        setStatus("Error uploading file.");
+        setIsUploading(false); // Set upload to false on error
+      };
+
+      xhr.send(videoFile);
     } catch (err) {
       console.error("Error uploading file:", err);
       setStatus("Error uploading file.");
+      setIsUploading(false); // Set upload to false on error
     }
   };
 
   const handleAdd = async () => {
-
     if (!videoFile || !videoTitle.trim()) {
       alert("Please provide a valid video title and file.");
       return;
     }
 
-    const { url, userData } = await generateUploadUrl(); // Get the URL directly
-    if (url) {
-      setUploadUrl(url); // Update state if needed for other components
-      await uploadFile(url); // Pass the URL directly to uploadFile
-    }
+    const { url, userData } = await generateUploadUrl();
+    if (!url) return;
 
     const getVideoDuration = (file) => {
       return new Promise((resolve, reject) => {
@@ -136,7 +166,7 @@ export default function AddVideos({ onAdd, numOfVideos }) {
     };
 
     try {
-      const duration = await getVideoDuration(videoFile); // Extract video duration
+      const duration = await getVideoDuration(videoFile);
 
       const videoId = uuidv4();
       const videoRef = doc(firestore, "videos", videoId);
@@ -155,25 +185,22 @@ export default function AddVideos({ onAdd, numOfVideos }) {
         course: courseData.courseId,
         uploadedAt: new Date(),
         sequence: numOfVideos + 1,
-        duration: Math.round(duration), // Store duration in seconds
+        duration: Math.round(duration),
       };
 
       const newVI = {
         videoId,
-        likes : 0,
-        dislikes : 0,
-        comments : []
-      }
+        likes: 0,
+        dislikes: 0,
+        comments: [],
+      };
 
       await setDoc(videoRef, newVideo, { merge: true });
       await setDoc(videoInteractionRef, newVI, { merge: true });
 
       setStatus("");
-      onAdd(newVideo);
 
-      setVideoTitle("");
-      setVideoFile(null);
-      document.getElementById("videoFileInput").value = "";
+      await uploadFile(url, newVideo);
     } catch (error) {
       console.error("Error getting video duration:", error);
       setStatus("Error processing video duration.");
@@ -182,7 +209,6 @@ export default function AddVideos({ onAdd, numOfVideos }) {
 
   return (
     <>
-
       <div>
         <input
           type="text"
@@ -200,9 +226,29 @@ export default function AddVideos({ onAdd, numOfVideos }) {
           className="p-2 border rounded-md"
         />
 
-        <Button onClick={handleAdd} variant="plain">
-          + Add Video
+        <Button
+          as={motion.button}
+          onClick={handleAdd}
+          variant="plain"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ml-4"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={isUploading || !videoTitle.trim() || !videoFile}
+        >
+          {isUploading ? "Uploading..." : "Upload"}
         </Button>
+
+        {uploadProgress > 0 && (
+          <div className="w-full bg-gray-200 rounded-full h-4 mt-4 ">
+            <div
+              className="h-4 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-600"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+        )}
+        {uploadProgress > 0 && (
+          <div className="mt-2 text-center">{uploadProgress}%</div>
+        )}
       </div>
       {status && <p className="mt-2 text-center">{status}</p>}
     </>
