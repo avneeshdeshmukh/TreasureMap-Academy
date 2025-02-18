@@ -6,9 +6,10 @@ import { StreakIcons } from "@/components/streak-icons";
 import { Header } from "./header";
 import { LessonButton } from "./lesson-button";
 import LeaderboardPos from "./leaderboard-position";
-import { doc, getFirestore, collection, query, where, getDocs, getDoc } from "firebase/firestore";
+import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthProvider";
 import { useState, useEffect } from "react";
+import { setLatestCourse } from "@/lib/utils";
 
 const learnPage = () => {
     const firestore = getFirestore();
@@ -21,59 +22,74 @@ const learnPage = () => {
     const [userData, setUserData] = useState(null);
     const [videos, setVideos] = useState([]);
 
+    const fetchUserDetails = async () => {
+        const usr = await getDoc(userRef);
+        if (!usr.exists()) {
+            console.log("User not found");
+            return;
+        }
 
+        const usrData = usr.data();
+        setUserData(usrData);
+        console.log("Enrolled Courses:", usrData.enrolledCourses);
+
+
+        // Check if enrolledCourses exist and if it includes courseId
+        console.log(usrData.enrolledCourses?.[0]);
+        setCourseId(usrData.enrolledCourses?.[0] || null);
+        if (usrData.enrolledCourses?.length <= 3)
+            setTopCourses(usrData.enrolledCourses)
+        else if (usrData.enrolledCourses?.length > 3)
+            setTopCourses(usrData.enrolledCourses.slice(0, 3))
+    };
+
+    const fetchVideos = async () => {
+        if (!courseId) return; // Ensure courseId is available
+
+        const videosRef = collection(firestore, "videos"); // Reference to "videos" collection
+        const q = query(videosRef, where("course", "==", courseId)); // Filter by courseId
+        console.log(q);
+
+        try {
+            const querySnapshot = await getDocs(q);
+            const videosList = querySnapshot.docs.map(doc => ({
+                videoId: doc.data().videoId,
+                ...doc.data(),
+            }));
+            console.log(videosList);
+            setVideos(videosList); // Store videos in state
+        } catch (error) {
+            console.error("Error fetching videos:", error);
+        }
+    };
 
 
     useEffect(() => {
-        const fetchUserDetails = async () => {
-            const usr = await getDoc(userRef);
-            if (!usr.exists()) {
-                console.log("User not found");
-                return;
-            }
-
-            const usrData = usr.data();
-            setUserData(usrData);
-            console.log("Enrolled Courses:", usrData.enrolledCourses);
-
-
-            // Check if enrolledCourses exist and if it includes courseId
-            console.log(usrData.enrolledCourses?.[0]);
-            setCourseId(usrData.enrolledCourses?.[0] || null);
-            if (usrData.enrolledCourses?.length <= 3)
-                setTopCourses(usrData.enrolledCourses)
-            else if (usrData.enrolledCourses?.length > 3)
-                setTopCourses(usrData.enrolledCourses.slice(0, 3))
-        };
-
         fetchUserDetails();
-
     }, [user])
 
     useEffect(() => {
-        const fetchVideos = async () => {
-            if (!courseId) return; // Ensure courseId is available
-
-            const videosRef = collection(firestore, "videos"); // Reference to "videos" collection
-            const q = query(videosRef, where("course", "==", courseId)); // Filter by courseId
-            console.log(q);
-
-            try {
-                const querySnapshot = await getDocs(q);
-                const videosList = querySnapshot.docs.map(doc => ({
-                    videoId: doc.data().videoId,
-                    ...doc.data(),
-                }));
-                console.log(videosList);
-                setVideos(videosList); // Store videos in state
-            } catch (error) {
-                console.error("Error fetching videos:", error);
-            }
-        };
-
         fetchVideos();
-
     }, [courseId])
+
+    const handleCourseSelect = async (selectedCourse) => {
+        // Update topCourses and set the title to the selected course
+        const updatedCourses = setLatestCourse(userData.enrolledCourses, selectedCourse);
+        setCourseId(updatedCourses[0]);
+        if (userData.enrolledCourses?.length <= 3)
+            setTopCourses(updatedCourses)
+        else if (userData.enrolledCourses?.length > 3)
+            setTopCourses(updatedCourses.slice(0, 3))
+
+        await updateDoc(userRef, {
+            enrolledCourses: updatedCourses
+        })
+    };
+
+    const handleAfterSelect = async () =>{
+        fetchUserDetails();
+        fetchVideos();
+    }
 
 
     const lessons = [
@@ -93,7 +109,7 @@ const learnPage = () => {
         { id: "14", index: 14, totalCount: 14, locked: true, current: false, percentage: 0 },
     ];
 
-    if (topCourses.length !== 0 ) {
+    if (topCourses.length !== 0) {
         return (
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
@@ -102,7 +118,7 @@ const learnPage = () => {
                     <LeaderboardPos />
                 </StickyWrapper>
                 <FeedWrapper>
-                    <Header topCourses={topCourses} />
+                    <Header topCourses={topCourses} onCourseSelect={handleCourseSelect} afterSelect={handleAfterSelect} />
                     <div className="relative flex flex-col items-center">
                         {videos.map((lesson, idx) => (
                             <LessonButton
