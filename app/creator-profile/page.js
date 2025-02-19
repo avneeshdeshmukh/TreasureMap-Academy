@@ -34,7 +34,7 @@ export default function CompleteCreatorProfile() {
                 }
             }
             catch (err) {
-                console.log("B00bs")
+                console.log("error")
                 setError(err.message)
             }
         }
