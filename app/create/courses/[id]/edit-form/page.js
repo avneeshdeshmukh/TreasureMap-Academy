@@ -18,7 +18,6 @@ export default function EditFormPage() {
   const handleSubmit = () => {
     console.log("Form Data Submitted:", formData);
     alert("Form submitted successfully!");
-    router.push("/mycourses");
   };
 
   // Handle going back
