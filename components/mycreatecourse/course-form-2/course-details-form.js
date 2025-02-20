@@ -11,6 +11,8 @@ import { LayoutDashboard, Edit3, Trash2, Edit } from "lucide-react";
 import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, updateDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { LanguageForm } from "./language-form";
+import { PriceForm } from "./price-form";
 
 export default function VideoUploadForm({ onNext }) {
   const firestore = getFirestore();
@@ -217,6 +219,8 @@ export default function VideoUploadForm({ onNext }) {
               <TitleForm initialData={courseData.title} />
               <DescriptionForm initialData={courseData.description} />
               <DifficultyForm initialData={courseData.difficulty} />
+              <LanguageForm initialData={courseData.language} />
+              <PriceForm initialData={courseData.price} />
             </div>
           </div>
 
