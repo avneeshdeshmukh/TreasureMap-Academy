@@ -169,6 +169,7 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
         price: parseFloat(courseDetails.price),
         language: courseDetails.language,
         difficulty: courseDetails.difficulty,
+        isPublished : false,
         thumbnailURL: `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`,
       };
 

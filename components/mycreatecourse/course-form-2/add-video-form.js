@@ -190,6 +190,7 @@ export default function AddVideos({ onAdd, numOfVideos }) {
 
       const newVI = {
         videoId,
+        courseId : courseData.courseId,
         likes: 0,
         dislikes: 0,
         comments: [],

@@ -1,17 +1,21 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import CourseDetailsForm from "@/components/mycreatecourse/course-form-2/course-details-form";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import DeleteModal from "@/components/mycreatecourse/course-form-2/DeleteModal";
+import { auth } from "@/lib/firebase";
+import { getFirestore, doc, collection, query, where, getDocs, deleteDoc, getDoc } from "firebase/firestore";
 
 export default function EditFormPage() {
+  const firestore = getFirestore();
+
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    courseDetails: {},
-    videos: [],
-  });
+  const { id } = useParams();
+  const courseRef = doc(firestore, "courses", id);
+
+  const [course, setCourse] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
@@ -27,14 +31,97 @@ export default function EditFormPage() {
     setShowTermsModal(false);
   };
 
+
   // Handle going back
   const handleBack = () => {
     router.back(); // Navigate to the previous page
   };
+  
+  useEffect(() => {
+    const getCourse = async () => {
+      const courseSnap = await getDoc(courseRef);
+      if (courseSnap.exists()) {
+        setCourse(courseSnap.data());
+        console.log(courseSnap.data());
+      }
+    }
+    getCourse();
+  }, [id])
 
-  const handleDelete = () => {
-    console.log("Course deleted!");
-    // Perform course deletion logic here (e.g., API request)
+  const deleteVideos = async () => {
+    if (!id) return;
+
+    try {
+      const videosRef = collection(firestore, "videos");
+      const q = query(videosRef, where("course", "==", id));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        console.log("No videos found for this course.");
+        return;
+      }
+
+      const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+
+      console.log(`Deleted ${snapshot.size} videos.`);
+    } catch (error) {
+      console.error("Error deleting videos:", error);
+    }
+  };
+
+  const deleteDraft = async () => {
+    if (!id) return;
+
+    const idToken = await auth.currentUser.getIdToken();
+
+    try {
+
+      const response = await fetch("/api/deleteCourse", {
+        method: "POST",
+        body: JSON.stringify({ folderPath: `${course.creator}/${id}` }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      console.log("Failed to delete folder.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+
+    try {
+      // Step 1: Delete course from S3
+      const deleteResponse = await deleteDraft();
+      console.log(deleteResponse.success);
+
+      if (deleteResponse && deleteResponse.message) {
+        console.log("S3 Deletion Successful");
+
+        // Step 2: Delete associated videos from Firestore
+        await deleteVideos();
+
+        // Step 3: Delete the course document from Firestore
+        await deleteDoc(courseRef);
+
+        console.log("Course and associated videos deleted from Firestore.");
+
+        // Step 4: Redirect to courses list or another page after deletion
+        router.push("/create/mycourses");
+      } else {
+        console.error("S3 Deletion Failed:", deleteResponse?.error);
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
+    
     setShowDeleteModal(false);
   };
 
@@ -43,7 +130,7 @@ export default function EditFormPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold ">Edit Course</h1>
         <div className="p-2 rounded-full hover:bg-red-500 transition"
-         onClick={() => setShowDeleteModal(true)}
+          onClick={() => setShowDeleteModal(true)}
         >
           <Trash2 className="cursor-pointer text-gray-700" />
         </div>
@@ -70,34 +157,28 @@ export default function EditFormPage() {
         onClose={() => setShowDeleteModal(false)}
         onDelete={handleDelete}
       />
-
       {/* Terms and Conditions Modal */}
       {showTermsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-screen overflow-auto">
             <h2 className="text-xl font-bold mb-4">Terms and Conditions</h2>
-            
             <div className="h-64 overflow-y-auto border p-4 mb-4 text-sm">
               <h3 className="font-semibold mb-2">1. Content Guidelines</h3>
               <p className="mb-3">
                 By publishing this course, you confirm that all content is original or properly licensed for use. You agree not to publish any content that infringes on intellectual property rights, contains offensive material, or violates our community guidelines.
               </p>
-              
               <h3 className="font-semibold mb-2">2. Revenue Sharing</h3>
               <p className="mb-3">
                 You understand that revenue generated from your course will be shared according to our current revenue split policy, which may be updated from time to time.
               </p>
-              
               <h3 className="font-semibold mb-2">3. Quality Standards</h3>
               <p className="mb-3">
                 You agree to maintain a certain level of quality and respond to student inquiries in a timely manner. Courses that consistently receive poor ratings may be subject to review.
               </p>
-              
               <h3 className="font-semibold mb-2">4. Distribution Rights</h3>
               <p className="mb-3">
                 By publishing your course, you grant us non-exclusive rights to market and distribute your content across our platform and affiliated channels.
               </p>
-              
               <h3 className="font-semibold mb-2">5. Modification</h3>
               <p>
                 We reserve the right to modify these terms at any time. Continued use of the platform after such modifications constitutes your consent to the updated terms.
@@ -114,6 +195,7 @@ export default function EditFormPage() {
               />
               <label htmlFor="agreeTerms" className="text-sm">I agree to the terms and conditions</label>
             </div>
+
             
             <div className="flex justify-end space-x-3">
               <Button 
@@ -122,6 +204,7 @@ export default function EditFormPage() {
               >
                 Cancel
               </Button>
+
               <Button 
                 onClick={handleSubmitAfterTerms} 
                 disabled={!termsAgreed}
@@ -134,5 +217,6 @@ export default function EditFormPage() {
         </div>
       )}
     </div>
+
   );
 }
