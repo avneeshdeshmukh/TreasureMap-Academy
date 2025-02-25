@@ -6,7 +6,7 @@ import Image from "next/image";
 import { auth } from "@/lib/firebase";
 import { User, Clock, BookOpen, BarChart } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc, getFirestore, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
+import { doc, getDoc, getFirestore, updateDoc, arrayUnion, setDoc, increment } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { setLatestCourse } from "@/lib/utils";
 
@@ -18,9 +18,11 @@ export default function Details() {
 
   const courseRef = doc(firestore, "courses", courseId);
   const userRef = doc(firestore, "users", user.uid);
+  const userProgRef = doc(firestore, "userProgress", user.uid);
 
   const [course, setCourse] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [userProgData, setUserProgData] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
   const [enrolled, setEnrolled] = useState(false);
   const [error, setError] = useState(null);
@@ -28,13 +30,12 @@ export default function Details() {
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
-      console.log(user);
       const crs = await getDoc(courseRef);
       if (crs.exists()) {
         const crsData = crs.data();
         setCourse(crsData);
       } else {
-        console.log("Video not found");
+        console.log("Course not found");
       }
     }
 
@@ -53,9 +54,19 @@ export default function Details() {
       setEnrolled(usrData.enrolledCourses?.includes(courseId) || false);
     };
 
+    const fetchUserProgress = async () => {
+      const prog = await getDoc(userProgRef);
+      if (prog.exists()) {
+        const progData = prog.data();
+        setUserProgData(progData);
+      } else {
+        console.log("User not found");
+      }
+    }
 
     fetchCourseDetails();
     fetchUserDetails();
+    fetchUserProgress();
   }, [courseId, user, enrolled])
 
   useEffect(() => {
@@ -109,6 +120,10 @@ export default function Details() {
         enrolledCourses: arrayUnion(courseId),
       });
 
+      await updateDoc(courseRef, {
+        enrollments: increment(1),
+      })
+
       console.log("Course enrolled successfully!");
     } catch (error) {
       if (error.code === "not-found") {
@@ -118,8 +133,20 @@ export default function Details() {
       } else {
         console.error("Error enrolling in course:", error);
       }
-    } finally {
+    }
 
+    try {
+      const updateProgress = {
+        courseId,
+        currentVideo: 1,
+      }
+
+      await updateDoc(userProgRef, {
+        [`courseProgress.${courseId}`]: updateProgress,
+      })
+
+    } catch (err) {
+      console.error("Error enrolling in course:", error);
     }
 
     setEnrolled(true);
@@ -129,7 +156,7 @@ export default function Details() {
     console.log(userData.enrolledCourses)
     const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
     await updateDoc(userRef, {
-      enrolledCourses : latestCourses
+      enrolledCourses: latestCourses
     })
     router.push('/learn');
   }

@@ -16,11 +16,14 @@ const learnPage = () => {
     const { user } = useAuth();
 
     const userRef = doc(firestore, "users", user.uid);
+    const userProgRef = doc(firestore, "userProgress", user.uid);
 
     const [courseId, setCourseId] = useState(null);
     const [topCourses, setTopCourses] = useState([]);
     const [userData, setUserData] = useState(null);
     const [videos, setVideos] = useState([]);
+    const [userProgress, setUserProgress] = useState(null);
+    const [lastVideo, setLastVideo] = useState(0);
 
     const fetchUserDetails = async () => {
         const usr = await getDoc(userRef);
@@ -56,6 +59,7 @@ const learnPage = () => {
                 videoId: doc.data().videoId,
                 ...doc.data(),
             }));
+            videosList.sort((a, b) => a.sequence - b.sequence);
             console.log(videosList);
             setVideos(videosList); // Store videos in state
         } catch (error) {
@@ -63,6 +67,18 @@ const learnPage = () => {
         }
     };
 
+    const fetchUserProgress = async () => {
+        try {
+            const prog = await getDoc(userProgRef);
+            const progData = prog.data();
+            setUserProgress(progData);
+            const last = progData?.courseProgress?.[courseId]?.currentVideo || 1; // Default to 1 if not found
+            console.log(last);
+            setLastVideo(last);
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     useEffect(() => {
         fetchUserDetails();
@@ -71,6 +87,10 @@ const learnPage = () => {
     useEffect(() => {
         fetchVideos();
     }, [courseId])
+
+    useEffect(() => {
+        fetchUserProgress();
+    }, [user])
 
     const handleCourseSelect = async (selectedCourse) => {
         // Update topCourses and set the title to the selected course
@@ -86,28 +106,19 @@ const learnPage = () => {
         })
     };
 
-    const handleAfterSelect = async () =>{
+    const handleAfterSelect = async () => {
         fetchUserDetails();
         fetchVideos();
     }
 
+    const checkLocked = (video) => {
+        if (video.sequence > lastVideo) {
+            console.log(video.sequence)
+            return true;
+        }
+        return false;
+    }
 
-    const lessons = [
-        { id: "1", index: 0, totalCount: 14, locked: false, current: false, percentage: 100 },
-        { id: "2", index: 1, totalCount: 14, locked: false, current: false, percentage: 100 },
-        { id: "3", index: 2, totalCount: 14, locked: false, current: true, percentage: 60 },
-        { id: "4", index: 3, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "5", index: 4, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "6", index: 5, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "7", index: 6, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "8", index: 7, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "9", index: 8, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "10", index: 9, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "11", index: 10, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "12", index: 11, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "13", index: 12, totalCount: 14, locked: true, current: false, percentage: 0 },
-        { id: "14", index: 14, totalCount: 14, locked: true, current: false, percentage: 0 },
-    ];
 
     if (topCourses.length !== 0) {
         return (
@@ -120,19 +131,25 @@ const learnPage = () => {
                 <FeedWrapper>
                     <Header topCourses={topCourses} onCourseSelect={handleCourseSelect} afterSelect={handleAfterSelect} />
                     <div className="relative flex flex-col items-center">
-                        {videos.map((lesson, idx) => (
-                            <LessonButton
-                                key={lesson.videoId}
-                                id={lesson.videoId}
-                                index={idx}
-                                totalCount={videos.length}
-                                locked={false}
-                                current={false}
-                                percentage={0}
-                                link={lesson.videoId}
-                                courseId={courseId}
-                            />
-                        ))}
+                        {videos.length > 0 && lastVideo !== null && videos.map((lesson, idx) => {
+                            const isLocked = lesson.sequence > lastVideo;
+                            console.log(`Lesson ${lesson.videoId} - Sequence: ${lesson.sequence}, Locked: ${isLocked}`);
+
+                            return (
+                                <LessonButton
+                                    key={lesson.videoId}
+                                    id={lesson.videoId}
+                                    index={idx}
+                                    totalCount={videos.length}
+                                    locked={isLocked}
+                                    current={lastVideo === lesson.sequence}
+                                    percentage={0}
+                                    link={lesson.videoId}
+                                    courseId={courseId}
+                                />
+                            );
+                        })}
+
                     </div>
                 </FeedWrapper>
             </div>
