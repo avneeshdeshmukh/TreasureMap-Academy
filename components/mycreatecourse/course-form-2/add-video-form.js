@@ -7,7 +7,7 @@ import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 import { motion } from "framer-motion";
 
-export default function AddVideos({ onAdd, numOfVideos }) {
+export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
   const firestore = getFirestore();
   const router = useRouter();
   const params = useParams();
@@ -202,6 +202,8 @@ export default function AddVideos({ onAdd, numOfVideos }) {
       setStatus("");
 
       await uploadFile(url, newVideo);
+
+      fetchVideos();
     } catch (error) {
       console.error("Error getting video duration:", error);
       setStatus("Error processing video duration.");

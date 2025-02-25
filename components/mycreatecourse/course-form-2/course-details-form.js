@@ -229,7 +229,7 @@ export default function VideoUploadForm({ onNext }) {
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium">Course Videos</h2>
               {/* Pass the handleAddVideo function to AddVideos */}
-              <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} />
+              <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos = {fetchCourseVideos}/>
             </div>
             <div className="w-full flex">
               <Button
