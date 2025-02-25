@@ -1,26 +1,44 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CourseForm from "./courseform";
 import Drafts from "./drafts";
+import { auth } from "@/lib/firebase";
+import { getFirestore, doc, getDoc, getDocs, where, query, collection } from "firebase/firestore";
 
 const MyCourses = () => {
+  const firestore = getFirestore();
   const router = useRouter();
+  const userId = auth.currentUser.uid;
+  const userRef = doc(firestore, "users", userId);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [drafts, setDrafts] = useState([]);
+  const [courses, setCourses] = useState([]);
 
-  const courses = [
-    { id: 1, title: "React Basics", enrollments: 50 },
-    { id: 2, title: "Advanced JavaScript", enrollments: 30 },
-  ];
 
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this draft?")) {
-      setSubmittedCourses((prevCourses) =>
-        prevCourses.filter((course) => course.id !== id)
+  useEffect(() => {
+    const fetchCourses = async () => {
+
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+      const coursesRef = collection(firestore, "courses");
+      // Query courses where username matches the current user's username
+      const q = query(
+        coursesRef,
+        where("creator", "==", userData.username),
+        where("isPublished", "==", true)
       );
+
+      // Fetch the query snapshot
+      const querySnapshot = await getDocs(q);
+
+      // Extract course data
+      const userCourses = querySnapshot.docs.map((doc) => doc.data());
+      console.log(userCourses)
+      setCourses(userCourses)
     }
-  };
+
+    fetchCourses();
+  }, [userId])
 
   const handleEdit = (courseid) => {
     console.log("Edit course with ID:", courseid);
@@ -42,15 +60,18 @@ const MyCourses = () => {
 
         {/* Course List */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {courses.map((course) => (
-            <div key={course.id} className="bg-[#f8f4eb] p-4 rounded-lg shadow">
-              <h2 className="text-xl font-semibold text-[#5a3b1a]">
-                {course.title}
-              </h2>
-              <p className="text-gray-500">Enrollments: {course.enrollments}</p>
-            </div>
-          ))}
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <div key={course.courseId} className="bg-[#f8f4eb] p-4 rounded-lg shadow">
+                <h2 className="text-xl font-semibold text-[#5a3b1a]">{course.title}</h2>
+                <p className="text-gray-500">Enrollments: {course.enrollments}</p>
+              </div>
+            ))
+          ) : (
+            <p>You have no published courses...</p>
+          )}
         </div>
+
 
         {/* Create New Course Button */}
         <button

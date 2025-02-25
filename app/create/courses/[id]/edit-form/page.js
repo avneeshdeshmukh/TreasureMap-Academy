@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import DeleteModal from "@/components/mycreatecourse/course-form-2/DeleteModal";
 import { auth } from "@/lib/firebase";
-import { getFirestore, doc, collection, query, where, getDocs, deleteDoc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, collection, query, where, getDocs, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function EditFormPage() {
   const firestore = getFirestore();
@@ -25,18 +25,21 @@ export default function EditFormPage() {
     setShowTermsModal(true);
   };
 
-  const handleSubmitAfterTerms = () => {
-    console.log("Form Data Submitted:", formData);
-    alert("Form submitted successfully!");
+  const handlePublishAfterTerms = async () => {
+    await updateDoc(courseRef, { 
+      isPublished: true,
+      enrollments : 0,
+    });
+    alert("Course Published Successfully");
     setShowTermsModal(false);
+    router.push("/create/mycourses");
   };
-
 
   // Handle going back
   const handleBack = () => {
     router.back(); // Navigate to the previous page
   };
-  
+
   useEffect(() => {
     const getCourse = async () => {
       const courseSnap = await getDoc(courseRef);
@@ -121,7 +124,7 @@ export default function EditFormPage() {
     } catch (error) {
       console.error("Error deleting course:", error);
     }
-    
+
     setShowDeleteModal(false);
   };
 
@@ -184,11 +187,11 @@ export default function EditFormPage() {
                 We reserve the right to modify these terms at any time. Continued use of the platform after such modifications constitutes your consent to the updated terms.
               </p>
             </div>
-            
+
             <div className="flex items-center mb-4">
-              <input 
-                type="checkbox" 
-                id="agreeTerms" 
+              <input
+                type="checkbox"
+                id="agreeTerms"
                 className="mr-2"
                 checked={termsAgreed}
                 onChange={() => setTermsAgreed(!termsAgreed)}
@@ -196,17 +199,17 @@ export default function EditFormPage() {
               <label htmlFor="agreeTerms" className="text-sm">I agree to the terms and conditions</label>
             </div>
 
-            
+
             <div className="flex justify-end space-x-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setShowTermsModal(false)}
               >
                 Cancel
               </Button>
 
-              <Button 
-                onClick={handleSubmitAfterTerms} 
+              <Button
+                onClick={handlePublishAfterTerms}
                 disabled={!termsAgreed}
                 className={!termsAgreed ? "opacity-50 cursor-not-allowed" : ""}
               >
