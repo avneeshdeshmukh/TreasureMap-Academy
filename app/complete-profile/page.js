@@ -85,7 +85,7 @@ export default function CompleteProfile() {
       }
 
       const userRef = doc(firestore, "users", user.uid);
-      const userProgRef = doc(firestore, "userProgress", username.toLowerCase());
+      const userProgRef = doc(firestore, "userProgress", user.uid);
 
       await updateProfile(user, { displayName: name });
 
