@@ -85,6 +85,8 @@ export default function CompleteProfile() {
       }
 
       const userRef = doc(firestore, "users", user.uid);
+      const userProgRef = doc(firestore, "userProgress", username.toLowerCase());
+
       await updateProfile(user, { displayName: name });
 
       const additionalData = {
@@ -95,7 +97,17 @@ export default function CompleteProfile() {
         occupation,
       };
 
+      const progress = {
+        uid : user.uid,
+        username : username.toLowerCase(),
+        streak : 0,
+        points : 0,
+        courseProgress : {},
+      }
+
       await setDoc(userRef, additionalData, { merge: true });
+      await setDoc(userProgRef, progress, { merge: true });
+      
       console.log("Profile completed successfully");
       router.push("/learn"); // Redirect to /learn page
     } catch (err) {
