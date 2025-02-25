@@ -36,7 +36,7 @@ export default function EditFormPage() {
   const handleBack = () => {
     router.back(); // Navigate to the previous page
   };
-
+  
   useEffect(() => {
     const getCourse = async () => {
       const courseSnap = await getDoc(courseRef);
@@ -121,7 +121,7 @@ export default function EditFormPage() {
     } catch (error) {
       console.error("Error deleting course:", error);
     }
-
+    
     setShowDeleteModal(false);
   };
 
@@ -162,38 +162,33 @@ export default function EditFormPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-screen overflow-auto">
             <h2 className="text-xl font-bold mb-4">Terms and Conditions</h2>
-
             <div className="h-64 overflow-y-auto border p-4 mb-4 text-sm">
               <h3 className="font-semibold mb-2">1. Content Guidelines</h3>
               <p className="mb-3">
                 By publishing this course, you confirm that all content is original or properly licensed for use. You agree not to publish any content that infringes on intellectual property rights, contains offensive material, or violates our community guidelines.
               </p>
-
               <h3 className="font-semibold mb-2">2. Revenue Sharing</h3>
               <p className="mb-3">
                 You understand that revenue generated from your course will be shared according to our current revenue split policy, which may be updated from time to time.
               </p>
-
               <h3 className="font-semibold mb-2">3. Quality Standards</h3>
               <p className="mb-3">
                 You agree to maintain a certain level of quality and respond to student inquiries in a timely manner. Courses that consistently receive poor ratings may be subject to review.
               </p>
-
               <h3 className="font-semibold mb-2">4. Distribution Rights</h3>
               <p className="mb-3">
                 By publishing your course, you grant us non-exclusive rights to market and distribute your content across our platform and affiliated channels.
               </p>
-
               <h3 className="font-semibold mb-2">5. Modification</h3>
               <p>
                 We reserve the right to modify these terms at any time. Continued use of the platform after such modifications constitutes your consent to the updated terms.
               </p>
             </div>
-
+            
             <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="agreeTerms"
+              <input 
+                type="checkbox" 
+                id="agreeTerms" 
                 className="mr-2"
                 checked={termsAgreed}
                 onChange={() => setTermsAgreed(!termsAgreed)}
@@ -201,15 +196,17 @@ export default function EditFormPage() {
               <label htmlFor="agreeTerms" className="text-sm">I agree to the terms and conditions</label>
             </div>
 
+            
             <div className="flex justify-end space-x-3">
-              <Button
-                variant="outline"
+              <Button 
+                variant="outline" 
                 onClick={() => setShowTermsModal(false)}
               >
                 Cancel
               </Button>
-              <Button
-                onClick={handleSubmitAfterTerms}
+
+              <Button 
+                onClick={handleSubmitAfterTerms} 
                 disabled={!termsAgreed}
                 className={!termsAgreed ? "opacity-50 cursor-not-allowed" : ""}
               >
