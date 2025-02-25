@@ -50,6 +50,8 @@ export default function SignUpPage() {
     }
 
     const userRef = doc(firestore, "users", user.uid);
+    const userProgRef = doc(firestore, "userProgress", username.toLowerCase());
+
     const userData = {
       uid: user.uid,
       email: user.email,
@@ -63,7 +65,16 @@ export default function SignUpPage() {
       createdAt: new Date(),
     };
 
+    const progress = {
+      uid : user.uid,
+      username : username.toLowerCase(),
+      streak : 0,
+      points : 0,
+      courseProgress : {},
+    }
+
     await setDoc(userRef, userData, { merge: true });
+    await setDoc(userProgRef, progress, { merge: true });
     console.log("Email sign-up data saved : ", userData);
   }
 
