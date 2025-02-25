@@ -28,6 +28,7 @@ export default function Details() {
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
+      console.log(user);
       const crs = await getDoc(courseRef);
       if (crs.exists()) {
         const crsData = crs.data();
@@ -46,7 +47,7 @@ export default function Details() {
 
       const usrData = usr.data();
       setUserData(usrData);
-      console.log(usrData.enrolledCourses.length)
+      console.log(usrData.enrolledCourses?.length)
 
       // Check if enrolledCourses exist and if it includes courseId
       setEnrolled(usrData.enrolledCourses?.includes(courseId) || false);
@@ -117,6 +118,8 @@ export default function Details() {
       } else {
         console.error("Error enrolling in course:", error);
       }
+    } finally {
+
     }
 
     setEnrolled(true);

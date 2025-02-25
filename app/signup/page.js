@@ -50,7 +50,7 @@ export default function SignUpPage() {
     }
 
     const userRef = doc(firestore, "users", user.uid);
-    const userProgRef = doc(firestore, "userProgress", username.toLowerCase());
+    const userProgRef = doc(firestore, "userProgress", user.uid());
 
     const userData = {
       uid: user.uid,
