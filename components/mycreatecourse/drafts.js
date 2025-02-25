@@ -29,7 +29,12 @@ const Drafts = ({ onEdit }) => {
       const coursesRef = collection(firestore, "courses");
 
       // Query courses where username matches the current user's username
-      const q = query(coursesRef, where("creator", "==", userData.username));
+      const q = query(
+        coursesRef,
+        where("creator", "==", userData.username),
+        where("isPublished", "==", false)
+      );
+
 
       // Fetch the query snapshot
       const querySnapshot = await getDocs(q);
