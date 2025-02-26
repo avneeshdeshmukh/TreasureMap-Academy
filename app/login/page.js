@@ -46,7 +46,7 @@ export default  function LoginPage() {
       console.log("User logged in successfully!");
 
       // Redirect to the homepage or another protected page after successful login
-      router.push("/learn"); // Replace with your desired route
+      router.push("/shop"); // Replace with your desired route
     } catch (err) {
       // Handle specific errors
       if (err.code === "auth/user-not-found") {

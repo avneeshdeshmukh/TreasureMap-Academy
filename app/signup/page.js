@@ -4,7 +4,16 @@ import { useState, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import TopButton from "@/components/TopButton";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import {
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -66,17 +75,17 @@ export default function SignUpPage() {
     };
 
     const progress = {
-      uid : user.uid,
-      username : username.toLowerCase(),
-      streak : 0,
-      points : 0,
-      courseProgress : {},
-    }
+      uid: user.uid,
+      username: username.toLowerCase(),
+      streak: 0,
+      points: 0,
+      courseProgress: {},
+    };
 
     await setDoc(userRef, userData, { merge: true });
     await setDoc(userProgRef, progress, { merge: true });
     console.log("Email sign-up data saved : ", userData);
-  }
+  };
 
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
@@ -87,9 +96,10 @@ export default function SignUpPage() {
     }
 
     try {
+      const lowerUsername = username.toLowerCase();
       const usernameQuery = query(
         collection(firestore, "users"),
-        where("username", "==", username.toLowerCase())
+        where("username", "==", lowerUsername)
       );
       const querySnapshot = await getDocs(usernameQuery);
 
@@ -99,7 +109,11 @@ export default function SignUpPage() {
         throw error;
       }
       // Sign up with email and password
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       // Optionally update displayName
@@ -115,11 +129,15 @@ export default function SignUpPage() {
     } catch (err) {
       // Handle specific errors
       if (err.code === "auth/email-already-in-use") {
-        setError("The email address is already in use. Please use a different email or log in.");
+        setError(
+          "The email address is already in use. Please use a different email or log in."
+        );
       } else if (err.code === "auth/weak-password") {
         setError("The password is too weak. Please use a stronger password.");
       } else if (err.code === "auth/invalid-email") {
-        setError("The email address is not valid. Please provide a valid email.");
+        setError(
+          "The email address is not valid. Please provide a valid email."
+        );
       } else if (err.code === "username-taken") {
         setError("Username already taken. Please try something else.");
       } else {
@@ -132,7 +150,6 @@ export default function SignUpPage() {
 
   const handleProviderSignUp = async (provider) => {
     try {
-
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
@@ -151,15 +168,19 @@ export default function SignUpPage() {
 
         await setDoc(userRef, userData, { merge: true });
 
-        console.log("New user signed up with provider:", user.providerData[0]?.providerId);
+        console.log(
+          "New user signed up with provider:",
+          user.providerData[0]?.providerId
+        );
         router.push("/complete-profile");
-      }
-      else {
-        console.log("Existing user, signed in with provider:", user.providerData[0]?.providerId);
+      } else {
+        console.log(
+          "Existing user, signed in with provider:",
+          user.providerData[0]?.providerId
+        );
         router.push("/learn");
       }
-    }
-    catch (err) {
+    } catch (err) {
       setError(`An error occured ${err.message}`);
     }
   };
@@ -174,7 +195,13 @@ export default function SignUpPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <TopButton href={'/home'} right="30px" type={'x'} color={'none'} outline={'gray'} />
+      <TopButton
+        href={"/home"}
+        right="30px"
+        type={"x"}
+        color={"none"}
+        outline={"gray"}
+      />
 
       <main className="flex flex-col items-center justify-center w-full flex-1 md:px-20 text-center">
         <div className="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full md:w-2/3 max-w-4xl">
@@ -196,7 +223,8 @@ export default function SignUpPage() {
                 </p>
                 <p
                   onClick={() => handleProviderSignUp(new GoogleAuthProvider())}
-                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer">
+                  className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer"
+                >
                   <FaGoogle className="text-sm" />
                 </p>
               </div>
@@ -208,6 +236,8 @@ export default function SignUpPage() {
                     <input
                       type="text"
                       placeholder="Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
@@ -216,6 +246,8 @@ export default function SignUpPage() {
                     <input
                       type="email"
                       placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
@@ -224,6 +256,8 @@ export default function SignUpPage() {
                     <input
                       type="username"
                       placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
@@ -232,12 +266,18 @@ export default function SignUpPage() {
                     <input
                       type="date"
                       placeholder="Date of Birth"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
                   <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
                     <FaBriefcase className="text-gray-500 m-2" />
-                    <select className="bg-gray-200 outline-none text-sm flex-1">
+                    <select
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                      value={occupation}
+                      onChange={(e) => setOccupation(e.target.value)}
+                    >
                       <option value="">Select Occupation</option>
                       <option value="student">Student</option>
                       <option value="working">Working Professional</option>
@@ -248,13 +288,16 @@ export default function SignUpPage() {
                     <input
                       type="password"
                       placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>
 
                   <button
-                    type="submit"
+                    type="button"
                     className="border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400"
+                    onClick={handleEmailSignUp}
                   >
                     Sign Up with Email
                   </button>
@@ -271,7 +314,9 @@ export default function SignUpPage() {
                 alt="Pirate"
                 className="w-32 md:w-45 h-32 md:h-45 mb-4"
               />
-              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">Join Our Crew, Treasure Seeker!</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">
+                Join Our Crew, Treasure Seeker!
+              </h2>
               <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
               <p className="mb-5">Already have an account?</p>
               <Link
