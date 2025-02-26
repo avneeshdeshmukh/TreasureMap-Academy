@@ -477,12 +477,14 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState(null);
+  const [points, setPoints] = useState(1); // New state for points
 
   useEffect(() => {
     if (existingQuestion) {
       setQuestion(existingQuestion.question || "");
       setOptions(existingQuestion.options || ["", ""]);
       setCorrectAnswer(existingQuestion.correctAnswer || null);
+      setPoints(existingQuestion.points || 1); // Load points if editing
     } else {
       // Reset to default state when not editing
       setQuestion("");
@@ -498,12 +500,14 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
         question,
         options,
         correctAnswer,
+        // points, // Include points in submission
       });
       // Only reset if we're not editing
       if (!existingQuestion) {
         setQuestion("");
         setOptions(["", ""]);
         setCorrectAnswer(null);
+        setPoints(1); // Reset points
       }
     }
   };
@@ -581,6 +585,18 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
         placeholder="Select Correct Answer"
       />
 
+       {/* Points Input */}
+       <label className="block font-medium">Points</label>
+       <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <Input
+        type="number"
+        value={points}
+        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        min="1"
+        max="4"
+        className="w-20 text-center"
+      />
+
       <div className="flex gap-2">
         <Button
           onClick={handleSubmit}
@@ -600,11 +616,13 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
 const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
   const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || "");
+  const [points, setPoints] = useState(1); // New state for points
 
   useEffect(() => {
     if (existingQuestion) {
       setQuestion(existingQuestion.question);
       setCorrectAnswer(existingQuestion.correctAnswer);
+      setPoints(existingQuestion.points || 1); // Load points if editing
     }
   }, [existingQuestion]);
 
@@ -613,9 +631,11 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
       type: "fillBlanks",
       question,
       correctAnswer,
+      //points, // Include points in submission
     });
     setQuestion("");
     setCorrectAnswer("");
+    setPoints(1); // Reset points
   };
 
   return (
@@ -630,6 +650,19 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
         value={correctAnswer}
         onChange={(e) => setCorrectAnswer(e.target.value)}
       />
+
+       {/* Points Input */}
+       <label className="block font-medium">Points</label>
+       <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <Input
+        type="number"
+        value={points}
+        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        min="1"
+        max="4"
+        className="w-20 text-center"
+      />
+
       <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
         {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
@@ -640,11 +673,13 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
 const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
   const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || null);
+  const [points, setPoints] = useState(1); // New state for points
 
   useEffect(() => {
     if (existingQuestion) {
       setQuestion(existingQuestion.question);
       setCorrectAnswer(existingQuestion.correctAnswer);
+      setPoints(existingQuestion.points || 1); // Load points if editing
     }
   }, [existingQuestion]);
 
@@ -654,9 +689,11 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
         type: "trueFalse",
         question,
         correctAnswer,
+        //points, // Include points in submission
       });
       setQuestion("");
       setCorrectAnswer(null);
+      setPoints(1); // Reset points
     }
   };
 
@@ -680,6 +717,19 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
         }
         placeholder="Select Correct Answer"
       />
+
+      {/* Points Input */}
+      <label className="block font-medium">Points</label>
+      <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <Input
+        type="number"
+        value={points}
+        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        min="1"
+        max="4"
+        className="w-20 text-center"
+      />
+
       <Button onClick={handleSubmit} disabled={!question || correctAnswer === null}>
         {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
@@ -692,6 +742,7 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
   const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || 50);
   const [min, setMin] = useState(existingQuestion?.min || 0);
   const [max, setMax] = useState(existingQuestion?.max || 100);
+  const [points, setPoints] = useState(1); // New state for point
 
   useEffect(() => {
     if (existingQuestion) {
@@ -699,6 +750,7 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
       setCorrectAnswer(existingQuestion.correctAnswer);
       setMin(existingQuestion.min);
       setMax(existingQuestion.max);
+      setPoints(existingQuestion.points || 1); // Load points if editing
     }
   }, [existingQuestion]);
 
@@ -709,6 +761,7 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
       correctAnswer,
       min,
       max,
+      //points, // Include points in submission
     });
     setQuestion("");
     setCorrectAnswer(50);
@@ -719,6 +772,7 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
   const handleRangeChange = (e) => {
     const value = Number(e.target.value);
     setCorrectAnswer(value);
+    setPoints(1); // Reset points
   };
 
   return (
@@ -763,6 +817,19 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
           className="w-full"
         />
       </div>
+
+      {/* Points Input */}
+      <label className="block font-medium">Points</label>
+      <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <Input
+        type="number"
+        value={points}
+        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        min="1"
+        max="4"
+        className="w-20 text-center"
+      />
+
       <Button onClick={handleSubmit} disabled={!question}>
         {existingQuestion ? 'Update Question' : 'Add Question'}
       </Button>
