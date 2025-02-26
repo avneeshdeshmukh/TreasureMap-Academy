@@ -9,7 +9,7 @@ import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
 
-export default function VideoQuiz({ courseId, videoId, preview }) {
+export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const firestore = getFirestore();
     const videoRef = doc(firestore, "videos", videoId);
 
@@ -115,7 +115,7 @@ export default function VideoQuiz({ courseId, videoId, preview }) {
 
     const handlePlayerReady = useCallback((player) => {
         playerRef.current = player;
-
+        
         const quizTimes = quizMarkers.map(marker => marker.time);
 
         // Add markers for quiz timestamps
@@ -161,6 +161,19 @@ export default function VideoQuiz({ courseId, videoId, preview }) {
                     }
                 }
             });
+
+            if (!preview) {
+                localStorage.removeItem("progress");
+
+                const progressItem = {
+                    videoId,
+                    courseId,
+                    userId: auth.currentUser.uid,
+                    timestamp: parseInt(currentTime),
+                }
+
+                localStorage.setItem("progress", JSON.stringify(progressItem));
+            }
         };
 
 
@@ -176,7 +189,7 @@ export default function VideoQuiz({ courseId, videoId, preview }) {
 
         player.on("timeupdate", handleTimeUpdate);
 
-        if(!preview) player.on("seeking", handleSeeking);
+        if (!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
