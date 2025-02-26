@@ -1,15 +1,20 @@
 "use client";
 import { getFirestore } from "firebase/firestore";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { useState, useEffect } from "react";
 import React from "react";
 
 const firestore = getFirestore();
 
-
 const Drafts = ({ onEdit }) => {
-
   const [courses, setCourses] = useState([]); // State to store courses
   const [loading, setLoading] = useState(true); // State for loading status
   const [error, setError] = useState(null); // State for error handling
@@ -34,7 +39,6 @@ const Drafts = ({ onEdit }) => {
         where("creator", "==", userData.username),
         where("isPublished", "==", false)
       );
-
 
       // Fetch the query snapshot
       const querySnapshot = await getDocs(q);
@@ -84,7 +88,6 @@ const Drafts = ({ onEdit }) => {
     return <p>Error: {error}</p>;
   }
 
-
   if (!courses || courses.length === 0) {
     return (
       <div className="max-w-3xl mx-auto mt-8 mb-8">
@@ -106,7 +109,9 @@ const Drafts = ({ onEdit }) => {
     <div className="max-w-3xl mx-auto mt-8 mb-8">
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Course Drafts</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Course Drafts
+          </h2>
           <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">
             {courses.length} {courses.length === 1 ? "Draft" : "Drafts"}
           </span>
@@ -122,7 +127,10 @@ const Drafts = ({ onEdit }) => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   {course.title}
                 </h3>
-                <p className="text-sm text-gray-600">{course.description}</p>
+                <p className="text-sm text-gray-600">
+                  {course.description.split(" ").slice(0, 25).join(" ")}
+                  {course.description.split(" ").length > 25 ? "..." : ""}
+                </p>
               </div>
               <div className="flex justify-end mt-4 space-x-2">
                 <button
