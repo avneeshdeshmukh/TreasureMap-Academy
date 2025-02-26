@@ -500,7 +500,7 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
         question,
         options,
         correctAnswer,
-        // points, // Include points in submission
+        points, // Include points in submission
       });
       // Only reset if we're not editing
       if (!existingQuestion) {
@@ -631,7 +631,7 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
       type: "fillBlanks",
       question,
       correctAnswer,
-      //points, // Include points in submission
+      points, // Include points in submission
     });
     setQuestion("");
     setCorrectAnswer("");
@@ -689,7 +689,7 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
         type: "trueFalse",
         question,
         correctAnswer,
-        //points, // Include points in submission
+        points, // Include points in submission
       });
       setQuestion("");
       setCorrectAnswer(null);
@@ -761,7 +761,7 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
       correctAnswer,
       min,
       max,
-      //points, // Include points in submission
+      points, // Include points in submission
     });
     setQuestion("");
     setCorrectAnswer(50);
