@@ -292,7 +292,7 @@ export default function LessonPage() {
                 {/* Left Column */}
                 <div className="flex-grow space-y-6">
                     {/* Video Player & Quiz */}
-                    <VideoQuiz courseId={courseId} videoId={videoId} startTime = {startFrom} className="w-full h-auto aspect-video" />
+                    <VideoQuiz courseId={courseId} preview={null} videoId={videoId} startTime = {startFrom} className="w-full h-auto aspect-video" />
 
                     {/* Interaction Buttons */}
                     <div className="flex space-x-4">
