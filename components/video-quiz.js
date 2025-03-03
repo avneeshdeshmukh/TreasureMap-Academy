@@ -188,16 +188,20 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
         };
 
         const handleSeeking = () => {
+            const player = playerRef.current;
+            if (!player) return;
+        
             const seekTime = player.currentTime();
-            const nextQuizTime = quizTimes.find(time => time > savedTimeRef.current);
+            const nextQuizTime = quizMarkers.map(m => m.time).find(time => time > lastAllowedTimeRef.current);
         
             if (nextQuizTime !== undefined && seekTime > nextQuizTime) {
-                player.currentTime(lastAllowedTimeRef.current); // Return to last allowed time
+                player.currentTime(lastAllowedTimeRef.current);  // Restrict seeking past quizzes
             }
         };
         
+        
         player.on("timeupdate", handleTimeUpdate);
-        // if(!preview) player.on("seeking", handleSeeking);
+        if(!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
