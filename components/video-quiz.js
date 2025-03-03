@@ -28,6 +28,12 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const lastAllowedTimeRef = useRef(0);
 
     useEffect(() => {
+        if (startTime) {
+            lastAllowedTimeRef.current = startTime;  // Allow seeking to startTime
+        }
+    }, [startTime]);
+
+    useEffect(() => {
         const getVideo = async () => {
             try {
                 const videoSnap = await getDoc(videoRef);
@@ -115,7 +121,12 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
 
     const handlePlayerReady = useCallback((player) => {
         playerRef.current = player;
-        
+
+        if (startTime) {
+            lastAllowedTimeRef.current = startTime; // Set initial allowed time
+            player.currentTime(startTime); // Seek to startTime
+        }
+
         const quizTimes = quizMarkers.map(marker => marker.time);
 
         // Add markers for quiz timestamps
@@ -176,26 +187,23 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
             }
         };
 
-
-
         const handleSeeking = () => {
             const seekTime = player.currentTime();
             const nextQuizTime = quizTimes.find(time => time > savedTimeRef.current);
-
+        
             if (nextQuizTime !== undefined && seekTime > nextQuizTime) {
                 player.currentTime(lastAllowedTimeRef.current); // Return to last allowed time
             }
         };
-
+        
         player.on("timeupdate", handleTimeUpdate);
-
-        if (!preview) player.on("seeking", handleSeeking);
+        // if(!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
             if (!preview) player.off("seeking", handleSeeking);
         };
-    }, [quizMarkers, quizzes]);
+    }, [quizMarkers, quizzes, startTime]);
 
 
     const currentQuestion = currentQuiz ? currentQuiz[currentQuestionIndex] : null;
