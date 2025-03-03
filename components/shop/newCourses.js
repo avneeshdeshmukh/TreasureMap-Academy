@@ -1,42 +1,74 @@
 "use client";
-import React, { useRef } from "react";
+import { getFirestore } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CourseCard from "@/components/shop/course-card";
+import { auth } from "@/lib/firebase";
 
-const EnrolledCourses = ({ courses }) => {
+const NewCourses = () => {
+    const firestore = getFirestore();
+    
     const sliderRef = useRef(null);
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Dummy data
-    const publishedCourses = [
-        { 
-            title: "React Fundamentals", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-02-10", 
-            courseLink: "/courses/react-fundamentals" 
-        },
-        { 
-            title: "Advanced JavaScript", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-01-15", 
-            courseLink: "/courses/advanced-javascript" 
-        },
-        { 
-            title: "Node.js Basics", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-03-05", 
-            courseLink: "/courses/nodejs-basics" 
-        },
-        { 
-            title: "Django Advanced", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-03-05", 
-            courseLink: "/courses/nodejs-basics" 
+    const fetchThumbnailUrl = async (thumbnailPath) => {
+        try {
+            const idToken = await auth.currentUser.getIdToken();
+            const response = await fetch("/api/getPresignedUrl", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ filepath: thumbnailPath }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch thumbnail URL");
+
+            const data = await response.json();
+            return data.videoUrl;
+        } catch (err) {
+            console.error("Error fetching thumbnail URL:", err);
+            setError(err.message);
+            return null;
         }
-    ];
+    };
 
-    // Use dummy data if no courses are provided
-    const displayedCourses = courses && courses.length > 0 ? courses : publishedCourses;
+    const fetchPublishedCourses = async () => {
+        try {
+            const coursesRef = collection(firestore, "courses");
+            const q = query(coursesRef, where("isPublished", "==", true));
+            const querySnapshot = await getDocs(q);
+    
+            const publishedCourses = await Promise.all(
+                querySnapshot.docs.map(async (course) => {
+                    const courseData = course.data();
+                    const thumbnailUrl = await fetchThumbnailUrl(courseData.thumbnailURL);
+                    return {
+                        id: course.id,
+                        ...courseData,
+                        thumbnailURL: thumbnailUrl,  // ✅ Use the fetched URL
+                    };
+                })
+            );
+    
+            setCourses(publishedCourses);
+        } catch (error) {
+            console.error("Error fetching published courses:", error);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+
+    useEffect(() => {
+        fetchPublishedCourses();
+    }, []);
 
     const scroll = (direction) => {
         if (sliderRef.current) {
@@ -72,24 +104,30 @@ const EnrolledCourses = ({ courses }) => {
             </div>
 
             {/* Courses Slider */}
-            <div
-                ref={sliderRef}
-                className="flex overflow-x-auto scrollbar-hide scroll-smooth gap-4 px-4"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-                {displayedCourses.map((course, index) => (
-                    <CourseCard
-                        key={index}
-                        title={course.title}
-                        thumbnail={course.thumbnail}
-                        publishedDate={course.publishedDate}
-                        courseLink={course.courseLink}
-                        buttonLabel="Enroll"
-                    />
-                ))}
-            </div>
+            {loading ? (
+                <p className="text-center">Loading courses...</p>
+            ) : courses.length > 0 ? (
+                <div
+                    ref={sliderRef}
+                    className="flex overflow-x-auto scrollbar-hide scroll-smooth gap-4 px-4"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                    {courses.map((course) => (
+                        <CourseCard
+                            key={course.id}
+                            title={course.title}
+                            thumbnail={course.thumbnailURL}
+                            publishedDate={course.publishedDate}
+                            courseLink={`/courses/${course.id}`}
+                            buttonLabel="Enroll"
+                        />
+                    ))}
+                </div>
+            ) : (
+                <p className="text-center">No courses available.</p>
+            )}
         </div>
     );
 };
 
-export default EnrolledCourses;
+export default NewCourses;
