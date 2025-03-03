@@ -5,7 +5,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CourseCard from "@/components/shop/course-card";
-
+import { auth } from "@/lib/firebase";
 
 const NewCourses = () => {
     const firestore = getFirestore();
@@ -13,25 +13,58 @@ const NewCourses = () => {
     const sliderRef = useRef(null);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const fetchThumbnailUrl = async (thumbnailPath) => {
+        try {
+            const idToken = await auth.currentUser.getIdToken();
+            const response = await fetch("/api/getPresignedUrl", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ filepath: thumbnailPath }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch thumbnail URL");
+
+            const data = await response.json();
+            return data.videoUrl;
+        } catch (err) {
+            console.error("Error fetching thumbnail URL:", err);
+            setError(err.message);
+            return null;
+        }
+    };
 
     const fetchPublishedCourses = async () => {
         try {
             const coursesRef = collection(firestore, "courses");
             const q = query(coursesRef, where("isPublished", "==", true));
             const querySnapshot = await getDocs(q);
-
-            const publishedCourses = querySnapshot.docs.map((course) => ({
-                id: course.id,
-                ...course.data(),
-            }));
-
+    
+            const publishedCourses = await Promise.all(
+                querySnapshot.docs.map(async (course) => {
+                    const courseData = course.data();
+                    const thumbnailUrl = await fetchThumbnailUrl(courseData.thumbnailURL);
+                    return {
+                        id: course.id,
+                        ...courseData,
+                        thumbnailURL: thumbnailUrl,  // ✅ Use the fetched URL
+                    };
+                })
+            );
+    
             setCourses(publishedCourses);
         } catch (error) {
             console.error("Error fetching published courses:", error);
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
+    
 
     useEffect(() => {
         fetchPublishedCourses();
@@ -83,7 +116,7 @@ const NewCourses = () => {
                         <CourseCard
                             key={course.id}
                             title={course.title}
-                            thumbnail={course.thumbnail}
+                            thumbnail={course.thumbnailURL}
                             publishedDate={course.publishedDate}
                             courseLink={`/courses/${course.id}`}
                             buttonLabel="Enroll"

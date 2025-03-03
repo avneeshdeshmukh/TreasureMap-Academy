@@ -98,9 +98,6 @@ export default function Details() {
     fetchThumbnailUrl();
   }, [course]);
 
-
-
-
   // const course = {
   //   title: "Advanced Web Development with React & Next.js",
   //   thumbnail: "/images/homelearner.png",
