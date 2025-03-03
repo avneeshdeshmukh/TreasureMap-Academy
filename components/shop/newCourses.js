@@ -1,42 +1,41 @@
 "use client";
-import React, { useRef } from "react";
+import { getFirestore } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CourseCard from "@/components/shop/course-card";
 
-const EnrolledCourses = ({ courses }) => {
+
+const NewCourses = () => {
+    const firestore = getFirestore();
+    
     const sliderRef = useRef(null);
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Dummy data
-    const publishedCourses = [
-        { 
-            title: "React Fundamentals", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-02-10", 
-            courseLink: "/courses/react-fundamentals" 
-        },
-        { 
-            title: "Advanced JavaScript", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-01-15", 
-            courseLink: "/courses/advanced-javascript" 
-        },
-        { 
-            title: "Node.js Basics", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-03-05", 
-            courseLink: "/courses/nodejs-basics" 
-        },
-        { 
-            title: "Django Advanced", 
-            thumbnail: "/images/bg.png", 
-            publishedDate: "2024-03-05", 
-            courseLink: "/courses/nodejs-basics" 
+    const fetchPublishedCourses = async () => {
+        try {
+            const coursesRef = collection(firestore, "courses");
+            const q = query(coursesRef, where("isPublished", "==", true));
+            const querySnapshot = await getDocs(q);
+
+            const publishedCourses = querySnapshot.docs.map((course) => ({
+                id: course.id,
+                ...course.data(),
+            }));
+
+            setCourses(publishedCourses);
+        } catch (error) {
+            console.error("Error fetching published courses:", error);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
-    // Use dummy data if no courses are provided
-    const displayedCourses = courses && courses.length > 0 ? courses : publishedCourses;
+    useEffect(() => {
+        fetchPublishedCourses();
+    }, []);
 
     const scroll = (direction) => {
         if (sliderRef.current) {
@@ -72,24 +71,30 @@ const EnrolledCourses = ({ courses }) => {
             </div>
 
             {/* Courses Slider */}
-            <div
-                ref={sliderRef}
-                className="flex overflow-x-auto scrollbar-hide scroll-smooth gap-4 px-4"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-                {displayedCourses.map((course, index) => (
-                    <CourseCard
-                        key={index}
-                        title={course.title}
-                        thumbnail={course.thumbnail}
-                        publishedDate={course.publishedDate}
-                        courseLink={course.courseLink}
-                        buttonLabel="Enroll"
-                    />
-                ))}
-            </div>
+            {loading ? (
+                <p className="text-center">Loading courses...</p>
+            ) : courses.length > 0 ? (
+                <div
+                    ref={sliderRef}
+                    className="flex overflow-x-auto scrollbar-hide scroll-smooth gap-4 px-4"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                >
+                    {courses.map((course) => (
+                        <CourseCard
+                            key={course.id}
+                            title={course.title}
+                            thumbnail={course.thumbnail}
+                            publishedDate={course.publishedDate}
+                            courseLink={`/courses/${course.id}`}
+                            buttonLabel="Enroll"
+                        />
+                    ))}
+                </div>
+            ) : (
+                <p className="text-center">No courses available.</p>
+            )}
         </div>
     );
 };
 
-export default EnrolledCourses;
+export default NewCourses;
