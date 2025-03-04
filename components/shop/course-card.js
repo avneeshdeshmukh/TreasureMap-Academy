@@ -24,7 +24,7 @@ const CourseCard = ({ title, thumbnail, enrolledDate, courseLink, buttonLabel })
                 <h3 className="text-lg font-semibold text-white truncate">{title}</h3>
 
                 {/* Enrolled Date */}
-                <div className="text-sm text-gray-400">Enrolled on: {formattedDate}</div>
+                {/* <div className="text-sm text-gray-400">Enrolled on: {formattedDate}</div> */}
 
                 {/* Action Button */}
                 <Button

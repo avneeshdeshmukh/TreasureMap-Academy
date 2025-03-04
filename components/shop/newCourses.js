@@ -117,7 +117,6 @@ const NewCourses = () => {
                             key={course.id}
                             title={course.title}
                             thumbnail={course.thumbnailURL}
-                            publishedDate={course.publishedDate}
                             courseLink={`/courses/${course.id}`}
                             buttonLabel="Enroll"
                         />
