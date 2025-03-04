@@ -8,41 +8,15 @@ import CourseCard from "@/components/shop/course-card";
 import { auth } from "@/lib/firebase";
 
 const EnrolledCourses = () => {
-    
+
     const firestore = getFirestore();
+    const userId = auth.currentUser.uid;
+    const userDocRef = doc(firestore, "users", userId);
     const sliderRef = useRef(null);
     const [courses, setCourses] = useState([]);
+    const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-
-    // Dummy data
-    // const enrolledCourses = [
-    //     { 
-    //         title: "React Fundamentals", 
-    //         thumbnail: "/images/bg.png", 
-    //         enrolledDate: "2024-02-10", 
-    //         courseLink: "/courses/react-fundamentals" 
-    //     },
-    //     { 
-    //         title: "Advanced JavaScript", 
-    //         thumbnail: "/images/bg.png", 
-    //         enrolledDate: "2024-01-15", 
-    //         courseLink: "/courses/advanced-javascript" 
-    //     },
-    //     { 
-    //         title: "Node.js Basics", 
-    //         thumbnail: "/images/bg.png", 
-    //         enrolledDate: "2024-03-05", 
-    //         courseLink: "/courses/nodejs-basics" 
-    //     },
-    //     { 
-    //         title: "Django Advanced", 
-    //         thumbnail: "/images/bg.png", 
-    //         enrolledDate: "2024-03-05", 
-    //         courseLink: "/courses/nodejs-basics" 
-    //     }
-    // ];
 
     const fetchThumbnailUrl = async (thumbnailPath) => {
         try {
@@ -69,15 +43,14 @@ const EnrolledCourses = () => {
 
     const fetchEnrolledCourses = async () => {
         try {
-            const idToken = await auth.currentUser.getIdToken();
-            const userId = auth.currentUser.uid;
-            const userDocRef = doc(firestore, "users", userId);
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
                 setCourses([]);
                 return;
             }
+
+            setUserData(userDoc.data());
 
             const enrolledCourseIds = userDoc.data().enrolledCourses || [];
 
@@ -120,15 +93,14 @@ const EnrolledCourses = () => {
         fetchEnrolledCourses();
     }, []);
 
-    // Use dummy data if no courses are provided
-    //const displayedCourses = courses && courses.length > 0 ? courses : enrolledCourses;
-
     const scroll = (direction) => {
         if (sliderRef.current) {
             const scrollAmount = direction === "left" ? -300 : 300;
             sliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
         }
     };
+
+    
 
     return (
         <div className="w-full py-6">
@@ -168,8 +140,10 @@ const EnrolledCourses = () => {
                             title={course.title}
                             thumbnail={course.thumbnailURL}
                             enrolledDate={course.enrolledDate || "N/A"}
-                            courseLink={`/courses/${course.id}`}
+                            courseId={course.id}
                             buttonLabel="Continue Learning"
+                            userData={userData}
+                            userDocRef={userDocRef}
                         />
                     ))}
                 </div>

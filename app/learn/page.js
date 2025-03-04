@@ -34,11 +34,9 @@ const learnPage = () => {
 
         const usrData = usr.data();
         setUserData(usrData);
-        console.log("Enrolled Courses:", usrData.enrolledCourses);
 
 
         // Check if enrolledCourses exist and if it includes courseId
-        console.log(usrData.enrolledCourses?.[0]);
         setCourseId(usrData.enrolledCourses?.[0] || null);
         if (usrData.enrolledCourses?.length <= 3)
             setTopCourses(usrData.enrolledCourses)
@@ -60,7 +58,6 @@ const learnPage = () => {
                 ...doc.data(),
             }));
             videosList.sort((a, b) => a.sequence - b.sequence);
-            console.log(videosList);
             setVideos(videosList); // Store videos in state
         } catch (error) {
             console.error("Error fetching videos:", error);
@@ -73,7 +70,6 @@ const learnPage = () => {
             const progData = prog.data();
             setUserProgress(progData);
             const last = progData?.courseProgress?.[courseId]?.currentVideo || 1; // Default to 1 if not found
-            console.log(last);
             setLastVideo(last);
         } catch (err) {
             console.log(err);
@@ -110,15 +106,6 @@ const learnPage = () => {
         fetchUserDetails();
         fetchVideos();
     }
-
-    const checkLocked = (video) => {
-        if (video.sequence > lastVideo) {
-            console.log(video.sequence)
-            return true;
-        }
-        return false;
-    }
-
 
     if (topCourses.length !== 0) {
         return (
