@@ -1,11 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { setLatestCourse } from "@/lib/utils";
+import { updateDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
-const CourseCard = ({ title, thumbnail, enrolledDate, courseLink, buttonLabel }) => {
-    const formattedDate = new Date(enrolledDate).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+const CourseCard = ({ title, thumbnail, enrolledDate, courseId, buttonLabel, userData, userDocRef }) => {
+
+    const router = useRouter();
+
+    const handleCourseManip = async () => {
+        const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
+        await updateDoc(userDocRef, {
+            enrolledCourses: latestCourses
+        })
+        router.push('/learn');
+    }
 
     return (
         <div className="flex-none w-72 bg-[#092247] rounded-lg shadow-lg border border-gray-700 overflow-hidden">
@@ -30,7 +38,7 @@ const CourseCard = ({ title, thumbnail, enrolledDate, courseLink, buttonLabel })
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => (window.location.href = courseLink)}
+                    onClick={handleCourseManip}
                 >
                     {buttonLabel}
                 </Button>
