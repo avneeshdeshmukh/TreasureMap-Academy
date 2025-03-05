@@ -8,7 +8,7 @@ import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import { getFirestore, doc, updateDoc, getDoc, deleteField, arrayRemove } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import VideoPreviewCard from "./video-preview-card"
 
 const MAX_HOURS = 23;

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Edit3, Trash2, Edit } from "lucide-react";
 import { getFirestore, doc, getDoc, getDocs, collection, query, where, deleteDoc, updateDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { LanguageForm } from "./language-form";
 import { PriceForm } from "./price-form";
 

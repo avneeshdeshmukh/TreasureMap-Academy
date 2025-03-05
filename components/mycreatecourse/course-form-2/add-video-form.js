@@ -234,8 +234,8 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
           onClick={handleAdd}
           variant="plain"
           className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ml-4"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whilehover={{ scale: 1.05 }}
+          whiletap={{ scale: 0.95 }}
           disabled={isUploading || !videoTitle.trim() || !videoFile}
         >
           {isUploading ? "Uploading..." : "Upload"}
