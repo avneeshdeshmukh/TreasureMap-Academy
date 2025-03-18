@@ -3,17 +3,22 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TrueFalseModal = ({ questionData, onSubmit }) => {
+const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
   const handleSubmit = useCallback(() => {
-    if (!isAnswered) {
+    if (!isAnswered && selectedOption !== null) {
+      if (selectedOption.toLowerCase() === questionData.correctAnswer.toLowerCase()) {
+        const newPoints = currentPoints + questionData.points * 10;
+        console.log(`TF points : ${newPoints}`);
+        setCoins(newPoints);
+      }
       setIsAnswered(true);
-    } else {
+    } else if (isAnswered) {
       onSubmit();
     }
-  }, [isAnswered, onSubmit]);
+  }, [isAnswered, selectedOption, questionData.correctAnswer, questionData.points, currentPoints, setCoins, onSubmit]);
 
   return (
     <>
@@ -62,9 +67,8 @@ const TrueFalseModal = ({ questionData, onSubmit }) => {
               return (
                 <motion.button
                   key={option}
-                  className={`px-6 py-3 text-lg font-semibold rounded-lg transition-all shadow-md ${bgColor} ${
-                    isAnswered ? "pointer-events-none" : "hover:bg-yellow-400"
-                  }`}
+                  className={`px-6 py-3 text-lg font-semibold rounded-lg transition-all shadow-md ${bgColor} ${isAnswered ? "pointer-events-none" : "hover:bg-yellow-400"
+                    }`}
                   whileTap={!isAnswered ? { scale: 0.95 } : {}}
                   onClick={() => !isAnswered && setSelectedOption(option.toLowerCase())}
                 >
@@ -79,11 +83,10 @@ const TrueFalseModal = ({ questionData, onSubmit }) => {
             <motion.button
               onClick={handleSubmit}
               disabled={selectedOption === null}
-              className={`px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ${
-                isAnswered
+              className={`px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ${isAnswered
                   ? "bg-blue-500 hover:bg-blue-600 text-white"
                   : "bg-yellow-500 hover:bg-yellow-600 text-black"
-              }`}
+                }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

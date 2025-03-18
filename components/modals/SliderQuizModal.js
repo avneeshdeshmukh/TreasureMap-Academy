@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 
-const SliderQuizModal = ({ questionData, onSubmit }) => {
+const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins }) => {
   const [selectedValue, setSelectedValue] = useState(50);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null); // Null = no answer yet
@@ -13,6 +13,12 @@ const SliderQuizModal = ({ questionData, onSubmit }) => {
     const isAnswerCorrect = selectedValue === questionData.correctAnswer;
     setIsCorrect(isAnswerCorrect);
     setIsAnswered(true);
+
+    if (isAnswerCorrect === true) {
+      const newPoints = currentPoints + questionData.points * 10;
+      console.log(`Slider points : ${newPoints}`);
+      setCoins(newPoints);
+    }
   };
 
   const handleNextQuestion = () => {
@@ -85,9 +91,8 @@ const SliderQuizModal = ({ questionData, onSubmit }) => {
           {isAnswered && (
             <div className="text-center mb-4">
               <p
-                className={`text-lg font-semibold ${
-                  isCorrect ? "text-green-600" : "text-red-600"
-                }`}
+                className={`text-lg font-semibold ${isCorrect ? "text-green-600" : "text-red-600"
+                  }`}
               >
                 {isCorrect ? "✅ Correct! Well done!" : "❌ Incorrect!"}
               </p>

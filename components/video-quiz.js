@@ -19,7 +19,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const [currentQuiz, setCurrentQuiz] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isQuizCompleted, setIsQuizCompleted] = useState(true);
-    const [temp, setTemp] = useState([]);
+    const [currentQuizPoints, setCurrentQuizPoints] = useState(0);
+    const [isCorrect, setIsCorrect] = useState(false);
     const [videoUrl, setVideoUrl] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,6 +28,10 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
     const lastAllowedTimeRef = useRef(0);
+
+    const setCoins = (value)=>{
+        setCurrentQuizPoints(value);
+    }
 
     useEffect(() => {
         if (startTime) {
@@ -100,7 +105,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
             setCurrentQuiz(null);
             setCurrentQuestionIndex(0);
 
-            // Resume video after completing quiz
+            alert(`Your coins : ${currentQuizPoints}`)
             resumeVideo();
         }
     };
@@ -234,19 +239,19 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
             </div>
 
             {currentQuestion && currentQuestion.type === "mcq" && (
-                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
+                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins}/>
             )}
 
             {currentQuestion && currentQuestion.type === "fillBlanks" && (
-                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
+                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins}/>
             )}
 
             {currentQuestion && currentQuestion.type === "trueFalse" && (
-                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
+                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins}/>
             )}
 
             {currentQuestion && currentQuestion.type === "slider" && (
-                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
+                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins}/>
             )}
         </>
     );
