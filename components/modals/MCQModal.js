@@ -6,20 +6,15 @@ import { Button } from "../ui/button";
 
 const MCQModal = ({ questionData, onSubmit }) => {
   const [selectedOption, setSelectedOption] = useState(null);
-  const [showError, setShowError] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isAnswered, setIsAnswered] = useState(false);
 
   const handleSubmit = useCallback(() => {
-    if (selectedOption !== questionData.correctAnswer) {
-      setShowError(true);
+    if (!isAnswered) {
+      setIsAnswered(true);
     } else {
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onSubmit(selectedOption);
-      }, 2000);
+      onSubmit();
     }
-  }, [selectedOption, questionData, onSubmit]);
+  }, [isAnswered, onSubmit]);
 
   return (
     <>
@@ -53,90 +48,52 @@ const MCQModal = ({ questionData, onSubmit }) => {
 
           {/* Options - Two Column Layout */}
           <div className="grid grid-cols-2 gap-4">
-            {questionData.options.map((option, index) => (
-              <motion.div
-                key={index}
-                className={`cursor-pointer p-3 rounded-lg border text-center text-lg font-medium transition-all ${
-                  selectedOption === option
-                    ? "bg-yellow-400 border-yellow-600"
-                    : "bg-white border-gray-300"
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedOption(option)}
-              >
-                {option}
-              </motion.div>
-            ))}
+            {questionData.options.map((option, index) => {
+              let bgColor = "bg-white border-gray-300"; // Default
+              if (isAnswered) {
+                if (option === questionData.correctAnswer) {
+                  bgColor = "bg-green-400 border-green-600 text-white";
+                } else if (option === selectedOption) {
+                  bgColor = "bg-red-400 border-red-600 text-white";
+                }
+              } else if (selectedOption === option) {
+                bgColor = "bg-yellow-400 border-yellow-600";
+              }
+
+              return (
+                <motion.div
+                  key={index}
+                  className={`cursor-pointer p-3 rounded-lg border text-center text-lg font-medium transition-all ${bgColor} ${
+                    isAnswered ? "pointer-events-none" : ""
+                  }`}
+                  whileHover={!isAnswered ? { scale: 1.05 } : {}}
+                  whileTap={!isAnswered ? { scale: 0.95 } : {}}
+                  onClick={() => !isAnswered && setSelectedOption(option)}
+                >
+                  {option}
+                </motion.div>
+              );
+            })}
           </div>
 
-          {/* Submit Button */}
+          {/* Submit / Next Button */}
           <div className="flex justify-center mt-6">
             <motion.button
               onClick={handleSubmit}
               disabled={selectedOption === null}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className={`px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ${
+                isAnswered
+                  ? "bg-blue-500 hover:bg-blue-600 text-white"
+                  : "bg-yellow-500 hover:bg-yellow-600 text-black"
+              }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Submit Answer
+              {isAnswered ? "Next Question" : "Submit Answer"}
             </motion.button>
           </div>
         </motion.div>
       </div>
-
-      {/* Error Message Modal */}
-      <AnimatePresence>
-        {showError && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[9999]"
-          >
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-              <p className="mb-4 text-red-600 font-semibold text-lg">
-                ❌ Incorrect! Try again.
-              </p>
-              <Button
-                variant="danger"
-                onClick={() => setShowError(false)}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md transition-all"
-              >
-                Close
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Success Message Modal */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[9999]"
-          >
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-              <p className="mb-4 text-green-600 font-semibold text-lg">
-                ✅ Correct Answer! Well done! 🎉
-              </p>
-              <motion.img
-                src="/images/success.png"
-                alt="Success"
-                className="w-16 h-16 mx-auto mb-2"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1.1 }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 };

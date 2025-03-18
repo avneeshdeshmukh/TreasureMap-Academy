@@ -2,24 +2,24 @@
 
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-const SliderQuizModal = ({ questionData, onSubmit, onClose }) => {
+const SliderQuizModal = ({ questionData, onSubmit }) => {
   const [selectedValue, setSelectedValue] = useState(50);
-  const [showError, setShowError] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null); // Null = no answer yet
 
   const handleSubmit = () => {
-    if (selectedValue === questionData.correctAnswer) {
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onSubmit(true);
-        onClose();
-      }, 2000); // Close modal after 2 seconds
-    } else {
-      setShowError(true);
-    }
+    const isAnswerCorrect = selectedValue === questionData.correctAnswer;
+    setIsCorrect(isAnswerCorrect);
+    setIsAnswered(true);
+  };
+
+  const handleNextQuestion = () => {
+    setIsAnswered(false);
+    setIsCorrect(null);
+    setSelectedValue(50); // Reset slider
+    onSubmit();
   };
 
   const incrementValue = () => {
@@ -81,67 +81,48 @@ const SliderQuizModal = ({ questionData, onSubmit, onClose }) => {
             </div>
           </div>
 
+          {/* Feedback Message */}
+          {isAnswered && (
+            <div className="text-center mb-4">
+              <p
+                className={`text-lg font-semibold ${
+                  isCorrect ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {isCorrect ? "✅ Correct! Well done!" : "❌ Incorrect!"}
+              </p>
+              {!isCorrect && (
+                <p className="text-gray-700 font-medium">
+                  🎯 The correct answer was <span className="text-blue-600 font-bold">{questionData.correctAnswer}%</span>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Buttons */}
           <div className="w-full flex justify-center mt-4">
-            <motion.button
-              onClick={handleSubmit}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Submit Answer
-            </motion.button>
+            {!isAnswered ? (
+              <motion.button
+                onClick={handleSubmit}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Submit Answer
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={handleNextQuestion}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Next Question
+              </motion.button>
+            )}
           </div>
         </div>
       </motion.div>
-
-      {/* Error Popup */}
-      <AnimatePresence>
-        {showError && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[9999]"
-          >
-            <div className="bg-white p-6 rounded shadow-md w-96 text-center">
-              <p className="mb-4 text-red-600 font-semibold text-lg">
-                ❌ Incorrect answer, try again.
-              </p>
-              <Button variant="danger" onClick={() => setShowError(false)}>
-                Close
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Success Popup */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-[9999]"
-          >
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-              <p className="mb-4 text-green-600 font-semibold text-lg">
-                ✅ Correct Answer! Well done! 🎉
-              </p>
-              <motion.img
-                src="/images/success.png"
-                alt="Success"
-                className="w-16 h-16 mx-auto mb-2"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1.1 }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 };
