@@ -19,6 +19,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const [currentQuiz, setCurrentQuiz] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isQuizCompleted, setIsQuizCompleted] = useState(true);
+    const [temp, setTemp] = useState([]);
     const [videoUrl, setVideoUrl] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
