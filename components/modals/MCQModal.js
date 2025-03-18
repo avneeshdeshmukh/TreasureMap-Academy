@@ -4,17 +4,23 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../ui/button";
 
-const MCQModal = ({ questionData, onSubmit }) => {
+const MCQModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
   const handleSubmit = useCallback(() => {
-    if (!isAnswered) {
+    if (!isAnswered && selectedOption !== null) {
+      if (selectedOption.toLowerCase() === questionData.correctAnswer.toLowerCase()) {
+        const newPoints = currentPoints + questionData.points * factor[time];
+        console.log(`MCQ points : ${newPoints}`);
+        setCoins(newPoints);
+      }
       setIsAnswered(true);
-    } else {
+    } else if (isAnswered) {
       onSubmit();
     }
-  }, [isAnswered, onSubmit]);
+  }, [isAnswered, selectedOption, questionData.correctAnswer, questionData.points, currentPoints, setCoins, onSubmit]);
+
 
   return (
     <>

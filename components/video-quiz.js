@@ -1,7 +1,7 @@
 'use client'
 import VideoPlayer from "@/components/video-player";
 import "videojs-markers";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { doc, getDoc, getFirestore, increment, updateDoc } from "firebase/firestore";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { auth } from "@/lib/firebase";
 import MCQModal from "@/components/modals/MCQModal";
@@ -17,22 +17,67 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
     const [quizzes, setQuizzes] = useState(null);
     const [quizMarkers, setQuizMarkers] = useState([]);
     const [currentQuiz, setCurrentQuiz] = useState(null);
+    const [currentQuizTimestamp, setCurrentQuizTimestamp] = useState(0);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isQuizCompleted, setIsQuizCompleted] = useState(true);
-    const [temp, setTemp] = useState([]);
+    const [currentQuizPoints, setCurrentQuizPoints] = useState(0);
     const [videoUrl, setVideoUrl] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [factors, setFactors] = useState(null);
 
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
     const lastAllowedTimeRef = useRef(0);
+
+    const setCoins = (value) => {
+        setCurrentQuizPoints(value);
+    }
 
     useEffect(() => {
         if (startTime) {
             lastAllowedTimeRef.current = startTime;  // Allow seeking to startTime
         }
     }, [startTime]);
+
+    const fetchAttempts = async () => {
+        if (preview) return;
+
+        const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${auth.currentUser.uid}`);
+
+        const vnSnap = await getDoc(videoNotesRef);
+
+        // Extract current quizzes map or initialize an empty object
+        const quiz = vnSnap.exists() ? vnSnap.data().quizzes || {} : null;
+        const quizTimes = quizMarkers.map(marker => marker.time);
+
+        console.log(quiz);
+        console.log(quizTimes);
+        let factor = {}; // Initialize an empty object
+
+        if (quiz) {
+            quizTimes.forEach(timestamp => {
+                if (quiz[timestamp]) {
+                    let attempt = quiz[timestamp].attempt;
+
+                    // Replace attempt values based on the given mapping
+                    if (attempt === 0) {
+                        factor[timestamp] = 10;
+                    } else if (attempt === 1) {
+                        factor[timestamp] = 5;
+                    } else if (attempt === 2) {
+                        factor[timestamp] = 2;
+                    } else if (attempt > 2) {
+                        factor[timestamp] = 1;
+                    } 
+                } else {
+                    factor[timestamp] = 10;
+                }
+            });
+        }
+        console.log(factor);
+        setFactors(factor);
+    }
 
     useEffect(() => {
         const getVideo = async () => {
@@ -48,16 +93,21 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
                     setQuizzes(quiz);
                     setQuizMarkers(markers);
                 }
-
-
+                
                 setVideo(vid);
             } catch (err) {
                 setError(err.message);
             }
         };
-
+        
         getVideo();
     }, [videoId]);
+
+    useEffect(() => {
+        if (quizzes && quizMarkers.length > 0) {
+            fetchAttempts(); // Call only after quizzes and markers are set
+        }
+    }, [quizzes, quizMarkers]);
 
     useEffect(() => {
         if (!video) return;
@@ -88,7 +138,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
         fetchVideoUrl();
     }, [video]);
 
-    const handleNextQuestion = () => {
+    const handleNextQuestion = async () => {
         if (!currentQuiz) return;
 
         const nextIndex = currentQuestionIndex + 1;
@@ -99,8 +149,49 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
             setIsQuizCompleted(true);
             setCurrentQuiz(null);
             setCurrentQuestionIndex(0);
+            if (!preview) {
+                const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${auth.currentUser.uid}`);
+                const userProgressRef = doc(firestore, "userProgress", auth.currentUser.uid);
 
-            // Resume video after completing quiz
+                try {
+                    const vnSnap = await getDoc(videoNotesRef);
+
+                    // Extract current quizzes map or initialize an empty object
+                    let quizzes = vnSnap.exists() ? vnSnap.data().quizzes || {} : {};
+
+                    // Check if the current quiz timestamp exists, otherwise initialize it
+                    if (!quizzes[currentQuizTimestamp]) {
+                        quizzes[currentQuizTimestamp] = {
+                            attempt: 0, // Default attempt count
+                            timestamp: currentQuizTimestamp,
+                        };
+                    }
+
+                    // Increment attempt count
+                    quizzes[currentQuizTimestamp].attempt += 1;
+
+                    // Perform the update
+                    await updateDoc(videoNotesRef, {
+                        [`quizzes.${currentQuizTimestamp}`]: quizzes[currentQuizTimestamp],
+                    });
+
+                    console.log("Attempt updated successfully!");
+                } catch (error) {
+                    console.error("Error updating attempt:", error);
+                }
+
+                try {
+                    await updateDoc(userProgressRef, {
+                        coins: increment(currentQuizPoints),
+                        [`courseProgress.${courseId}.courseCoins`]: increment(currentQuizPoints),
+                    })
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+
+            setCurrentQuizPoints(0);
+            alert(`Your coins : ${currentQuizPoints}`)
             resumeVideo();
         }
     };
@@ -159,8 +250,10 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
                     savedTimeRef.current = marker.time;
 
                     const questions = quizzes[marker.time]?.questions;
+                    const timestamp = quizzes[marker.time]?.timestamp;
                     if (questions) {
                         setCurrentQuiz(questions);
+                        setCurrentQuizTimestamp(timestamp);
                         setIsQuizCompleted(false);  // Set first question
 
                         if (document.fullscreenElement || document.webkitFullscreenElement) {
@@ -191,18 +284,18 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
         const handleSeeking = () => {
             const player = playerRef.current;
             if (!player) return;
-        
+
             const seekTime = player.currentTime();
             const nextQuizTime = quizMarkers.map(m => m.time).find(time => time > lastAllowedTimeRef.current);
-        
+
             if (nextQuizTime !== undefined && seekTime > nextQuizTime) {
                 player.currentTime(lastAllowedTimeRef.current);  // Restrict seeking past quizzes
             }
         };
-        
-        
+
+
         player.on("timeupdate", handleTimeUpdate);
-        if(!preview) player.on("seeking", handleSeeking);
+        if (!preview) player.on("seeking", handleSeeking);
 
         return () => {
             player.off("timeupdate", handleTimeUpdate);
@@ -213,41 +306,42 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime }) {
 
     const currentQuestion = currentQuiz ? currentQuiz[currentQuestionIndex] : null;
 
-    return (
-        <>
-            <div className="w-4/5 max-w-4xl aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
-                {videoUrl ? (
-                    <VideoPlayer
-                        options={{
-                            autoplay: false,
-                            controls: true,
-                            responsive: true,
-                            fluid: true,
-                            playbackRates: [0.5, 1, 1.5, 2, 2.5, 3],
-                            sources: [{ src: videoUrl, type: "video/mp4" }],
-                        }}
-                        onPlayerReady={handlePlayerReady}
-                    />
-                ) : (
-                    <p className="text-white text-center p-4">Loading video...</p>
+    
+        return (
+            <>
+                <div className="w-4/5 max-w-4xl aspect-video bg-black rounded-lg shadow-lg overflow-hidden">
+                    {videoUrl ? (
+                        <VideoPlayer
+                            options={{
+                                autoplay: false,
+                                controls: true,
+                                responsive: true,
+                                fluid: true,
+                                playbackRates: [0.5, 1, 1.5, 2, 2.5, 3],
+                                sources: [{ src: videoUrl, type: "video/mp4" }],
+                            }}
+                            onPlayerReady={handlePlayerReady}
+                        />
+                    ) : (
+                        <p className="text-white text-center p-4">Loading video...</p>
+                    )}
+                </div>
+
+                {currentQuestion && currentQuestion.type === "mcq" && (
+                    <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins} factor={factors} time={currentQuizTimestamp} />
                 )}
-            </div>
 
-            {currentQuestion && currentQuestion.type === "mcq" && (
-                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
-            )}
+                {currentQuestion && currentQuestion.type === "fillBlanks" && (
+                    <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins} factor={factors} time={currentQuizTimestamp} />
+                )}
 
-            {currentQuestion && currentQuestion.type === "fillBlanks" && (
-                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
-            )}
+                {currentQuestion && currentQuestion.type === "trueFalse" && (
+                    <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins} factor={factors} time={currentQuizTimestamp} />
+                )}
 
-            {currentQuestion && currentQuestion.type === "trueFalse" && (
-                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
-            )}
-
-            {currentQuestion && currentQuestion.type === "slider" && (
-                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} />
-            )}
-        </>
-    );
+                {currentQuestion && currentQuestion.type === "slider" && (
+                    <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setCoins} factor={factors} time={currentQuizTimestamp} />
+                )}
+            </>
+        );
 }

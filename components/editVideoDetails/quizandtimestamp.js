@@ -269,6 +269,7 @@ export default function QuizCreator() {
     setCurrentSecond("00");
     setCurrentQuestions([]);
     setEditingTimestampIndex(null);
+    setEditingQuestionIndex(null);
   };
 
   const handleEditQuestion = (index) => {

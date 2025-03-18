@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 
-const FillInTheBlanksModal = ({ questionData, onSubmit }) => {
+const FillInTheBlanksModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null); // null -> not answered, true -> correct, false -> incorrect
@@ -14,6 +14,12 @@ const FillInTheBlanksModal = ({ questionData, onSubmit }) => {
 
     setIsCorrect(isAnswerCorrect);
     setIsAnswered(true);
+
+    if (isAnswerCorrect === true) {
+      const newPoints = currentPoints + questionData.points * factor[time];
+      console.log(`Fill points : ${newPoints}`);
+      setCoins(newPoints);
+    }
   }, [userAnswer, questionData]);
 
   return (
@@ -52,13 +58,12 @@ const FillInTheBlanksModal = ({ questionData, onSubmit }) => {
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             placeholder="Type your answer here..."
-            className={`w-full border rounded-lg px-4 py-3 text-lg text-center bg-white focus:ring-2 outline-none transition-all ${
-              isAnswered
+            className={`w-full border rounded-lg px-4 py-3 text-lg text-center bg-white focus:ring-2 outline-none transition-all ${isAnswered
                 ? isCorrect
                   ? "border-green-500 text-green-600 bg-green-100"
                   : "border-red-500 text-red-600 bg-red-100"
                 : "border-gray-300 focus:ring-yellow-400"
-            }`}
+              }`}
             disabled={isAnswered}
             animate={{ x: isAnswered && !isCorrect ? [-5, 5, -5, 5, 0] : 0 }}
             transition={{ duration: 0.3 }}
@@ -76,11 +81,10 @@ const FillInTheBlanksModal = ({ questionData, onSubmit }) => {
             <motion.button
               onClick={isAnswered ? onSubmit : handleSubmit}
               disabled={!userAnswer}
-              className={`px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ${
-                isAnswered
+              className={`px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed ${isAnswered
                   ? "bg-blue-500 hover:bg-blue-600 text-white"
                   : "bg-yellow-500 hover:bg-yellow-600 text-black"
-              }`}
+                }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
