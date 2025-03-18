@@ -205,12 +205,12 @@ export default function VideoUploadForm({ onNext }) {
   if (courseData) {
 
     return (
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        <h1 className="text-3xl font-semibold mb-2">Course Setup</h1>
+      <div className="container mx-auto px-4 sm:px-2 py-6 space-y-6">
+        <h1 className="text-2xl md:text-3xl font-semibold mb-2">Course Setup</h1>
 
-        <div className="grid md:grid-cols-1 gap-8">
+        <div className="grid md:grid-cols-1 gap-6">
           {/* Left Section: Course Customization */}
-          <div className="">
+          <div className="space-y-4">
             <div className="flex items-center gap-x-3 mb-4">
               <IconBadge icon={LayoutDashboard} />
               <h2 className="text-xl font-medium">Customize Your Course</h2>
@@ -225,9 +225,9 @@ export default function VideoUploadForm({ onNext }) {
           </div>
 
           {/* Right Section: Course Videos */}
-          <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium">Course Videos</h2>
+              <h2 className="text-lg md:text-xl font-medium">Course Videos</h2>
               {/* Pass the handleAddVideo function to AddVideos */}
               <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos = {fetchCourseVideos}/>
             </div>
@@ -327,7 +327,6 @@ export default function VideoUploadForm({ onNext }) {
               </p>
             )}
 
-            {/* Submit Button */}
 
           </div>
         </div>

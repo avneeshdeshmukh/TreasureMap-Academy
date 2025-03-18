@@ -60,31 +60,32 @@ export const TitleForm = ({initialData}) => {
 
   if (courseData) {
     return (
-      <div className="mt-6 border bg-[#ffffff] shadow-md rounded-md p-4">
-        <div className="font-medium flex items-center justify-between">
-          <span>Course Title</span>
+      <div className="mt-6 border bg-[#ffffff] shadow-md rounded-md p-4 sm:p-3">
+        <div className="font-medium flex items-center justify-between flex-wrap gap-y-2">
+          <span className="text-base sm:text-sm">Course Title</span>
           <Button onClick={toggleEdit} variant="plain" size="vsm">
             {isEditing ? "Cancel" : (
               <>
-                <Pencil className="h-4 w-4 mr-2" />
+                <Pencil className="h-4 w-4 sm:h-3 sm:w-3 mr-2" />
                 Edit Title
               </>
             )}
           </Button>
         </div>
         {!isEditing && (
-          <p className="text-sm mt-2">{courseData.title}</p>
+          <p className="text-sm mt-2 break-words">{courseData.title}</p>
         )}
         {isEditing && (
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4 sm:mt-2">
             <div>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. 'Advanced Web Developer'"
+                className="w-full text-sm"
               />
             </div>
-            <div className="flex items-center gap-x-2">
+            <div className="flex items-center gap-x-2 flex-wrap">
               <Button type="submit" variant="ghost">Save</Button>
             </div>
           </form>
