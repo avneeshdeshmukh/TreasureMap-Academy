@@ -3,14 +3,16 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins }) => {
+const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
   const handleSubmit = useCallback(() => {
     if (!isAnswered && selectedOption !== null) {
+      console.log(factor);
+      console.log(time);
       if (selectedOption.toLowerCase() === questionData.correctAnswer.toLowerCase()) {
-        const newPoints = currentPoints + questionData.points * 10;
+        const newPoints = currentPoints + questionData.points * factor[time];
         console.log(`TF points : ${newPoints}`);
         setCoins(newPoints);
       }

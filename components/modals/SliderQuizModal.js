@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 
-const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins }) => {
+const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
   const [selectedValue, setSelectedValue] = useState(50);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null); // Null = no answer yet
@@ -15,7 +15,7 @@ const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins }) =>
     setIsAnswered(true);
 
     if (isAnswerCorrect === true) {
-      const newPoints = currentPoints + questionData.points * 10;
+      const newPoints = currentPoints + questionData.points * factor[time];
       console.log(`Slider points : ${newPoints}`);
       setCoins(newPoints);
     }
