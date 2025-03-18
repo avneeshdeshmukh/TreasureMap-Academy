@@ -6,10 +6,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
-import { getFirestore, doc, updateDoc, getDoc, deleteField, arrayRemove } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  getDoc,
+  deleteField,
+  arrayRemove,
+} from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import VideoPreviewCard from "./video-preview-card"
+import VideoPreviewCard from "./video-preview-card";
 
 const MAX_HOURS = 23;
 
@@ -38,7 +45,7 @@ export default function QuizCreator() {
     const seconds = totalSeconds % 60;
 
     return {
-      hours: String(hours).padStart(2, "0"),  // Ensures 2-digit format
+      hours: String(hours).padStart(2, "0"), // Ensures 2-digit format
       minutes: String(minutes).padStart(2, "0"),
       seconds: String(seconds).padStart(2, "0"),
     };
@@ -56,7 +63,8 @@ export default function QuizCreator() {
     const parts = [];
     if (h > 0) parts.push(`${h} ${h === 1 ? "hour" : "hours"}`);
     if (m > 0) parts.push(`${m} ${m === 1 ? "minute" : "minutes"}`);
-    if (s > 0 || parts.length === 0) parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
+    if (s > 0 || parts.length === 0)
+      parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
 
     return parts.join(" ");
   };
@@ -116,9 +124,9 @@ export default function QuizCreator() {
       alert("Please enter a valid timestamp");
       return;
     }
-    
+
     if (editingTimestampIndex === null) {
-      if (timestamps.some(item => item.timestamp === currentTimestamp)) {
+      if (timestamps.some((item) => item.timestamp === currentTimestamp)) {
         handleCancel();
         alert("The timestamp already exists. Please update the same.");
         return;
@@ -148,8 +156,8 @@ export default function QuizCreator() {
           });
 
           // Update the state locally
-          updatedTimestamp.timestamp = currentTimestamp;  // Change to the new timestamp value
-          updatedTimestamp.questions = currentQuestions;  // Update the questions
+          updatedTimestamp.timestamp = currentTimestamp; // Change to the new timestamp value
+          updatedTimestamp.questions = currentQuestions; // Update the questions
           updatedTimestamps[editingTimestampIndex] = updatedTimestamp;
         } else {
           // If the timestamp has not changed, just update the questions
@@ -165,7 +173,6 @@ export default function QuizCreator() {
         setTimestamps(updatedTimestamps); // Update local state
         setEditingTimestampIndex(null); // Reset editing state
         setPreviousTimestamp(null); // Clear previous timestamp
-
       } else {
         // If it's a new timestamp, add it to the state and Firestore
         setTimestamps((prevTimestamps) => [...prevTimestamps, newQuestion]);
@@ -198,10 +205,14 @@ export default function QuizCreator() {
 
     setTimeout(() => {
       if (timestampInputRef.current) {
-        timestampInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        timestampInputRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
 
         // Optional: Add a slight background highlight for better visibility
-        timestampInputRef.current.style.transition = "background-color 0.5s ease-in-out";
+        timestampInputRef.current.style.transition =
+          "background-color 0.5s ease-in-out";
         timestampInputRef.current.style.backgroundColor = "#fff3cd"; // Light yellow highlight
 
         // Remove highlight after a delay
@@ -227,8 +238,10 @@ export default function QuizCreator() {
   const handleDeleteQuestion = async (index) => {
     const question = currentQuestions[index];
     const ts = timestamps[index].timestamp;
-    const isConfirmed = window.confirm("Are you sure you want to delete this question?");
-    console.log(isConfirmed)
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this question?"
+    );
+    console.log(isConfirmed);
     if (isConfirmed) {
       await updateDoc(videoRef, {
         [`quizzes.${ts}.questions`]: arrayRemove(question),
@@ -256,7 +269,7 @@ export default function QuizCreator() {
     setCurrentSecond("00");
     setCurrentQuestions([]);
     setEditingTimestampIndex(null);
-  }
+  };
 
   const handleEditQuestion = (index) => {
     const questionToEdit = currentQuestions[index];
@@ -280,17 +293,56 @@ export default function QuizCreator() {
   const renderQuizTypeForm = () => {
     if (!selectedQuizType) return null;
 
-    const existingQuestion = editingQuestionIndex !== null ? currentQuestions[editingQuestionIndex] : null;
+    const existingQuestion =
+      editingQuestionIndex !== null
+        ? currentQuestions[editingQuestionIndex]
+        : null;
 
     switch (selectedQuizType) {
       case "mcq":
-        return <MultipleChoiceForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
+        return (
+          <MultipleChoiceForm
+            onSubmit={
+              editingQuestionIndex !== null
+                ? handleUpdateQuestion
+                : handleAddQuestion
+            }
+            existingQuestion={existingQuestion}
+          />
+        );
       case "fillBlanks":
-        return <FillBlanksForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
+        return (
+          <FillBlanksForm
+            onSubmit={
+              editingQuestionIndex !== null
+                ? handleUpdateQuestion
+                : handleAddQuestion
+            }
+            existingQuestion={existingQuestion}
+          />
+        );
       case "trueFalse":
-        return <TrueFalseForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
+        return (
+          <TrueFalseForm
+            onSubmit={
+              editingQuestionIndex !== null
+                ? handleUpdateQuestion
+                : handleAddQuestion
+            }
+            existingQuestion={existingQuestion}
+          />
+        );
       case "slider":
-        return <SliderForm onSubmit={editingQuestionIndex !== null ? handleUpdateQuestion : handleAddQuestion} existingQuestion={existingQuestion} />;
+        return (
+          <SliderForm
+            onSubmit={
+              editingQuestionIndex !== null
+                ? handleUpdateQuestion
+                : handleAddQuestion
+            }
+            existingQuestion={existingQuestion}
+          />
+        );
       default:
         return null;
     }
@@ -299,12 +351,16 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
-      {videoDoc && (<div>
-        <VideoPreviewCard videoData={videoDoc} />
-      </div>)}
+      {videoDoc && (
+        <div>
+          <VideoPreviewCard videoData={videoDoc} />
+        </div>
+      )}
 
-
-      <div className="p-2 my-3 flex gap-2 items-center border rounded-lg" ref={timestampInputRef}>
+      <div
+        className="p-2 my-3 flex gap-2 items-center border rounded-lg"
+        ref={timestampInputRef}
+      >
         <label>Timestamp (HH:MM:SS)</label>
 
         <Input
@@ -334,31 +390,55 @@ export default function QuizCreator() {
           placeholder="SS"
           className="w-16 text-center"
         />
-
       </div>
-
 
       {currentTimestamp !== 0 && (
         <>
-          <p className="text-slate-500 text-sm mb-2">(Select the type of quiz you want to add)</p>
+          <p className="text-slate-500 text-sm mb-2">
+            (Select the type of quiz you want to add)
+          </p>
           <Tabs>
             <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger onClick={() => setSelectedQuizType("mcq")}
-                className={`${selectedQuizType === "mcq" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
-                  }`}
-              >Multiple Choice</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("fillBlanks")}
-                className={`${selectedQuizType === "fillBlanks" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
-                  }`}
-              >Fill Blanks</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("trueFalse")}
-                className={`${selectedQuizType === "trueFalse" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
-                  }`}
-              >True/False</TabsTrigger>
-              <TabsTrigger onClick={() => setSelectedQuizType("slider")}
-                className={`${selectedQuizType === "slider" ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl" : "h-10"
-                  }`}
-              >Slider</TabsTrigger>
+              <TabsTrigger
+                onClick={() => setSelectedQuizType("mcq")}
+                className={`${
+                  selectedQuizType === "mcq"
+                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                    : "h-10"
+                }`}
+              >
+                Multiple Choice
+              </TabsTrigger>
+              <TabsTrigger
+                onClick={() => setSelectedQuizType("fillBlanks")}
+                className={`${
+                  selectedQuizType === "fillBlanks"
+                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                    : "h-10"
+                }`}
+              >
+                Fill Blanks
+              </TabsTrigger>
+              <TabsTrigger
+                onClick={() => setSelectedQuizType("trueFalse")}
+                className={`${
+                  selectedQuizType === "trueFalse"
+                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                    : "h-10"
+                }`}
+              >
+                True/False
+              </TabsTrigger>
+              <TabsTrigger
+                onClick={() => setSelectedQuizType("slider")}
+                className={`${
+                  selectedQuizType === "slider"
+                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                    : "h-10"
+                }`}
+              >
+                Slider
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -374,7 +454,11 @@ export default function QuizCreator() {
                 >
                   <h3 className="font-semibold mb-2">Current Questions</h3>
                   {currentQuestions.map((q, index) => (
-                    <Draggable key={index} draggableId={index.toString()} index={index}>
+                    <Draggable
+                      key={index}
+                      draggableId={index.toString()}
+                      index={index}
+                    >
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
@@ -418,14 +502,12 @@ export default function QuizCreator() {
             className="mt-4"
             variant="ghost"
           >
-            {editingTimestampIndex !== null ? 'Update Timestamp' : 'Save Timestamp'}
+            {editingTimestampIndex !== null
+              ? "Update Timestamp"
+              : "Save Timestamp"}
           </Button>
 
-          <Button
-            onClick={handleCancel}
-            className="mt-4"
-            variant="danger"
-          >
+          <Button onClick={handleCancel} className="mt-4" variant="danger">
             Cancel
           </Button>
         </>
@@ -467,7 +549,6 @@ export default function QuizCreator() {
           ))}
         </div>
       )}
-
     </div>
   );
 }
@@ -488,7 +569,7 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
     } else {
       // Reset to default state when not editing
       setQuestion("");
-      setOptions(["", ""]);  // Initialize with two empty options
+      setOptions(["", ""]); // Initialize with two empty options
       setCorrectAnswer(null);
     }
   }, [existingQuestion]);
@@ -518,7 +599,7 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
       return;
     }
     setOptions([...options, ""]);
-  }
+  };
 
   const updateOption = (index, value) => {
     const newOptions = [...options];
@@ -527,7 +608,8 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
   };
 
   const deleteOption = (index) => {
-    if (options.length > 2) {  // Maintain minimum of 2 options
+    if (options.length > 2) {
+      // Maintain minimum of 2 options
       const newOptions = options.filter((_, i) => i !== index);
       setOptions(newOptions);
       // Reset correct answer if deleted option was the correct one
@@ -562,10 +644,7 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
           )}
         </div>
       ))}
-      <Button
-        variant="outline"
-        onClick={addOption}
-      >
+      <Button variant="outline" onClick={addOption}>
         Add Option
       </Button>
 
@@ -585,13 +664,17 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
         placeholder="Select Correct Answer"
       />
 
-       {/* Points Input */}
-       <label className="block font-medium">Points</label>
-       <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      {/* Points Input */}
+      <label className="block font-medium">Points</label>
+      <p className="text-sm text-gray-500 -mt-1">
+        1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
+      </p>
       <Input
         type="number"
         value={points}
-        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        onChange={(e) =>
+          setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
+        }
         min="1"
         max="4"
         className="w-20 text-center"
@@ -606,7 +689,7 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
             options.filter((opt) => opt.trim() !== "").length < 2
           }
         >
-          {existingQuestion ? 'Update Question' : 'Add Question'}
+          {existingQuestion ? "Update Question" : "Add Question"}
         </Button>
       </div>
     </div>
@@ -615,7 +698,9 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
 
 const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
-  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || "");
+  const [correctAnswer, setCorrectAnswer] = useState(
+    existingQuestion?.correctAnswer || ""
+  );
   const [points, setPoints] = useState(1); // New state for points
 
   useEffect(() => {
@@ -626,7 +711,30 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
     }
   }, [existingQuestion]);
 
+  // Check if blank exists in the question
+  const hasBlank = question.includes("<blank>");
+
+  const toggleBlank = () => {
+    if (hasBlank) {
+      setQuestion(question.replace("<blank>", "")); // Remove blank
+    } else {
+      // Insert blank at the cursor position or at the end
+      setQuestion((prev) => {
+        const selectionStart =
+          document.getElementById("question-input")?.selectionStart ||
+          prev.length;
+        return (
+          prev.slice(0, selectionStart) + "<blank>" + prev.slice(selectionStart)
+        );
+      });
+    }
+  };
+
   const handleSubmit = () => {
+    if (!hasBlank) {
+      alert("Each fill-in-the-blank question must contain a blank.");
+      return;
+    }
     onSubmit({
       type: "fillBlanks",
       question,
@@ -641,38 +749,58 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
   return (
     <div className="space-y-4">
       <Input
+        id="question-input"
         placeholder="Enter question with blank"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
       />
+
+      <Button
+        onClick={toggleBlank}
+        className={
+          hasBlank
+            ? "bg-red-500 hover:bg-red-600 text-white"
+            : "bg-yellow-500 hover:bg-yellow-600"
+        }
+      >
+        {hasBlank ? "Remove Blank" : "Insert Blank"}
+      </Button>
+
       <Input
         placeholder="Correct Answer"
         value={correctAnswer}
         onChange={(e) => setCorrectAnswer(e.target.value)}
       />
 
-       {/* Points Input */}
-       <label className="block font-medium">Points</label>
-       <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      {/* Points Input */}
+      <label className="block font-medium">Points</label>
+      <p className="text-sm text-gray-500 -mt-1">
+        1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
+      </p>
       <Input
         type="number"
         value={points}
-        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        onChange={(e) =>
+          setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
+        }
         min="1"
         max="4"
         className="w-20 text-center"
       />
 
       <Button onClick={handleSubmit} disabled={!question || !correctAnswer}>
-        {existingQuestion ? 'Update Question' : 'Add Question'}
+        {existingQuestion ? "Update Question" : "Add Question"}
       </Button>
     </div>
   );
 };
 
+
 const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
-  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || null);
+  const [correctAnswer, setCorrectAnswer] = useState(
+    existingQuestion?.correctAnswer || null
+  );
   const [points, setPoints] = useState(1); // New state for points
 
   useEffect(() => {
@@ -720,18 +848,25 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
 
       {/* Points Input */}
       <label className="block font-medium">Points</label>
-      <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <p className="text-sm text-gray-500 -mt-1">
+        1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
+      </p>
       <Input
         type="number"
         value={points}
-        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        onChange={(e) =>
+          setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
+        }
         min="1"
         max="4"
         className="w-20 text-center"
       />
 
-      <Button onClick={handleSubmit} disabled={!question || correctAnswer === null}>
-        {existingQuestion ? 'Update Question' : 'Add Question'}
+      <Button
+        onClick={handleSubmit}
+        disabled={!question || correctAnswer === null}
+      >
+        {existingQuestion ? "Update Question" : "Add Question"}
       </Button>
     </div>
   );
@@ -739,7 +874,9 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
 
 const SliderForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
-  const [correctAnswer, setCorrectAnswer] = useState(existingQuestion?.correctAnswer || 50);
+  const [correctAnswer, setCorrectAnswer] = useState(
+    existingQuestion?.correctAnswer || 50
+  );
   const [min, setMin] = useState(existingQuestion?.min || 0);
   const [max, setMax] = useState(existingQuestion?.max || 100);
   const [points, setPoints] = useState(1); // New state for point
@@ -806,7 +943,9 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
       </div>
       <div className="space-y-2">
         <label>
-          <span className="font-semibold">Select Correct Answer: {correctAnswer}</span>
+          <span className="font-semibold">
+            Select Correct Answer: {correctAnswer}
+          </span>
         </label>
         <input
           type="range"
@@ -820,18 +959,22 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
 
       {/* Points Input */}
       <label className="block font-medium">Points</label>
-      <p className="text-sm text-gray-500 -mt-1">1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult</p>
+      <p className="text-sm text-gray-500 -mt-1">
+        1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
+      </p>
       <Input
         type="number"
         value={points}
-        onChange={(e) => setPoints(Math.max(1, Math.min(4, Number(e.target.value))))}
+        onChange={(e) =>
+          setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
+        }
         min="1"
         max="4"
         className="w-20 text-center"
       />
 
       <Button onClick={handleSubmit} disabled={!question}>
-        {existingQuestion ? 'Update Question' : 'Add Question'}
+        {existingQuestion ? "Update Question" : "Add Question"}
       </Button>
     </div>
   );
