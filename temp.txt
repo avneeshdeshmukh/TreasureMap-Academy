@@ -1,17 +1,21 @@
-1. Quiz reattempt -> multiplication factor
-                  -> store results
-                  -> marker
+LLM ->
+        QP : {
+            sample : 40
+            value : 
+        }
+        DS : {
 
-2. LLM
+        }
 
-quizzes : {
-    2 : {
-        attempt = 1,
-        timestamp = 2,
-    }
-}
 
-factor : {
-    2 : 10,
-    7 : 5
-}
+
+
+sample : 2
+value : 
+
+
+1  => 1/1   = 1   
+
+1  => 2.5 = 2.5
+
+3.5

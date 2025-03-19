@@ -17,8 +17,8 @@ export default function ProgressUpdate({ children }) {
                 const videoNotesRef = doc(firestore, "videoNotes", `${parsedProgress.videoId}_${parsedProgress.userId}`);
 
                 await updateDoc(videoNotesRef, {
-                    lastProgressTime: parsedProgress.timestamp
-                })
+                    lastProgressTime: parsedProgress.timestamp,
+                }, { merge: true })
             } catch (error) {
                 console.error(error);
             }

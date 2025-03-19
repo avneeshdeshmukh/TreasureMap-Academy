@@ -66,6 +66,7 @@ export default function LessonPage() {
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [vidNotes, setVidNotes] = useState(null);
 
   const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${userId}`);
 
@@ -77,6 +78,7 @@ export default function LessonPage() {
     const docSnap = await getDoc(videoNotesRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
+      setVidNotes(data);
       setStartFrom(data.lastProgressTime ?? 0);
       setSavedNotes(data.notes || []);
       switch (data.likeStatus) {
@@ -90,12 +92,18 @@ export default function LessonPage() {
       }
     } else {
       // Document does not exist, create it with an empty notes array
-      await setDoc(videoNotesRef, {
+      const data = {
         videoId,
         userId,
+        courseId,
+        isCompleted: false,
+        duration: video.duration,
         notes: [],
         likeStatus: 0,
-      });
+      }
+
+      await setDoc(videoNotesRef, data);
+      setVidNotes(data);
       setSavedNotes([]); // No notes, so start with an empty array
     }
   };
@@ -299,15 +307,21 @@ export default function LessonPage() {
       {/* Main Layout */}
       <div className="flex flex-col md:flex-row gap-6 p-8">
         {/* Left Column */}
+        
         <div className="flex-grow space-y-6">
           {/* Video Player & Quiz */}
-          <VideoQuiz
-            courseId={courseId}
-            preview={null}
-            videoId={videoId}
-            startTime={startFrom}
-            className="w-full h-auto aspect-video"
-          />
+          {vidNotes ? (
+            <VideoQuiz
+              courseId={courseId}
+              preview={null}
+              videoId={videoId}
+              startTime={startFrom}
+              vidNotes={vidNotes}
+              className="w-full h-auto aspect-video"
+            />
+          ) : (
+            <></>
+          )}
 
           {/* Interaction Buttons */}
           <div className="flex space-x-4">
