@@ -8,11 +8,16 @@ const CourseCard = ({ title, thumbnail, enrolledDate, courseId, buttonLabel, use
     const router = useRouter();
 
     const handleCourseManip = async () => {
-        const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
-        await updateDoc(userDocRef, {
-            enrolledCourses: latestCourses
-        })
-        router.push('/learn');
+        if(buttonLabel === "Continue Learning"){
+            const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
+            await updateDoc(userDocRef, {
+                enrolledCourses: latestCourses
+            })
+            router.push('/learn');
+        }
+        else {
+            router.push(`/shop/${courseId}/details`);
+        }
     }
 
     return (

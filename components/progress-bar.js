@@ -13,7 +13,7 @@ export const ProgressBar = ({ currentValue, maxValue, label, icon }) => {
             <div className="w-full">
                 <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-white">{label}</span>
-                    <span className="text-sm font-medium text-white">{`${currentValue} / ${maxValue}`}</span>
+                    <span className="text-sm font-medium text-white">{maxValue ? `${currentValue} / ${maxValue}` : `${currentValue}`}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                     <div

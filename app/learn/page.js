@@ -112,7 +112,7 @@ const learnPage = () => {
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
                     <StreakIcons streak={39} coins={65} />
-                    <Stats />
+                    <Stats userProgress={userProgress} />
                     <LeaderboardPos />
                 </StickyWrapper>
                 <FeedWrapper>
