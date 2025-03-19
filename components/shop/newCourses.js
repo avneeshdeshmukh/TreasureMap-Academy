@@ -1,6 +1,6 @@
 "use client";
 import { getFirestore } from "firebase/firestore";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -9,10 +9,13 @@ import { auth } from "@/lib/firebase";
 
 const NewCourses = () => {
     const firestore = getFirestore();
-    
+
     const sliderRef = useRef(null);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const userId = auth.currentUser.uid;
+    const userDocRef = doc(firestore, "users", userId);
+    const [userData, setUserData] = useState(null);
     const [error, setError] = useState(null);
 
     const fetchThumbnailUrl = async (thumbnailPath) => {
@@ -40,10 +43,19 @@ const NewCourses = () => {
 
     const fetchPublishedCourses = async () => {
         try {
+            const userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) {
+                setCourses([]);
+                return;
+            }
+
+            setUserData(userDoc.data());
+
             const coursesRef = collection(firestore, "courses");
-            const q = query(coursesRef, where("isPublished", "==", true));
+            const q = query(coursesRef);
             const querySnapshot = await getDocs(q);
-    
+
             const publishedCourses = await Promise.all(
                 querySnapshot.docs.map(async (course) => {
                     const courseData = course.data();
@@ -55,7 +67,7 @@ const NewCourses = () => {
                     };
                 })
             );
-    
+
             setCourses(publishedCourses);
         } catch (error) {
             console.error("Error fetching published courses:", error);
@@ -64,7 +76,7 @@ const NewCourses = () => {
             setLoading(false);
         }
     };
-    
+
 
     useEffect(() => {
         fetchPublishedCourses();
@@ -117,8 +129,10 @@ const NewCourses = () => {
                             key={course.id}
                             title={course.title}
                             thumbnail={course.thumbnailURL}
-                            courseLink={`/courses/${course.id}`}
+                            courseId={course.id}
                             buttonLabel="Enroll"
+                            userData={userData}
+                            userDocRef={userDocRef}
                         />
                     ))}
                 </div>

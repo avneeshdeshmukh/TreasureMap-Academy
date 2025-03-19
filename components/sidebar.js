@@ -12,7 +12,6 @@ export const Sidebar = ({ className }) => { //#2c3748
     const getActiveItem = () => {
         if (pathname.includes("/leaderboard")) return "Leaderboard";
         if (pathname.includes("/learn")) return "Learn";
-        if (pathname.includes("/quiz")) return "Quiz";
         if (pathname.includes("/shop")) return "Shop";
         if (pathname.includes("/profile")) return "Profile";
         return "";
@@ -36,12 +35,6 @@ export const Sidebar = ({ className }) => { //#2c3748
                         icon={"medal"}
                         href={"/leaderboard"}
                         label={"Leaderboard"}
-                    />
-                    <SidebarItem
-                        variant={activeItem === "Quiz" ? "sidebarOutlineActive" : "sidebarOutline"}
-                        icon={"bulb"}
-                        href={"#"}
-                        label={"Quiz"}
                     />
                     <SidebarItem
                         variant={activeItem === "Shop" ? "sidebarOutlineActive" : "sidebarOutline"}

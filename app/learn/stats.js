@@ -1,12 +1,12 @@
 import { ProgressBar } from "@/components/progress-bar";
 import { Button } from "@/components/ui/button";
 
-export const Stats = () => {
+export const Stats = ({userProgress}) => {
     return (
         <div
             className="text-white rounded-xl my-2 z-50 border-4 border-[#606060] text-lg bg-[#2c3748] justify-center p-5 shadow-lg"
         >
-            <h2 className="font-bold text-2xl ms-3 mb-2">Stats</h2>
+            <h2 className="font-bold text-2xl ms-3 mb-2">Course Stats</h2>
             <hr />
             <br />
             <ProgressBar
@@ -15,8 +15,8 @@ export const Stats = () => {
                 label="Lessons Completed"
             />
             <ProgressBar
-                currentValue={40}
-                maxValue={300}
+                currentValue={userProgress.coins}
+                // maxValue={300}
                 label="Coins Earned"
             />
             <ProgressBar
