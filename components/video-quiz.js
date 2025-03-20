@@ -251,11 +251,35 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             markers: quizMarkers,
         });
 
-        const handleTimeUpdate = () => {
+        const handleTimeUpdate = async () => {
             const currentTime = player.currentTime();
 
             if (currentTime > lastAllowedTimeRef.current) {
                 lastAllowedTimeRef.current = currentTime;
+            }
+
+            // Check if video is completed
+            console.log(player.duration());
+            if (currentTime >= player.duration() - 0.5) {  // Allow small margin for precision
+                if (!preview) {
+                    const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${auth.currentUser.uid}`);
+                    const userProgressRef = doc(firestore, "userProgress", auth.currentUser.uid);
+
+                    try {
+                        const vnSnap = await getDoc(videoNotesRef);
+                        if (vnSnap.exists() && vnSnap.data().isCompleted) {
+                            return; // Don't update if already true
+                        }
+
+                        await updateDoc(videoNotesRef, { isCompleted: true }, { merge: true });
+                        await updateDoc(userProgressRef, {
+                            [`courseProgress.${courseId}.currentVideo`]: increment(1)
+                        }, { merge: true })
+                        console.log("Video marked as completed");
+                    } catch (error) {
+                        console.error("Error updating completion status:", error);
+                    }
+                }
             }
 
             quizMarkers.forEach(marker => {
@@ -287,7 +311,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             if (!preview) {
                 let progressTime = parseInt(currentTime);
 
-                if (progressTime === video.duration) {
+                if (progressTime === player.duration()) {
                     progressTime = 0;
                 }
 

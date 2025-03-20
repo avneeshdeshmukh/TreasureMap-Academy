@@ -75,6 +75,8 @@ export default function LessonPage() {
   };
 
   const fetchSavedNotes = async () => {
+    if(!video) return;
+
     const docSnap = await getDoc(videoNotesRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
@@ -110,7 +112,7 @@ export default function LessonPage() {
 
   useEffect(() => {
     fetchSavedNotes();
-  }, [videoId, userId]);
+  }, [videoId, userId, video]);
 
   const handleLike = async () => {
     if (liked) {
