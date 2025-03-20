@@ -24,6 +24,7 @@ const learnPage = () => {
     const [videos, setVideos] = useState([]);
     const [userProgress, setUserProgress] = useState(null);
     const [lastVideo, setLastVideo] = useState(0);
+    const [percentage, setPercentage] = useState(0);
 
     const fetchUserDetails = async () => {
         const usr = await getDoc(userRef);
@@ -65,12 +66,24 @@ const learnPage = () => {
     };
 
     const fetchUserProgress = async () => {
+        if (!courseId || !videos.length) return;
+
         try {
             const prog = await getDoc(userProgRef);
             const progData = prog.data();
             setUserProgress(progData);
             const last = progData?.courseProgress?.[courseId]?.currentVideo || 1; // Default to 1 if not found
             setLastVideo(last);
+            const videoNotesRef = doc(firestore, "videoNotes", `${videos[last - 1].videoId}_${user.uid}`);
+            const vnSnap = await getDoc(videoNotesRef);
+            console.log(vnSnap.data());
+            if(vnSnap.exists()){
+                const vnData = vnSnap.data();
+                const percent = (vnData.lastProgressTime / vnData.duration) * 100;
+                setPercentage(percent);
+            } else {
+                setPercentage(0);
+            }
         } catch (err) {
             console.log(err);
         }
@@ -86,7 +99,7 @@ const learnPage = () => {
 
     useEffect(() => {
         fetchUserProgress();
-    }, [user])
+    }, [user, courseId, videos])
 
     const handleCourseSelect = async (selectedCourse) => {
         // Update topCourses and set the title to the selected course
@@ -107,7 +120,7 @@ const learnPage = () => {
         fetchVideos();
     }
 
-    if (topCourses.length !== 0) {
+    if (userProgress && topCourses.length !== 0) {
         return (
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
@@ -130,7 +143,7 @@ const learnPage = () => {
                                     totalCount={videos.length}
                                     locked={isLocked}
                                     current={lastVideo === lesson.sequence}
-                                    percentage={0}
+                                    percentage={percentage}
                                     link={lesson.videoId}
                                     courseId={courseId}
                                 />
