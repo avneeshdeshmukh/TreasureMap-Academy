@@ -100,7 +100,7 @@ export default function LessonPage() {
         duration: video.duration,
         notes: [],
         likeStatus: 0,
-      }
+      };
 
       await setDoc(videoNotesRef, data);
       setVidNotes(data);
@@ -285,31 +285,36 @@ export default function LessonPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-slate-900 min-h-14 p-4 text-white flex justify-between items-center sticky top-0 z-50">
+      <nav className="bg-slate-900 min-h-12 sm:min-h-14 p-1 sm:p-2 md:p-4 text-white flex justify-between items-center sticky top-0 z-50">
         <div>
-          <Button variant="ghost" className="text-white p-2 hover:bg-slate-800">
-            <ArrowBigLeft className="cursor-pointer" />
-            <span className="ml-2">Back to Course</span>
+          <Button
+            variant="ghost"
+            className="text-white h-auto p-1 sm:p-2 hover:bg-slate-800 flex items-center"
+          >
+            <ArrowBigLeft className="cursor-pointer w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+            <span className="ml-1 sm:ml-2 text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-none">
+              Back to Course
+            </span>
           </Button>
         </div>
-        <div>
+        <div className="flex items-center">
           <StreakIcons streak={39} coins={65} />
         </div>
       </nav>
 
       {/* Video Title */}
       {video ? (
-        <div className="text-2xl font-semibold mt-6 ml-8"> {video.title}</div>
+        <div className="text-lg sm:text-xl md:text-2xl font-semibold mt-3 sm:mt-4 md:mt-6 px-4 sm:px-6 md:px-8">
+          {video.title}
+        </div>
       ) : (
         <></>
       )}
 
       {/* Main Layout */}
-      <div className="flex flex-col md:flex-row gap-6 p-8">
-        {/* Left Column */}
-        
-        <div className="flex-grow space-y-6">
-          {/* Video Player & Quiz */}
+      <div className="flex flex-col gap-4 sm:gap-5 md:gap-6 p-4 sm:p-6 md:p-8">
+        {/* Video Player & Quiz */}
+        <div className="w-full">
           {vidNotes ? (
             <VideoQuiz
               courseId={courseId}
@@ -322,174 +327,184 @@ export default function LessonPage() {
           ) : (
             <></>
           )}
+        </div>
 
-          {/* Interaction Buttons */}
-          <div className="flex space-x-4">
-            <Button
-              variant="outline"
-              onClick={handleLike}
-              className="flex items-center space-x-2 hover:bg-blue-50 transition-colors"
-            >
-              <ThumbsUp size={20} className={liked && "text-blue-500"} />
-              <span>{likeCount}</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDislike}
-              className="flex items-center space-x-2 hover:bg-red-50 transition-colors"
-            >
-              <ThumbsDown size={20} className={disliked && "text-red-500"} />
-              <span>{dislikeCount}</span>
-            </Button>
-          </div>
+        {/* Interaction Buttons */}
+        <div className="flex space-x-3 sm:space-x-4">
+          <Button
+            variant="outline"
+            onClick={handleLike}
+            className="flex items-center space-x-1 sm:space-x-2 hover:bg-blue-50 transition-colors text-xs sm:text-sm"
+          >
+            <ThumbsUp size={16} className={liked && "text-blue-500"} />
+            <span>{likeCount}</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleDislike}
+            className="flex items-center space-x-1 sm:space-x-2 hover:bg-red-50 transition-colors text-xs sm:text-sm"
+          >
+            <ThumbsDown size={16} className={disliked && "text-red-500"} />
+            <span>{dislikeCount}</span>
+          </Button>
+        </div>
 
+        {/* Responsive Layout for Notes and Comments */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {/* Notes Section */}
-          <Card className="shadow-lg">
-            <div className="p-4 border-b flex justify-between items-center cursor-pointer">
-              <div className="flex items-center gap-2">
-                <BookOpen size={20} />
-                <h3 className="text-lg font-semibold">Notes</h3>
+          <Card className="shadow-lg lg:col-span-2">
+            <div
+              className="p-3 sm:p-4 border-b flex justify-between items-center cursor-pointer"
+              onClick={() => setShowNotesSection(!showNotesSection)}
+            >
+              <div className="flex items-center gap-1 sm:gap-2">
+                <BookOpen size={18} />
+                <h3 className="text-base sm:text-lg font-semibold">Notes</h3>
               </div>
-              {savedNotes.length > 0 ? (
-                <ChevronUp size={20} />
+              {showNotesSection ? (
+                <ChevronUp size={18} />
               ) : (
-                <ChevronDown size={20} />
+                <ChevronDown size={18} />
               )}
             </div>
 
-            <CardContent className="p-4 space-y-4">
-              {/* Add/Update Note Form */}
-              <div className="space-y-3">
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Take notes for this video..."
-                  className="min-h-32 resize-y"
-                />
-                <Button
-                  onClick={handleSaveNotes}
-                  className="flex items-center gap-2"
-                >
-                  <Save size={16} />
-                  {editingNoteIndex !== null ? "Update Note" : "Save Note"}
-                </Button>
-              </div>
+            {showNotesSection && (
+              <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+                {/* Add/Update Note Form */}
+                <div className="space-y-2 sm:space-y-3">
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Take notes for this video..."
+                    className="min-h-24 sm:min-h-32 resize-y text-sm sm:text-base"
+                  />
+                  <Button
+                    onClick={handleSaveNotes}
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                  >
+                    <Save size={14} className="w-4 h-4 sm:w-5 sm:h-5" />
+                    {editingNoteIndex !== null ? "Update Note" : "Save Note"}
+                  </Button>
+                </div>
 
-              {/* Saved Notes */}
-              <div className="space-y-3">
-                <h4 className="font-medium">
-                  Saved Notes ({savedNotes.length})
-                </h4>
-                {savedNotes.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">
-                    No saved notes yet. Start taking notes!
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {savedNotes.map((note, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                      >
-                        <div className="flex justify-between items-start">
-                          <p className="whitespace-pre-wrap flex-grow">
-                            {note.text}
-                          </p>
-                          <div className="flex gap-2 ml-4">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditNote(index)}
-                              className="text-blue-500 hover:text-blue-700"
-                            >
-                              <Edit2 size={16} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteNote(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 size={16} />
-                            </Button>
+                {/* Saved Notes */}
+                <div className="space-y-2 sm:space-y-3">
+                  <h4 className="font-medium text-sm sm:text-base">
+                    Saved Notes ({savedNotes.length})
+                  </h4>
+                  {savedNotes.length === 0 ? (
+                    <p className="text-gray-500 text-center py-3 sm:py-4 text-sm sm:text-base">
+                      No saved notes yet. Start taking notes!
+                    </p>
+                  ) : (
+                    <div className="space-y-2 sm:space-y-3">
+                      {savedNotes.map((note, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                        >
+                          <div className="flex justify-between items-start">
+                            <p className="whitespace-pre-wrap flex-grow text-sm sm:text-base">
+                              {note.text}
+                            </p>
+                            <div className="flex gap-1 sm:gap-2 ml-2 sm:ml-4">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditNote(index)}
+                                className="text-blue-500 hover:text-blue-700 p-1"
+                              >
+                                <Edit2 size={14} className="sm:size-16" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteNote(index)}
+                                className="text-red-500 hover:text-red-700 p-1"
+                              >
+                                <Trash2 size={14} className="sm:size-16" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 sm:mt-2">
+                            {note.timestamp}
                           </div>
                         </div>
-                        <div className="text-xs text-gray-500 mt-2">
-                          {note.timestamp}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Comments Section */}
+          <Card className="shadow-lg">
+            <div
+              className="p-3 sm:p-4 border-b flex justify-between items-center cursor-pointer"
+              onClick={() => setShowCommentsSection(!showCommentsSection)}
+            >
+              <div className="flex items-center gap-1 sm:gap-2">
+                <MessageCircle size={18} />
+                <h3 className="text-base sm:text-lg font-semibold">Comments</h3>
               </div>
-            </CardContent>
+              {showCommentsSection ? (
+                <ChevronUp size={18} />
+              ) : (
+                <ChevronDown size={18} />
+              )}
+            </div>
+
+            {showCommentsSection && (
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center gap-1 sm:gap-2 mb-3 sm:mb-4">
+                  <Input
+                    type="text"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="flex-grow text-sm sm:text-base"
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") handleCommentSubmit();
+                    }}
+                  />
+                  <Button
+                    onClick={handleCommentSubmit}
+                    className="flex items-center gap-1 text-xs sm:text-sm"
+                  >
+                    <Send size={14} className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden xs:inline">Post</span>
+                  </Button>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3">
+                  {comments.length === 0 ? (
+                    <p className="text-gray-500 text-center py-3 sm:py-4 text-sm sm:text-base">
+                      No comments yet. Be the first to comment!
+                    </p>
+                  ) : (
+                    comments.map((cmt, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-2 sm:p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex justify-between flex-wrap">
+                          <span className="font-semibold text-sm sm:text-base">
+                            {cmt.username}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(cmt.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-sm sm:text-base">{cmt.text}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            )}
           </Card>
         </div>
-
-        {/* Right Column: Comments Section */}
-        <Card className="w-full md:w-1/3 shadow-lg">
-          <div
-            className="p-4 border-b flex justify-between items-center cursor-pointer"
-            onClick={() => setShowCommentsSection(!showCommentsSection)}
-          >
-            <div className="flex items-center gap-2">
-              <MessageCircle size={20} />
-              <h3 className="text-lg font-semibold">Comments</h3>
-            </div>
-            {showCommentsSection ? (
-              <ChevronUp size={20} />
-            ) : (
-              <ChevronDown size={20} />
-            )}
-          </div>
-
-          {showCommentsSection && (
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Input
-                  type="text"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="flex-grow"
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") handleCommentSubmit();
-                  }}
-                />
-                <Button
-                  onClick={handleCommentSubmit}
-                  className="flex items-center gap-2"
-                >
-                  <Send size={16} />
-                  Post
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {comments.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">
-                    No comments yet. Be the first to comment!
-                  </p>
-                ) : (
-                  comments.map((cmt, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
-                    >
-                      <div className="flex justify-between">
-                        <span className="font-semibold">{cmt.username}</span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(cmt.timestamp).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="mt-1">{cmt.text}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          )}
-        </Card>
       </div>
 
       {/* Feedback Alert */}

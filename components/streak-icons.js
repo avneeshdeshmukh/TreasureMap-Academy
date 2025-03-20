@@ -25,8 +25,6 @@ export const StreakIcons = ({ streak, coins }) => {
 
     if (userData) {
 
-
-
         return (
             <div className="flex items-center justify-between gap-x-1 w-full">
                 <Link href={'/courses'}>

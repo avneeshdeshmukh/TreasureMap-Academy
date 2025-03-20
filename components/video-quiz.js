@@ -27,6 +27,9 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
     const [error, setError] = useState(null);
     const [factors, setFactors] = useState(null);
 
+    //coin animation trial
+    
+
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
     const lastAllowedTimeRef = useRef(0);
@@ -146,6 +149,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
 
         if (nextIndex < currentQuiz.length) {
             setCurrentQuestionIndex(nextIndex);
+
+            
         } else {
             setIsQuizCompleted(true);
             setCurrentQuiz(null);
