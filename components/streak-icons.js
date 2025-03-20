@@ -29,7 +29,7 @@ export const StreakIcons = ({ streak, coins }) => {
             <div className="flex items-center justify-between gap-x-1 w-full">
                 <Link href={'/courses'}>
                     <Button variant="ghost" >
-                        <Flame className="animate-pulse mr-2" size={30} stroke="orange" fill={"orange"} />
+                        <Flame className=" mr-2" size={30} stroke="orange" fill={"orange"} />
                         <p className="text-bold text-xl">{streak}</p>
                     </Button>
 

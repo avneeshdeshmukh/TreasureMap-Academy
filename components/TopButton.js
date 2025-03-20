@@ -20,7 +20,7 @@ const TopButton = ({ right, href, type, color, outline, num }) => {
                 right: right,
             }}
         >
-            <IconComponent className={`${animate} mx-2`} size={30} fill={color} stroke={outline} />
+            <IconComponent size={30}   />
             <p className="font-bold text-white text-lg">{num}</p>
         </Link>
     );
