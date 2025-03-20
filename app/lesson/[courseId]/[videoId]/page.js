@@ -295,7 +295,7 @@ export default function LessonPage() {
           </Button>
         </div>
         <div>
-          <StreakIcons streak={39} coins={65} />
+          <StreakIcons streak={39} />
         </div>
       </nav>
 
