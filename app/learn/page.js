@@ -55,10 +55,6 @@ const learnPage = () => {
         // Add logic to update Firestore or local state if needed
     };
 
-    const openModal = (value) =>{
-        setIsModalOpen(value);
-    }
-
     const fetchVideos = async () => {
         if (!courseId) return; // Ensure courseId is available
 
@@ -161,7 +157,7 @@ const learnPage = () => {
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
                     <StreakIcons streak={39}/>
-                    <Stats userProgress={userProgress} courseId = {topCourses[0]} setIsModalOpen={openModal} />
+                    <Stats userProgress={userProgress} courseId = {topCourses[0]} setIsModalOpen={setIsModalOpen} />
                     <LeaderboardPos />
                 </StickyWrapper>
                 <StreakGoalModal
