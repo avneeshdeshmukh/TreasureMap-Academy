@@ -13,6 +13,7 @@ import {
   getDoc,
   deleteField,
   arrayRemove,
+  increment,
 } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -22,9 +23,12 @@ const MAX_HOURS = 23;
 
 export default function QuizCreator() {
   const firestore = getFirestore();
-  const { courseId, videoId } = useParams();
+  const { id, videoId } = useParams();
 
+
+  const courseRef = doc(firestore, "courses", id);
   const videoRef = doc(firestore, "videos", videoId);
+
   const timestampInputRef = useRef(null);
 
   const [videoDoc, setVideoDoc] = useState(null);
@@ -34,6 +38,7 @@ export default function QuizCreator() {
   const [currentTimestamp, setCurrentTimestamp] = useState(0);
   const [selectedQuizType, setSelectedQuizType] = useState(null);
   const [timestamps, setTimestamps] = useState([]);
+  const [totalTimestamps, setTotalTimestamps] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [editingTimestampIndex, setEditingTimestampIndex] = useState(null);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
@@ -108,6 +113,8 @@ export default function QuizCreator() {
         if (videoData.quizzes) {
           const fetchedQuizzes = Object.values(videoData.quizzes);
           setTimestamps(fetchedQuizzes);
+          setTotalTimestamps(fetchedQuizzes.length);
+
           console.log(fetchedQuizzes);
         }
       } else {
@@ -181,6 +188,10 @@ export default function QuizCreator() {
           [`quizzes.${currentTimestamp}`]: newQuestion, // Add new timestamp to Firestore
         });
 
+        await updateDoc(courseRef, {
+          totalQuizzes : increment(1),
+        }, {merge : true})
+
         setPreviousTimestamp(null); // Clear previous timestamp when adding a new one
       }
 
@@ -231,6 +242,11 @@ export default function QuizCreator() {
     await updateDoc(videoRef, {
       [`quizzes.${timestampToDelete}`]: deleteField(),
     });
+
+    await updateDoc(courseRef, {
+      totalQuizzes : increment(-1),
+    }, {merge : true})
+
     setTimestamps(timestamps.filter((_, i) => i !== index));
     handleCancel();
   };

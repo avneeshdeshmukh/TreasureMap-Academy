@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 import { motion } from "framer-motion";
 
@@ -170,6 +170,7 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
 
       const videoId = uuidv4();
       const videoRef = doc(firestore, "videos", videoId);
+      const courseRef = doc(firestore, "courses", courseId);
       const videoInteractionRef = doc(firestore, "videoInteraction", videoId);
 
       const newVideo = {
@@ -198,6 +199,10 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
 
       await setDoc(videoRef, newVideo, { merge: true });
       await setDoc(videoInteractionRef, newVI, { merge: true });
+      await updateDoc(courseRef, {
+        totalVideos : increment(1),
+        courseDuration : increment(Math.round(duration)),
+      }, {merge : true })
 
       setStatus("");
 

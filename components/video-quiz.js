@@ -217,7 +217,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             }
 
             setCurrentQuizPoints(0);
-            alert(`Your coins : ${currentQuizPoints}`)
+            if(!preview) alert(`Your coins : ${currentQuizPoints}`);
             resumeVideo();
         }
     };
@@ -388,19 +388,19 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             </div>
 
             {currentQuestion && currentQuestion.type === "mcq" && (
-                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "fillBlanks" && (
-                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "trueFalse" && (
-                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "slider" && (
-                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
             )}
         </>
     );

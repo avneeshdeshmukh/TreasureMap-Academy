@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthProvider"
 import { useRouter } from "next/navigation"
 import { getFirestore, doc, getDoc } from "firebase/firestore"
 import { useEffect } from "react"
+import { CoinsProvider } from "../context/CoinsContext"
 
 const firestore = getFirestore();
 
@@ -35,9 +36,11 @@ export default function CreateLayout({ children }) {
 
     return (
         <ProtectedRoute>
+            <CoinsProvider>
             <div className="min-h-screen bg-[#efeeea] py-10">
                 {children}
             </div>
+            </CoinsProvider>
         </ProtectedRoute>
     )
 }

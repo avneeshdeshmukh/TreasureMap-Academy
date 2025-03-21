@@ -75,6 +75,8 @@ export default function LessonPage() {
   };
 
   const fetchSavedNotes = async () => {
+    if (!video) return;
+
     const docSnap = await getDoc(videoNotesRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
@@ -315,7 +317,7 @@ export default function LessonPage() {
       <div className="flex flex-col gap-4 sm:gap-5 md:gap-6 p-4 sm:p-6 md:p-8">
         {/* Left Column */}
 
-        <div className="w-full">
+        <div className="flex-grow space-y-6">
           {/* Video Player & Quiz */}
           {vidNotes ? (
             <VideoQuiz
