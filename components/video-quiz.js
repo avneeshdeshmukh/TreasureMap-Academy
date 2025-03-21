@@ -197,12 +197,20 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
                     console.log(QPS);
                     console.log(DS);
 
-                    await updateDoc(userProgressRef, {
+                    let updateData = {
                         coins: increment(currentQuizPoints),
                         [`courseProgress.${courseId}.courseCoins`]: increment(currentQuizPoints),
                         "PLUH.QPS": QPS,
                         "PLUH.DS": DS,
-                    })
+                    };
+                    
+                    // Add additional properties if `att - 1 === 0`
+                    if (att - 1 === 0) {
+                        updateData[`courseProgress.${courseId}.quizzesCompleted`] = increment(1);
+                    }
+                    
+                    // Update Firestore document with optimized object
+                    await updateDoc(userProgressRef, updateData);                    
 
                     setCoins(userProgSnap.data().coins + currentQuizPoints);
 
@@ -212,7 +220,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             }
 
             setCurrentQuizPoints(0);
-            if(!preview) alert(`Your coins : ${currentQuizPoints}`);
+            if (!preview) alert(`Your coins : ${currentQuizPoints}`);
             resumeVideo();
         }
     };
@@ -341,7 +349,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
 
 
         player.on("timeupdate", handleTimeUpdate);
-        player.on('ended', function() {
+        player.on('ended', function () {
             const progressItem = {
                 videoId,
                 courseId,

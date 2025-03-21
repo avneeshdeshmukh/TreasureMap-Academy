@@ -6,16 +6,23 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
-  console.log(user);
+  const { user, loading } = useAuth();  // Get loading state
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      // Redirect to the login page if the user is not authenticated
-      router.push('/login');
+    if (!loading && !user) {
+      router.replace('/login'); // Use replace to prevent back navigation
     }
-  }, [user, router]);
+  }, [user, loading, router]);
+
+  // Prevent rendering until authentication is resolved
+  if (loading) {
+    return null;  // or replace with a loading UI
+  }
+
+  if (!user) {
+    return null; // Prevent rendering children before redirect
+  }
 
   return <>{children}</>;
 };

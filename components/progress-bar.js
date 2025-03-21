@@ -1,5 +1,5 @@
 
-export const ProgressBar = ({ currentValue, maxValue, label, icon }) => {
+export const ProgressBar = ({ currentValue, maxValue, label, icon, disabled }) => {
     const progress = (currentValue / maxValue) * 100;
 
     return (
@@ -13,14 +13,18 @@ export const ProgressBar = ({ currentValue, maxValue, label, icon }) => {
             <div className="w-full">
                 <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-white">{label}</span>
-                    <span className="text-sm font-medium text-white">{maxValue ? `${currentValue} / ${maxValue}` : `${currentValue}`}</span>
+                    {(currentValue !== undefined && currentValue !== null && maxValue !== undefined && maxValue !== null) && (
+                        <span className="text-sm font-medium text-white">{currentValue}/{maxValue}</span>
+                    )}
+
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
-                        className="bg-yellow-400 h-3 rounded-full"
-                        style={{ width: `${progress}%` }}
+                        className={disabled ? "bg-gray-400 w-full h-3 rounded-full" : "bg-yellow-400 h-3 rounded-full"}
+                        style={!disabled ? { width: `${progress}%` } : {}}
                     ></div>
                 </div>
+
             </div>
         </div>
     );

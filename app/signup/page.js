@@ -79,6 +79,7 @@ export default function SignUpPage() {
       uid: user.uid,
       username: username.toLowerCase(),
       streak: 0,
+      streakGoal: 0,
       coins: 0,
       courseProgress: {},
       PLUH : {
