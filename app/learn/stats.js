@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState, useEffect } from "react";
 
-export const Stats = ({ userProgress, courseId }) => {
+export const Stats = ({ userProgress, courseId, setIsModalOpen }) => {
     const firestore = getFirestore();
 
     const [course, setCourse] = useState(null);
+    
     const courseRef = doc(firestore, "courses", courseId);
 
     useEffect(() => {
@@ -16,6 +17,9 @@ export const Stats = ({ userProgress, courseId }) => {
         }
         fetchCourse();
     }, [])
+
+   
+
 
     return (
         course &&
@@ -40,11 +44,11 @@ export const Stats = ({ userProgress, courseId }) => {
                 maxValue={course.totalQuizzes}
                 label="Quizzes Completed"
             />
-             {userProgress.streakGoal === 0 ? (
+            {userProgress.streakGoal === 0 ? (
                     <>
                         <ProgressBar disabled={true} label="Streak Goal" />
                         <div className="flex justify-end">
-                            <Button variant="ghost">
+                            <Button variant="ghost" onClick={() => setIsModalOpen(true)}>
                                 Set Goal
                             </Button>
                         </div>
@@ -57,6 +61,8 @@ export const Stats = ({ userProgress, courseId }) => {
                     />
                 )}
 
+                {/* Streak Goal Modal */}
+               
         </div>)
 
     );
