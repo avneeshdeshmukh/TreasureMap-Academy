@@ -123,20 +123,27 @@ const learnPage = () => {
         fetchVideos();
     }
 
-    if(topCourses.length === 0){
+    if (topCourses.length === 0) {
         return (
-            <div>
-            <h1>
+            <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 sm:p-8 md:p-12 lg:p-20 xl:p-40 text-center">
+            <div className="bg-[#f8e8c8] border border-yellow-700 shadow-lg rounded-xl w-full max-w-md p-4 sm:p-6">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-900">
                 No Courses Yet!
-            </h1>
-            <Button
-            onClick = {()=>{router.push('/shop')}}
-            >
+              </h1>
+              <p className="text-gray-800 mt-2 text-xs sm:text-sm md:text-base">
+                Your course library is empty. Discover courses that match your
+                interests.
+              </p>
+              <button 
+                className="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg shadow-md transition-all duration-300 text-sm sm:text-base"
+                onClick={() => {router.push('/shop')}}
+              >
                 Go To Shop
-            </Button>
+              </button>
             </div>
-        )
-    }
+          </div>
+        );
+      }
 
     if (userProgress && topCourses.length !== 0) {
         return (
