@@ -17,7 +17,6 @@ export const Stats = ({ userProgress, courseId }) => {
         fetchCourse();
     }, [])
 
-
     return (
         course &&
         (<div
@@ -41,29 +40,22 @@ export const Stats = ({ userProgress, courseId }) => {
                 maxValue={course.totalQuizzes}
                 label="Quizzes Completed"
             />
-            {userProgress.streakGoal === 0 ? (
-                <>
+             {userProgress.streakGoal === 0 ? (
+                    <>
+                        <ProgressBar disabled={true} label="Streak Goal" />
+                        <div className="flex justify-end">
+                            <Button variant="ghost">
+                                Set Goal
+                            </Button>
+                        </div>
+                    </>
+                ) : (
                     <ProgressBar
-                    disabled={true}
-                    label="Streak Goal"
-                />
-                    <div className="flex justify-end">
-                        <Button
-                            variant='ghost'
-                        >Set Goal
-                        </Button>
-                    </div>
-                </>
-            ) : (
-
-                <ProgressBar
-                    currentValue={userProgress.streak}
-                    maxValue={userProgress.streakGoal}
-                    label="Streak Goal"
-                />
-
-            )}
-
+                        currentValue={userProgress.streak}
+                        maxValue={userProgress.streakGoal}
+                        label="Streak Goal"
+                    />
+                )}
 
         </div>)
 
