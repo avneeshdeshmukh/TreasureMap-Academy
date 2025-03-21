@@ -84,6 +84,7 @@ export default function VideoUploadForm({ onNext }) {
     const videoRef = doc(firestore, "videos", videoId);
     const videoSnap = await getDoc(videoRef);
     const filepath = videoSnap.data().videoURL;
+    const currentDuration = videoSnap.data().duration;
 
     const deleteURL = await generateDeleteUrl(filepath);
 
@@ -97,6 +98,7 @@ export default function VideoUploadForm({ onNext }) {
         await updateDoc(courseRef, {
           totalVideos : increment(-1),
           totalQuizzes : increment(-1),
+          totalDuration : increment(-1 * currentDuration),
         }, {merge : true })
         setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
         setOriginalVideos((prev) => prev.filter((video) => video.videoId !== videoId));
@@ -235,16 +237,18 @@ export default function VideoUploadForm({ onNext }) {
               {/* Pass the handleAddVideo function to AddVideos */}
               <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos = {fetchCourseVideos}/>
             </div>
+            {videos.length && 
             <div className="w-full flex">
               <Button
                 size="sm"
-                className="flex items-center gap-x-1"
+                className="flex items-center gap-x-1 ms-2"
                 onClick={handleEditButton}
               >
                 <Edit size={16} />
                 {isEditing ? "Cancel" : "Edit Order"}
               </Button>
             </div>
+            }
 
 
             {isEditing && (
@@ -270,11 +274,12 @@ export default function VideoUploadForm({ onNext }) {
                               className="flex items-center justify-between py-3"
                             >
                               <div>{/* Serial number */}
-                                <h4 className="font-medium text-gray-800">{index + 1}. {video.title}</h4>
-                                <p className="text-sm text-gray-500">{video.file.name}</p>
+                                <h4 className="font-medium text-gray-800 ms-4">{index + 1}. {video.title}</h4>
+                                <p className="text-sm text-gray-500 ms-4">{video.file.name}</p>
                               </div>
                               {!isEditing && (
                                 <div className="flex space-x-3">
+                                  {video.quizzes && <p className="mt-1">✅</p>}
                                   <Button
                                     variant="outline"
                                     size="sm"

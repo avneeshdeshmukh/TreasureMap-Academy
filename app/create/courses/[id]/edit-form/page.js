@@ -22,13 +22,17 @@ export default function EditFormPage() {
 
   // Handle the submit logic
   const handlePublish = () => {
+    if(course.totalVideos < 10){
+      alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
+      return;
+    }
     setShowTermsModal(true);
   };
 
   const handlePublishAfterTerms = async () => {
-    await updateDoc(courseRef, { 
+    await updateDoc(courseRef, {
       isPublished: true,
-      enrollments : 0,
+      enrollments: 0,
     });
     alert("Course Published Successfully");
     setShowTermsModal(false);

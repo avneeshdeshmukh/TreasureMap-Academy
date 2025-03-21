@@ -53,7 +53,7 @@ const NewCourses = () => {
             setUserData(userDoc.data());
 
             const coursesRef = collection(firestore, "courses");
-            const q = query(coursesRef);
+            const q = query(coursesRef, where("isPublished", "==", true));
             const querySnapshot = await getDocs(q);
 
             const publishedCourses = await Promise.all(
