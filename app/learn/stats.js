@@ -2,7 +2,6 @@ import { ProgressBar } from "@/components/progress-bar";
 import { Button } from "@/components/ui/button";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import StreakGoalModal from "./streak-modal";
 
 export const Stats = ({ userProgress, courseId, setIsModalOpen }) => {
     const firestore = getFirestore();

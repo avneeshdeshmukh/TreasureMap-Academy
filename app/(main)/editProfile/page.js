@@ -1,11 +1,20 @@
 "use client";
-
+import { useAuth } from "@/app/context/AuthProvider";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState } from "react";
-export default function EditProfilePage() {
+
+const firestore = getFirestore();
+
+export default async function EditProfilePage() {
+  const { user } = useAuth();
   // State to manage form inputs
-  const [name, setName] = useState("John Doe");
-  const [username, setUsername] = useState("@johndoe");
-  const [email, setEmail] = useState("johndoe@example.com");
+  // const [name, setName] = useState("John Doe");
+  // const [username, setUsername] = useState("@johndoe");
+  // const [email, setEmail] = useState("johndoe@example.com");
+
+   const userRef = doc(firestore, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -24,37 +33,37 @@ export default function EditProfilePage() {
             <form onSubmit={handleSubmit}>
               {/* Name Input */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
+                <label className="block text-sm font-semibold text-white mb-2">Name</label>
                 <input
                   type="text"
-                  value={name}
+                  value={user.displayName}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your name"
+                  placeholder="Edit name"
                 />
               </div>
 
               {/* Username Input */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                <label className="block text-sm font-semibold text-white mb-2">Username</label>
                 <input
                   type="text"
-                  value={username}
+                  value={userData.username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your username"
+                  placeholder="Edit username"
                 />
               </div>
 
               {/* Email Input */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-semibold text-white mb-2">Email</label>
                 <input
                   type="email"
-                  value={email}
+                  value={userData.email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your email"
+                  placeholder="Edit email"
                 />
               </div>
 
