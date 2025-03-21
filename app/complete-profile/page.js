@@ -101,15 +101,33 @@ export default function CompleteProfile() {
         uid : user.uid,
         username : username.toLowerCase(),
         streak : 0,
-        points : 0,
+        coins : 0,
         courseProgress : {},
+        PLUH : {
+          DS :{
+            sample : 0,
+            value : 0
+          },
+          ES :{
+            sample : 0,
+            value : 0
+          },
+          QPS :{
+            sample : 0,
+            value : 0
+          },
+          RPS :{
+            sample : 0,
+            value : 0
+          },
+        }
       }
 
       await setDoc(userRef, additionalData, { merge: true });
       await setDoc(userProgRef, progress, { merge: true });
       
       console.log("Profile completed successfully");
-      router.push("/learn"); // Redirect to /learn page
+      router.push("/shop"); // Redirect to /learn page
     } catch (err) {
       setLoading(false); // Stop loading on error
       if (err.code === "username-taken") {

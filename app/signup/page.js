@@ -65,6 +65,7 @@ export default function SignUpPage() {
       uid: user.uid,
       email: user.email,
       isAdditionalInfoAdded: true,
+      enrolledCourses : [],
       isCreator: false,
       name,
       username: username.toLowerCase(),
@@ -78,8 +79,26 @@ export default function SignUpPage() {
       uid: user.uid,
       username: username.toLowerCase(),
       streak: 0,
-      points: 0,
+      coins: 0,
       courseProgress: {},
+      PLUH : {
+        DS :{
+          sample : 0,
+          value : 0
+        },
+        ES :{
+          sample : 0,
+          value : 0
+        },
+        QPS :{
+          sample : 0,
+          value : 0
+        },
+        RPS :{
+          sample : 0,
+          value : 0
+        },
+      }
     };
 
     await setDoc(userRef, userData, { merge: true });
@@ -162,6 +181,7 @@ export default function SignUpPage() {
           email: user.email,
           isCreator: false,
           isAdditionalInfoAdded: false,
+          enrolledCourses : [],
           provider: user.providerData[0]?.providerId,
           createdAt: new Date(),
         };

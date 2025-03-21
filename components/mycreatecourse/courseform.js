@@ -170,6 +170,8 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
         language: courseDetails.language,
         difficulty: courseDetails.difficulty,
         isPublished : false,
+        totalVideos : 0,
+        totalQuizzes : 0,
         thumbnailURL: `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`,
       };
 

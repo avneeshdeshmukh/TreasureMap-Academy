@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
+const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor, preview }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
 
@@ -11,7 +11,7 @@ const TrueFalseModal = ({ questionData, onSubmit, currentPoints, setCoins, time,
     if (!isAnswered && selectedOption !== null) {
       console.log(factor);
       console.log(time);
-      if (selectedOption.toLowerCase() === questionData.correctAnswer.toLowerCase()) {
+      if (!preview && selectedOption.toLowerCase() === questionData.correctAnswer.toLowerCase()) {
         const newPoints = currentPoints + questionData.points * factor[time];
         console.log(`TF points : ${newPoints}`);
         setCoins(newPoints);
