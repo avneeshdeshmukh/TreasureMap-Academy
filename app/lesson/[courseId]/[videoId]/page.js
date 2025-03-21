@@ -297,8 +297,8 @@ export default function LessonPage() {
             </span>
           </Button>
         </div>
-        <div className="flex items-center">
-          <StreakIcons streak={39} coins={65} />
+        <div>
+          <StreakIcons streak={39} />
         </div>
       </nav>
 

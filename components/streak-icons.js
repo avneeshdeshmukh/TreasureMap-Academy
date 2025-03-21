@@ -4,8 +4,10 @@ import { Anchor, CircleDollarSign, Flame } from "lucide-react"
 import { doc, getDoc, getFirestore } from "firebase/firestore"
 import { auth } from "@/lib/firebase"
 import { useState, useEffect } from "react"
+import { useCoins } from "@/app/context/CoinsContext";
 
-export const StreakIcons = ({ streak, coins }) => {
+export const StreakIcons = ({ streak }) => {
+    const { coins, setCoins } = useCoins();
     const firestore = getFirestore();
     const uid = auth.currentUser.uid;
     const userProgressRef = doc(firestore, "userProgress", uid);
@@ -17,6 +19,7 @@ export const StreakIcons = ({ streak, coins }) => {
             if (userSnap.exists()) {
                 console.log(userSnap.data());
                 setUserData(userSnap.data());
+                setCoins(userSnap.data().coins);
             }
         }
 
@@ -37,7 +40,7 @@ export const StreakIcons = ({ streak, coins }) => {
                 <Link href={"/courses"}>
                     <Button variant="ghost" >
                         <CircleDollarSign className="mr-2" size={30} fill={"none"} />
-                        <p className="text-bold text-xl">{userData.coins}</p>
+                        <p className="text-bold text-xl">{coins}</p>
                     </Button>
                 </Link>
                 <Link href={"/leaderboard"}>
