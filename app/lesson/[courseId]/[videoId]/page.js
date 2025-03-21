@@ -102,7 +102,7 @@ export default function LessonPage() {
         duration: video.duration,
         notes: [],
         likeStatus: 0,
-      };
+      }
 
       await setDoc(videoNotesRef, data);
       setVidNotes(data);
@@ -112,7 +112,7 @@ export default function LessonPage() {
 
   useEffect(() => {
     fetchSavedNotes();
-  }, [videoId, userId]);
+  }, [videoId, userId, video]);
 
   const handleLike = async () => {
     if (liked) {
@@ -287,16 +287,11 @@ export default function LessonPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-slate-900 min-h-12 sm:min-h-14 p-1 sm:p-2 md:p-4 text-white flex justify-between items-center sticky top-0 z-50">
+      <nav className="bg-slate-900 min-h-14 p-4 text-white flex justify-between items-center sticky top-0 z-50">
         <div>
-          <Button
-            variant="ghost"
-            className="text-white h-auto p-1 sm:p-2 hover:bg-slate-800 flex items-center"
-          >
-            <ArrowBigLeft className="cursor-pointer w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-            <span className="ml-1 sm:ml-2 text-xs sm:text-sm md:text-base truncate max-w-[90px] sm:max-w-none">
-              Back to Course
-            </span>
+          <Button variant="ghost" className="text-white p-2 hover:bg-slate-800">
+            <ArrowBigLeft className="cursor-pointer" />
+            <span className="ml-2">Back to Course</span>
           </Button>
         </div>
         <div>
@@ -306,15 +301,13 @@ export default function LessonPage() {
 
       {/* Video Title */}
       {video ? (
-        <div className="text-lg sm:text-xl md:text-2xl font-semibold mt-3 sm:mt-4 md:mt-6 px-4 sm:px-6 md:px-8">
-        {video.title}
-      </div>
+        <div className="text-2xl font-semibold mt-6 ml-8"> {video.title}</div>
       ) : (
         <></>
       )}
 
       {/* Main Layout */}
-      <div className="flex flex-col gap-4 sm:gap-5 md:gap-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col md:flex-row gap-6 p-8">
         {/* Left Column */}
 
         <div className="flex-grow space-y-6">
@@ -333,11 +326,11 @@ export default function LessonPage() {
           )}
 
           {/* Interaction Buttons */}
-          <div className="flex space-x-3 sm:space-x-4">
+          <div className="flex space-x-4">
             <Button
               variant="outline"
               onClick={handleLike}
-              className="flex items-center space-x-1 sm:space-x-2 hover:bg-blue-50 transition-colors text-xs sm:text-sm"
+              className="flex items-center space-x-2 hover:bg-blue-50 transition-colors"
             >
               <ThumbsUp size={20} className={liked && "text-blue-500"} />
               <span>{likeCount}</span>
@@ -345,7 +338,7 @@ export default function LessonPage() {
             <Button
               variant="outline"
               onClick={handleDislike}
-              className="flex items-center space-x-1 sm:space-x-2 hover:bg-red-50 transition-colors text-xs sm:text-sm"
+              className="flex items-center space-x-2 hover:bg-red-50 transition-colors"
             >
               <ThumbsDown size={20} className={disliked && "text-red-500"} />
               <span>{dislikeCount}</span>
@@ -379,7 +372,7 @@ export default function LessonPage() {
                   onClick={handleSaveNotes}
                   className="flex items-center gap-2"
                 >
-                  <Save size={14} className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Save size={16} />
                   {editingNoteIndex !== null ? "Update Note" : "Save Note"}
                 </Button>
               </div>
@@ -469,7 +462,7 @@ export default function LessonPage() {
                   onClick={handleCommentSubmit}
                   className="flex items-center gap-2"
                 >
-                  <Send size={16} className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Send size={16} />
                   Post
                 </Button>
               </div>

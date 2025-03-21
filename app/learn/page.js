@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { Stats } from "./stats";
 import { StickyWrapper } from "@/components/sticky-wrapper";
@@ -6,16 +6,7 @@ import { StreakIcons } from "@/components/streak-icons";
 import { Header } from "./header";
 import { LessonButton } from "./lesson-button";
 import LeaderboardPos from "./leaderboard-position";
-import {
-  doc,
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthProvider";
 import { useState, useEffect } from "react";
 import { setLatestCourse } from "@/lib/utils";
@@ -23,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 const learnPage = () => {
-
     const firestore = getFirestore();
     const { user } = useAuth();
     const router = useRouter();
@@ -102,35 +92,37 @@ const learnPage = () => {
         }
     }
 
-    const usrData = usr.data();
-    setUserData(usrData);
+    useEffect(() => {
+        fetchUserDetails();
+    }, [user])
 
-    // Check if enrolledCourses exist and if it includes courseId
-    setCourseId(usrData.enrolledCourses?.[0] || null);
-    if (usrData.enrolledCourses?.length <= 3)
-      setTopCourses(usrData.enrolledCourses);
-    else if (usrData.enrolledCourses?.length > 3)
-      setTopCourses(usrData.enrolledCourses.slice(0, 3));
-  };
+    useEffect(() => {
+        fetchVideos();
+    }, [courseId])
 
-  const fetchVideos = async () => {
-    if (!courseId) return; // Ensure courseId is available
+    useEffect(() => {
+        fetchUserProgress();
+    }, [user, courseId, videos])
 
-    const videosRef = collection(firestore, "videos"); // Reference to "videos" collection
-    const q = query(videosRef, where("course", "==", courseId)); // Filter by courseId
-    console.log(q);
+    const handleCourseSelect = async (selectedCourse) => {
+        // Update topCourses and set the title to the selected course
+        const updatedCourses = setLatestCourse(userData.enrolledCourses, selectedCourse);
+        setCourseId(updatedCourses[0]);
+        if (userData.enrolledCourses?.length <= 3)
+            setTopCourses(updatedCourses)
+        else if (userData.enrolledCourses?.length > 3)
+            setTopCourses(updatedCourses.slice(0, 3))
 
-    try {
-      const querySnapshot = await getDocs(q);
-      const videosList = querySnapshot.docs.map((doc) => ({
-        videoId: doc.data().videoId,
-        ...doc.data(),
-      }));
-      videosList.sort((a, b) => a.sequence - b.sequence);
-      setVideos(videosList); // Store videos in state
-    } catch (error) {
-      console.error("Error fetching videos:", error);
+        await updateDoc(userRef, {
+            enrolledCourses: updatedCourses
+        })
+    };
+
+    const handleAfterSelect = async () => {
+        fetchUserDetails();
+        fetchVideos();
     }
+
     if(topCourses.length === 0){
         return (
             <div>
@@ -181,104 +173,6 @@ const learnPage = () => {
             </div>
         )
     }
-  };
 
-  useEffect(() => {
-    fetchUserDetails();
-  }, [user]);
-
-  useEffect(() => {
-    fetchVideos();
-  }, [courseId]);
-
-  useEffect(() => {
-    fetchUserProgress();
-  }, [user, courseId, videos]);
-
-  const handleCourseSelect = async (selectedCourse) => {
-    // Update topCourses and set the title to the selected course
-    const updatedCourses = setLatestCourse(
-      userData.enrolledCourses,
-      selectedCourse
-    );
-    setCourseId(updatedCourses[0]);
-    if (userData.enrolledCourses?.length <= 3) setTopCourses(updatedCourses);
-    else if (userData.enrolledCourses?.length > 3)
-      setTopCourses(updatedCourses.slice(0, 3));
-
-    await updateDoc(userRef, {
-      enrolledCourses: updatedCourses,
-    });
-  };
-
-  const handleAfterSelect = async () => {
-    fetchUserDetails();
-    fetchVideos();
-  };
-
-  if (topCourses.length === 0) {
-    return (
-        <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 sm:p-8 md:p-12 lg:p-20 xl:p-40 text-center">
-        <div className="bg-[#f8e8c8] border border-yellow-700 shadow-lg rounded-xl w-full max-w-md p-4 sm:p-6">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-900">
-            No Courses Yet!
-          </h1>
-          <p className="text-gray-800 mt-2 text-xs sm:text-sm md:text-base">
-            Your course library is empty. Discover courses that match your
-            interests.
-          </p>
-          <button 
-            className="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg shadow-md transition-all duration-300 text-sm sm:text-base"
-            onClick={() => {router.push('/shop')}}
-          >
-            Go To Shop
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (userProgress && topCourses.length !== 0) {
-    return (
-      <div className="flex flex-row-reverse gap-[48px] px-6">
-        <StickyWrapper>
-          <StreakIcons streak={39} />
-          <Stats userProgress={userProgress} />
-          <LeaderboardPos />
-        </StickyWrapper>
-        <FeedWrapper>
-          <Header
-            topCourses={topCourses}
-            onCourseSelect={handleCourseSelect}
-            afterSelect={handleAfterSelect}
-          />
-          <div className="relative flex flex-col items-center">
-            {videos.length > 0 &&
-              lastVideo !== null &&
-              videos.map((lesson, idx) => {
-                const isLocked = lesson.sequence > lastVideo;
-                console.log(
-                  `Lesson ${lesson.videoId} - Sequence: ${lesson.sequence}, Locked: ${isLocked}`
-                );
-
-                return (
-                  <LessonButton
-                    key={lesson.videoId}
-                    id={lesson.videoId}
-                    index={idx}
-                    totalCount={videos.length}
-                    locked={isLocked}
-                    current={lastVideo === lesson.sequence}
-                    percentage={percentage}
-                    link={lesson.videoId}
-                    courseId={courseId}
-                  />
-                );
-              })}
-          </div>
-        </FeedWrapper>
-      </div>
-    );
-  }
-};
+}
 export default learnPage;
