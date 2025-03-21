@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 
-const FillInTheBlanksModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor }) => {
+const FillInTheBlanksModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor, preview }) => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null); // null -> not answered, true -> correct, false -> incorrect
@@ -15,7 +15,7 @@ const FillInTheBlanksModal = ({ questionData, onSubmit, currentPoints, setCoins,
     setIsCorrect(isAnswerCorrect);
     setIsAnswered(true);
 
-    if (isAnswerCorrect === true) {
+    if (isAnswerCorrect === true && !preview) {
       const newPoints = currentPoints + questionData.points * factor[time];
       console.log(`Fill points : ${newPoints}`);
       setCoins(newPoints);

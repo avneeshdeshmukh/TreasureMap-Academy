@@ -10,10 +10,13 @@ import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc
 import { useAuth } from "../context/AuthProvider";
 import { useState, useEffect } from "react";
 import { setLatestCourse } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const learnPage = () => {
     const firestore = getFirestore();
     const { user } = useAuth();
+    const router = useRouter();
 
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
@@ -120,11 +123,26 @@ const learnPage = () => {
         fetchVideos();
     }
 
+    if(topCourses.length === 0){
+        return (
+            <div>
+            <h1>
+                No Courses Yet!
+            </h1>
+            <Button
+            onClick = {()=>{router.push('/shop')}}
+            >
+                Go To Shop
+            </Button>
+            </div>
+        )
+    }
+
     if (userProgress && topCourses.length !== 0) {
         return (
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
-                    <StreakIcons streak={39} coins={65} />
+                    <StreakIcons streak={39}/>
                     <Stats userProgress={userProgress} />
                     <LeaderboardPos />
                 </StickyWrapper>

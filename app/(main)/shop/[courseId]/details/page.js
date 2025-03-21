@@ -28,6 +28,36 @@ export default function Details() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null);
 
+  const convertSecondsToHMS = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return {
+      hours: String(hours).padStart(2, "0"), // Ensures 2-digit format
+      minutes: String(minutes).padStart(2, "0"),
+      seconds: String(seconds).padStart(2, "0"),
+    };
+  };
+
+  const displayTime = (totalSeconds) => {
+    const { hours, minutes, seconds } = convertSecondsToHMS(totalSeconds);
+
+    // Convert to numbers to remove leading zeros
+    const h = Number(hours);
+    const m = Number(minutes);
+    const s = Number(seconds);
+
+    // Build time parts with correct singular/plural wording
+    const parts = [];
+    if (h > 0) parts.push(`${h} ${h === 1 ? "hour" : "hours"}`);
+    if (m > 0) parts.push(`${m} ${m === 1 ? "minute" : "minutes"}`);
+    if (s > 0 || parts.length === 0)
+      parts.push(`${s} ${s === 1 ? "second" : "seconds"}`);
+
+    return parts.join(" ");
+  };
+
   useEffect(() => {
     const fetchCourseDetails = async () => {
       const crs = await getDoc(courseRef);
@@ -236,7 +266,7 @@ export default function Details() {
                     <div>
                       <p className="text-sm text-gray-500">Duration</p>
                       <p className="font-medium text-gray-900">
-                        {course.duration}
+                        {displayTime(course.courseDuration)}
                       </p>
                     </div>
                   </div>
@@ -245,7 +275,7 @@ export default function Details() {
                     <div>
                       <p className="text-sm text-gray-500">Total Lessons</p>
                       <p className="font-medium text-gray-900">
-                        {course.totalLessons} lessons
+                        {course.totalVideos}
                       </p>
                     </div>
                   </div>
@@ -253,7 +283,7 @@ export default function Details() {
                     <BarChart className="text-yellow-600" size={24} />
                     <div>
                       <p className="text-sm text-gray-500">Level</p>
-                      <p className="font-medium text-gray-900">{course.level}</p>
+                      <p className="font-medium text-gray-900">{course.difficulty}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -261,7 +291,7 @@ export default function Details() {
                     <div>
                       <p className="text-sm text-gray-500">Students Enrolled</p>
                       <p className="font-medium text-gray-900">
-
+                        {course.enrollments}
                       </p>
                     </div>
                   </div>

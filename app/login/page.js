@@ -79,6 +79,7 @@ export default  function LoginPage() {
           uid: user.uid,
           email: user.email,
           isAdditionalInfoAdded: false,
+          enrolledCourses : [],
           provider: user.providerData[0]?.providerId,
           createdAt: new Date(),
         };
