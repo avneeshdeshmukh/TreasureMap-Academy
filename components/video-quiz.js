@@ -171,6 +171,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
 
                     // Extract current quizzes map or initialize an empty object
                     let quizzes = vnSnap.exists() ? vnSnap.data().quizzes || {} : {};
+                    console.log(quizzes);
 
                     // Check if the current quiz timestamp exists, otherwise initialize it
                     if (!quizzes[currentQuizTimestamp]) {
@@ -203,7 +204,6 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                     console.log(userProgSnap.data().PLUH);
                     const QPS = getQPS(userProgSnap.data(), ratio, att);
                     const DS = getDS(userProgSnap.data(), difficulty, att);
-                    console.log(isYesterday(userProgSnap.data().lastLesson.toDate()));
 
                     let updateData = {
                         coins: increment(currentQuizPoints),
@@ -216,8 +216,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                     if (att - 1 === 0) {
                         updateData[`courseProgress.${courseId}.quizzesCompleted`] = increment(1);
                         updateData["lastLesson"] = new Date();
-                        updateData["streak"] = increment(1);
-                        if (isYesterday(userProgSnap.data().lastLesson.toDate())) {
+                        console.log(isYesterday(userProgSnap.data().lastLesson?.toDate()))
+                        if (userProgSnap.data().lastLesson && isYesterday(userProgSnap.data().lastLesson.toDate())) {
                             setStreak(userProgSnap.data().streak + 1);
                         }
                     }
