@@ -54,6 +54,7 @@ export default function LessonPage() {
   const [userFeedback, setUserFeedback] = useState(null);
 
   const [startFrom, setStartFrom] = useState(0);
+  const [allowedTs, setAllowedTs] = useState(0);
 
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
@@ -80,8 +81,11 @@ export default function LessonPage() {
     const docSnap = await getDoc(videoNotesRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
+      const ts = Math.max(...Object.keys(data.quizzes).map(Number));
+      console.log(ts);
       setVidNotes(data);
       setStartFrom(data.lastProgressTime ?? 0);
+      setAllowedTs(Math.max(data.lastProgressTime ?? 0, ts))
       setSavedNotes(data.notes || []);
       switch (data.likeStatus) {
         case 1:
@@ -318,6 +322,7 @@ export default function LessonPage() {
               preview={null}
               videoId={videoId}
               startTime={startFrom}
+              allowedTs={allowedTs}
               vidNotes={vidNotes}
               className="w-full h-auto aspect-video"
             />
