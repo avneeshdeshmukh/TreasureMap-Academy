@@ -13,7 +13,7 @@ const StreakGoalModal = ({ isOpen, onClose, onSave }) => {
   };
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-[#f8e8c8] border border-yellow-700 shadow-lg rounded-xl w-full max-w-md p-4 sm:p-6 animate-fadeIn">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl sm:text-2xl font-extrabold text-yellow-900">

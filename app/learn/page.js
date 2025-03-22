@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { setLatestCourse } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import StreakGoalModal from "./streak-modal";
 
 const learnPage = () => {
     const firestore = getFirestore();
@@ -20,6 +21,7 @@ const learnPage = () => {
 
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [courseId, setCourseId] = useState(null);
     const [topCourses, setTopCourses] = useState([]);
@@ -46,6 +48,11 @@ const learnPage = () => {
             setTopCourses(usrData.enrolledCourses)
         else if (usrData.enrolledCourses?.length > 3)
             setTopCourses(usrData.enrolledCourses.slice(0, 3))
+    };
+
+    const handleSaveGoal = (goal) => {
+        console.log("Streak goal set to:", goal);
+        // Add logic to update Firestore or local state if needed
     };
 
     const fetchVideos = async () => {
@@ -150,9 +157,14 @@ const learnPage = () => {
             <div className="flex flex-row-reverse gap-[48px] px-6" >
                 <StickyWrapper>
                     <StreakIcons streak={39}/>
-                    <Stats userProgress={userProgress} courseId = {topCourses[0]} />
+                    <Stats userProgress={userProgress} courseId = {topCourses[0]} setIsModalOpen={setIsModalOpen} />
                     <LeaderboardPos />
                 </StickyWrapper>
+                <StreakGoalModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleSaveGoal}
+                />
                 <FeedWrapper>
                     <Header topCourses={topCourses} onCourseSelect={handleCourseSelect} afterSelect={handleAfterSelect} />
                     <div className="relative flex flex-col items-center">
