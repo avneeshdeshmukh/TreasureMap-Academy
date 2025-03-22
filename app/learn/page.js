@@ -50,9 +50,14 @@ const learnPage = () => {
             setTopCourses(usrData.enrolledCourses.slice(0, 3))
     };
 
-    const handleSaveGoal = (goal) => {
-        console.log("Streak goal set to:", goal);
-        // Add logic to update Firestore or local state if needed
+    const handleSaveGoal = async (goal) => {
+        try {
+            console.log("Streak goal set to:", goal);
+            await updateDoc(userProgRef, { streakGoal: goal });
+            console.log("Streak goal updated successfully in Firestore");
+        } catch (error) {
+            console.error("Error updating streak goal:", error);
+        }
     };
 
     const fetchVideos = async () => {
