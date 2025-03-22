@@ -8,7 +8,7 @@ import MCQModal from "@/components/modals/MCQModal";
 import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
-import { getQPS, getQuizMetrics, getDS } from "@/lib/pluh-calculations";
+import { getQPS, getQuizMetrics, getDS, getES } from "@/lib/pluh-calculations";
 import { useCoins } from "@/app/context/CoinsContext";
 import { useStreak } from "@/app/context/StreakContext";
 
@@ -218,10 +218,14 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                         if (userProgSnap.data().lastLesson && isYesterday(userProgSnap.data().lastLesson.toDate())) {
                             updateData["lastLesson"] = new Date();
                             updateData["streak"] = increment(1);
+                            updateData["PLUH.ES"] = getES(userProgSnap.data());
+                            console.log(getES(userProgSnap.data()));
                             setStreak(userProgSnap.data().streak + 1);
                         } else if(!userProgSnap.data().lastLesson){
                             updateData["lastLesson"] = new Date();
                             updateData["streak"] = increment(1);
+                            updateData["PLUH.ES"] = getES(userProgSnap.data());
+                            console.log(getES(userProgSnap.data()));
                             setStreak(userProgSnap.data().streak + 1);
                         }
                     }
@@ -250,7 +254,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
             playerRef.current.one("seeked", () => {
                 setTimeout(() => {
                     playerRef.current.play().catch((err) => console.error("Error resuming video:", err));
-                }, 200);  // Small delay to ensure smooth playback
+                }, 100);  // Small delay to ensure smooth playback
             });
         }
     };
@@ -313,10 +317,10 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
 
             quizMarkers.forEach(marker => {
                 if (
-                    Math.abs(currentTime - marker.time) < 0.2   // Prevent repeat triggering
+                    Math.abs(currentTime - marker.time) < 0.17   // Prevent repeat triggering
                 ) {
                     player.pause();
-                    savedTimeRef.current = marker.time;
+                    savedTimeRef.current = Math.round(currentTime+1);
 
                     const questions = quizzes[marker.time]?.questions;
                     const timestamp = quizzes[marker.time]?.timestamp;
