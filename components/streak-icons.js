@@ -5,9 +5,11 @@ import { doc, getDoc, getFirestore } from "firebase/firestore"
 import { auth } from "@/lib/firebase"
 import { useState, useEffect } from "react"
 import { useCoins } from "@/app/context/CoinsContext";
+import { useStreak } from "@/app/context/StreakContext"
 
-export const StreakIcons = ({ streak }) => {
+export const StreakIcons = () => {
     const { coins, setCoins } = useCoins();
+    const { streak, setStreak } = useStreak();
     const firestore = getFirestore();
     const uid = auth.currentUser.uid;
     const userProgressRef = doc(firestore, "userProgress", uid);
@@ -20,6 +22,7 @@ export const StreakIcons = ({ streak }) => {
                 console.log(userSnap.data());
                 setUserData(userSnap.data());
                 setCoins(userSnap.data().coins);
+                setStreak(userSnap.data().streak);
             }
         }
 

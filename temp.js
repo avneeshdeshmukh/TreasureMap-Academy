@@ -1,17 +1,14 @@
-function calculateDifficulty(quizArray) {
-    let diffArray = [];
-    for(let i=0; i<quizArray.length; i++){
-        diffArray[i]=quizArray[i].points;
-    }
+function isYesterday(date) {
+    const givenDate = new Date(date);
+    const now = new Date();
 
-    console.log(diffArray)
+    // Convert both dates to the user's local timezone by resetting time to midnight
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    givenDate.setHours(0, 0, 0, 0);
 
-    diffArray.sort((a, b) => a - b); // Sort array in ascending order
-    const mid = Math.floor(diffArray.length / 2);
-
-    return diffArray.length % 2 !== 0
-        ? diffArray[mid]  // Odd length: return middle element
-        : (diffArray[mid - 1] + diffArray[mid]) / 2;
+    return givenDate.getTime() === yesterday.getTime();
 }
 
-console.log(calculateDifficulty([{"correctAnswer":"true","type":"trueFalse","points":3,"question":"Hi"},{"question":"Hi my name <blank>.","type":"fillBlanks","correctAnswer":"Mihika","points":2}]))
+// Example Usage:
+console.log(isYesterday("2025-03-21")); // ✅ Should return true if today is March 22 in IST
+console.log(isYesterday(new Date(Date.now() - 86400000))); // ✅ Another way to check yesterday

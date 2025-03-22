@@ -10,9 +10,11 @@ import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
 import { getQPS, getQuizMetrics, getDS } from "@/lib/pluh-calculations";
 import { useCoins } from "@/app/context/CoinsContext";
+import { useStreak } from "@/app/context/StreakContext";
 
-export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNotes }) {
+export default function VideoQuiz({ courseId, videoId, preview, startTime, allowedTs }) {
     const { setCoins } = useCoins();
+    const { setStreak } = useStreak();
     const firestore = getFirestore();
     const videoRef = doc(firestore, "videos", videoId);
 
@@ -33,15 +35,22 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
     const savedTimeRef = useRef(0);
     const lastAllowedTimeRef = useRef(0);
 
-    const setPoints = (value) => {
-        setCurrentQuizPoints(value);
-    }
-
     useEffect(() => {
-        if (startTime) {
-            lastAllowedTimeRef.current = startTime;  // Allow seeking to startTime
+        if (allowedTs) {
+            lastAllowedTimeRef.current = allowedTs;  // Allow seeking to startTime
         }
-    }, [startTime]);
+    }, [allowedTs]);
+
+    function isYesterday(date) {
+        const givenDate = new Date(date);
+        const now = new Date();
+
+        // Convert both dates to the user's local timezone by resetting time to midnight
+        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        givenDate.setHours(0, 0, 0, 0);
+
+        return givenDate.getTime() === yesterday.getTime();
+    }
 
     const fetchAttempts = async () => {
         if (preview) return;
@@ -194,8 +203,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
                     console.log(userProgSnap.data().PLUH);
                     const QPS = getQPS(userProgSnap.data(), ratio, att);
                     const DS = getDS(userProgSnap.data(), difficulty, att);
-                    console.log(QPS);
-                    console.log(DS);
+                    console.log(isYesterday(userProgSnap.data().lastLesson.toDate()));
 
                     let updateData = {
                         coins: increment(currentQuizPoints),
@@ -203,15 +211,19 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
                         "PLUH.QPS": QPS,
                         "PLUH.DS": DS,
                     };
-                    
+
                     // Add additional properties if `att - 1 === 0`
                     if (att - 1 === 0) {
                         updateData[`courseProgress.${courseId}.quizzesCompleted`] = increment(1);
+                        updateData["lastLesson"] = new Date();
+                        updateData["streak"] = increment(1);
+                        if (isYesterday(userProgSnap.data().lastLesson.toDate())) {
+                            setStreak(userProgSnap.data().streak + 1);
+                        }
                     }
-                    
-                    // Update Firestore document with optimized object
-                    await updateDoc(userProgressRef, updateData);                    
 
+                    // Update Firestore document with optimized object
+                    await updateDoc(userProgressRef, updateData);
                     setCoins(userProgSnap.data().coins + currentQuizPoints);
 
                 } catch (error) {
@@ -244,7 +256,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
         playerRef.current = player;
 
         if (startTime) {
-            lastAllowedTimeRef.current = startTime; // Set initial allowed time
+            lastAllowedTimeRef.current = allowedTs; // Set initial allowed time
             player.currentTime(startTime); // Seek to startTime
         }
 
@@ -391,19 +403,19 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, vidNo
             </div>
 
             {currentQuestion && currentQuestion.type === "mcq" && (
-                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <MCQModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setCurrentQuizPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "fillBlanks" && (
-                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <FillInTheBlanksModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setCurrentQuizPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "trueFalse" && (
-                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <TrueFalseModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setCurrentQuizPoints} factor={factors} time={currentQuizTimestamp} />
             )}
 
             {currentQuestion && currentQuestion.type === "slider" && (
-                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setPoints} factor={factors} time={currentQuizTimestamp} />
+                <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setCurrentQuizPoints} factor={factors} time={currentQuizTimestamp} />
             )}
         </>
     );
