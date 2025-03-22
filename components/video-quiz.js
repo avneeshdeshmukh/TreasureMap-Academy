@@ -215,9 +215,13 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                     // Add additional properties if `att - 1 === 0`
                     if (att - 1 === 0) {
                         updateData[`courseProgress.${courseId}.quizzesCompleted`] = increment(1);
-                        updateData["lastLesson"] = new Date();
-                        console.log(isYesterday(userProgSnap.data().lastLesson?.toDate()))
                         if (userProgSnap.data().lastLesson && isYesterday(userProgSnap.data().lastLesson.toDate())) {
+                            updateData["lastLesson"] = new Date();
+                            updateData["streak"] = increment(1);
+                            setStreak(userProgSnap.data().streak + 1);
+                        } else if(!userProgSnap.data().lastLesson){
+                            updateData["lastLesson"] = new Date();
+                            updateData["streak"] = increment(1);
                             setStreak(userProgSnap.data().streak + 1);
                         }
                     }
