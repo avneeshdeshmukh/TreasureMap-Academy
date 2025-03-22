@@ -81,7 +81,10 @@ export default function LessonPage() {
     const docSnap = await getDoc(videoNotesRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const ts = Math.max(...Object.keys(data.quizzes).map(Number));
+      const ts = data.quizzes
+        ? Math.max(...Object.keys(data.quizzes).map(Number))
+        : 0;
+
       console.log(ts);
       setVidNotes(data);
       setStartFrom(data.lastProgressTime ?? 0);
