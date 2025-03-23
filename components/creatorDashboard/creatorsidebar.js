@@ -29,12 +29,6 @@ export const CreatorSidebar = ({ className }) => {
                     />
                     <SidebarItem
                         variant={"sidebarOutline"}
-                        icon={"users"}
-                        href={"#"}
-                        label={"Community"}
-                    />
-                    <SidebarItem
-                        variant={"sidebarOutline"}
                         icon={"settings"}
                         href={"#"}
                         label={"Settings"}

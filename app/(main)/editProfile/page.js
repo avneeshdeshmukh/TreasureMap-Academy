@@ -2,11 +2,15 @@
 import { useAuth } from "@/app/context/AuthProvider";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const firestore = getFirestore();
 
 export default async function EditProfilePage() {
   const { user } = useAuth();
+  const router = useRouter();
   // State to manage form inputs
   // const [name, setName] = useState("John Doe");
   // const [username, setUsername] = useState("@johndoe");
@@ -23,62 +27,70 @@ export default async function EditProfilePage() {
   };
 
   return (
-      <div>
-        {/* Edit Profile Card */}
-        <div className="flex items-center justify-center min-h-screen py-10">
-          <div className="bg-[#2c3748] shadow-2xl rounded-3xl p-8 w-11/12 md:w-3/4 lg:w-1/2">
-            <h2 className="text-3xl font-extrabold text-white mb-6">Edit Profile</h2>
+    <div className="min-h-screen bg-[#1a2332] text-white py-12">
+      <div className="max-w-4xl mx-auto px-6">
+        
+        {/* Back Button */}
+        <button
+          onClick={() => router.back()} // Go back to the previous page
+          className="flex items-center gap-2 text-gray-300 hover:text-yellow-500 mb-6"
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
 
-            {/* Edit Profile Form */}
-            <form onSubmit={handleSubmit}>
-              {/* Name Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-white mb-2">Name</label>
-                <input
-                  type="text"
-                  value={user.displayName}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Edit name"
-                />
-              </div>
+        {/* Page Title */}
+        <h2 className="text-4xl font-extrabold text-center mb-8">Edit Profile</h2>
 
-              {/* Username Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-white mb-2">Username</label>
-                <input
-                  type="text"
-                  value={userData.username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Edit username"
-                />
-              </div>
-
-              {/* Email Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-white mb-2">Email</label>
-                <input
-                  type="email"
-                  value={userData.email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Edit email"
-                />
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-center">
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r bg-[#daa520] text-white py-2 px-6 rounded-lg font-bold shadow-md hover:bg-[#9e5610] transition"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+        {/* Edit Profile Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Name Input */}
+          <div>
+            <label className="block text-lg font-semibold mb-2">Name</label>
+            <input
+              type="text"
+              value={user.displayName}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Edit name"
+            />
           </div>
-        </div>
+
+          {/* Username Input */}
+          <div>
+            <label className="block text-lg font-semibold mb-2">Username</label>
+            <input
+              type="text"
+              value={userData.username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Edit username"
+            />
+          </div>
+
+          {/* Email Input */}
+          <div>
+            <label className="block text-lg font-semibold mb-2">Email</label>
+            <input
+              type="email"
+              value={userData.email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Edit email"
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4">
+            <Button variant="secondary" type="submit">
+              Save Changes
+            </Button>
+            <Button variant="danger" onClick={() => router.back()}>
+              Cancel
+            </Button>
+          </div>
+        </form>
       </div>
+    </div>
   );
 }
