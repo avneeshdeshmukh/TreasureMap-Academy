@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation"
 import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import {
@@ -25,7 +26,7 @@ export default function QuizCreator() {
   const firestore = getFirestore();
   const { id, videoId } = useParams();
 
-
+  const router = useRouter();
   const courseRef = doc(firestore, "courses", id);
   const videoRef = doc(firestore, "videos", videoId);
 
@@ -367,7 +368,16 @@ export default function QuizCreator() {
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
-      <h2 className="text-2xl font-bold mb-4">Quiz Creator</h2>
+      <div className="flex justify-between items-center">
+  <h2 className="text-2xl font-bold">Quiz Creator</h2>
+  <Button 
+    variant={"secondary"} 
+    onClick={() => router.push(`/create/courses/${id}/edit-form`)}
+  >
+    Done
+  </Button>
+</div>
+      
       {videoDoc && (
         <div>
           <VideoPreviewCard videoData={videoDoc} />
