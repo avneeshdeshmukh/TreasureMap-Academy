@@ -30,7 +30,7 @@ export const CreatorSidebar = ({ className }) => {
                     <SidebarItem
                         variant={"sidebarOutline"}
                         icon={"settings"}
-                        href={"#"}
+                        href={"/create/settings"}
                         label={"Settings"}
                     />
                 </div>
