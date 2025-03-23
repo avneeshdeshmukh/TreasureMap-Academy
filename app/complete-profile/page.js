@@ -104,6 +104,7 @@ export default function CompleteProfile() {
         streakGoal : 0,
         coins : 0,
         courseProgress : {},
+        nextLeaderBoardType : "seafarer",
         PLUH : {
           DS :{
             sample : 0,
