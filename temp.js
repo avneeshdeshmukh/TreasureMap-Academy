@@ -2,6 +2,7 @@
 //     const givenDate = new Date(date);
 //     const now = new Date("2025-03-24T00:00:00");
 
+
 //     // Get local midnight for 'yesterday' by adjusting for local time zone
 
 //     console.log(now)
@@ -25,12 +26,37 @@
 // // console.log(yesterday < (new Date("2025-03-21")))
 // console.log(yesterday.getHours())
 
-function getES(val) {
-
-    const lowerBound = Math.floor(val); // Get the integer part
-    const increment = 0.5 * Math.pow(0.5, lowerBound);
-    const newValue = val < increment ? 0 : val - increment;
-    return Math.round(newValue * 100) / 100;
+const oldRPS = {
+    minValue: undefined, // Use old min or set to first value
+    maxValue: 60, // Use old max or set to first value
+    currentValue: 5, // Default midpoint
 }
 
-console.log(getES(0.1));
+function getRPS(data, newCoins) {
+    const oldRPS = data.PLUH.RPS || {};
+
+    let newRPS = {
+        minValue: oldRPS?.minValue ?? newCoins, // Use old min or set to first value
+        maxValue: oldRPS?.maxValue ?? newCoins, // Use old max or set to first value
+        currentValue: 2.5, // Default midpoint
+    };
+
+    if (oldRPS.minValue === undefined || oldRPS.maxValue === undefined) {
+        return newRPS;
+    }
+
+    newRPS.minValue = Math.min(oldRPS.minValue, newCoins);
+    newRPS.maxValue = Math.max(oldRPS.maxValue, newCoins);
+
+    if (newRPS.maxValue === newRPS.minValue) {
+        newRPS.currentValue = 2.5;
+    } else {
+        // Normalize value between 0 and 5
+        newRPS.currentValue = ((newCoins - newRPS.minValue) /
+            (newRPS.maxValue - newRPS.minValue)) * 5;
+    }
+
+    return newRPS;
+}
+
+console.log(oldRPS.minValue)

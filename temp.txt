@@ -36,3 +36,5 @@ lastLesson -> should be yesterday
 else -> streak = 0
         ES -= 0.5
         
+
+
