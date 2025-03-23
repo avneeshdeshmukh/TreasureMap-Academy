@@ -3,8 +3,8 @@
 import { MobileHeader } from "@/components/mobile-header"
 import ProtectedRoute from "@/components/protected-route"
 import { Sidebar } from "@/components/sidebar"
-import { CoinsProvider } from "../context/CoinsContext"
-import { StreakProvider } from "../context/StreakContext"
+import { CoinsProvider } from "../../context/CoinsContext"
+import { StreakProvider } from "../../context/StreakContext"
 
 export default function LearnLayout({ children }) {
 
