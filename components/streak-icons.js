@@ -7,6 +7,7 @@ import { useState, useEffect } from "react"
 import { useCoins } from "@/app/context/CoinsContext";
 import { useStreak } from "@/app/context/StreakContext"
 
+
 export const StreakIcons = () => {
     const { coins, setCoins } = useCoins();
     const { streak, setStreak } = useStreak();
@@ -42,13 +43,13 @@ export const StreakIcons = () => {
                     </Button>
 
                 </Link>
-                <Link href={"/courses"}>
+                <Link href={"/leaderboard"}>
                     <Button variant="ghost" >
                         <CircleDollarSign className="mr-2" size={30} fill={"none"} />
                         <p className="text-bold text-xl">{coins}</p>
                     </Button>
                 </Link>
-                <Link href={"/leaderboard"}>
+                <Link href={"/badges"}>
                     <Button variant="ghost" >
                         <Anchor size={30} fill={"none"} />
                     </Button>
