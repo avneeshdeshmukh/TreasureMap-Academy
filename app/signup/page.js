@@ -88,17 +88,13 @@ export default function SignUpPage() {
           value : 0
         },
         ES :{
-          sample : 0,
           value : 0
         },
         QPS :{
           sample : 0,
           value : 0
         },
-        RPS :{
-          sample : 0,
-          value : 0
-        },
+        RPS :{},
       }
     };
 

@@ -8,7 +8,7 @@ import MCQModal from "@/components/modals/MCQModal";
 import FillInTheBlanksModal from "@/components/modals/FillInTheBlanksModal";
 import TrueFalseModal from "@/components/modals/TrueFalseModal";
 import SliderQuizModal from "@/components/modals/SliderQuizModal";
-import { getQPS, getQuizMetrics, getDS, getES } from "@/lib/pluh-calculations";
+import { getQPS, getQuizMetrics, getDS, getES, getRPS } from "@/lib/pluh-calculations";
 import { useCoins } from "@/app/context/CoinsContext";
 import { useStreak } from "@/app/context/StreakContext";
 
@@ -203,7 +203,6 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                     console.log(ratio)
 
                     const userProgSnap = await getDoc(userProgressRef);
-                    console.log(userProgSnap.data().PLUH);
                     const QPS = getQPS(userProgSnap.data(), ratio, att);
                     const DS = getDS(userProgSnap.data(), difficulty, att);
 
@@ -212,6 +211,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                         [`courseProgress.${courseId}.courseCoins`]: increment(currentQuizPoints),
                         "PLUH.QPS": QPS,
                         "PLUH.DS": DS,
+                        "PLUH.RPS" : getRPS(userProgSnap.data(), currentQuizPoints),
+                        leaderboardCoins : increment(currentQuizPoints),
                     };
 
                     // Add additional properties if `att - 1 === 0`
