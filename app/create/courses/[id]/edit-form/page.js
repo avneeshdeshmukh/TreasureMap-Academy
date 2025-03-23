@@ -41,7 +41,7 @@ export default function EditFormPage() {
 
   // Handle going back
   const handleBack = () => {
-    router.back(); // Navigate to the previous page
+    router.push(`/create/mycourses`); // Navigate to the previous page
   };
 
   useEffect(() => {
