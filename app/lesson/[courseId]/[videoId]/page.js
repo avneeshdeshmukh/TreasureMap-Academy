@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -36,6 +37,7 @@ import { comment } from "postcss";
 
 export default function LessonPage() {
   const firestore = getFirestore();
+  const router = useRouter();
   const { courseId, videoId } = useParams();
   const userId = auth.currentUser.uid;
 
@@ -296,7 +298,9 @@ export default function LessonPage() {
       {/* Navigation Bar */}
       <nav className="bg-slate-900 min-h-14 p-4 text-white flex justify-between items-center sticky top-0 z-50">
         <div>
-          <Button variant="ghost" className="text-white p-2 hover:bg-slate-800">
+          <Button variant="ghost" className="text-white p-2 hover:bg-slate-800"
+          onClick={()=>{router.push('/learn')}}
+          >
             <ArrowBigLeft className="cursor-pointer" />
             <span className="ml-2">Back to Course</span>
           </Button>
