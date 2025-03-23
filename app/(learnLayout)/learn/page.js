@@ -7,14 +7,15 @@ import { Header } from "./header";
 import { LessonButton } from "./lesson-button";
 import LeaderboardPos from "./leaderboard-position";
 import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc } from "firebase/firestore";
-import { useAuth } from "../context/AuthProvider";
+import { useAuth } from "../../context/AuthProvider";
 import { useState, useEffect } from "react";
 import { setLatestCourse } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import StreakGoalModal from "./streak-modal";
+import { IoClose } from 'react-icons/io5'; // Import the close icon
 
-const learnPage = () => {
+const LearnPage = () => {
     const firestore = getFirestore();
     const { user } = useAuth();
     const router = useRouter();
@@ -22,6 +23,8 @@ const learnPage = () => {
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isChestOpened, setIsChestOpened] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const [courseId, setCourseId] = useState(null);
     const [topCourses, setTopCourses] = useState([]);
@@ -41,8 +44,6 @@ const learnPage = () => {
         const usrData = usr.data();
         setUserData(usrData);
 
-
-        // Check if enrolledCourses exist and if it includes courseId
         setCourseId(usrData.enrolledCourses?.[0] || null);
         if (usrData.enrolledCourses?.length <= 3)
             setTopCourses(usrData.enrolledCourses)
@@ -61,11 +62,10 @@ const learnPage = () => {
     };
 
     const fetchVideos = async () => {
-        if (!courseId) return; // Ensure courseId is available
+        if (!courseId) return;
 
-        const videosRef = collection(firestore, "videos"); // Reference to "videos" collection
-        const q = query(videosRef, where("course", "==", courseId)); // Filter by courseId
-        console.log(q);
+        const videosRef = collection(firestore, "videos");
+        const q = query(videosRef, where("course", "==", courseId));
 
         try {
             const querySnapshot = await getDocs(q);
@@ -74,7 +74,7 @@ const learnPage = () => {
                 ...doc.data(),
             }));
             videosList.sort((a, b) => a.sequence - b.sequence);
-            setVideos(videosList); // Store videos in state
+            setVideos(videosList);
         } catch (error) {
             console.error("Error fetching videos:", error);
         }
@@ -87,12 +87,12 @@ const learnPage = () => {
             const prog = await getDoc(userProgRef);
             const progData = prog.data();
             setUserProgress(progData);
-            const last = progData?.courseProgress?.[courseId]?.currentVideo || 1; // Default to 1 if not found
+            const last = progData?.courseProgress?.[courseId]?.currentVideo || 1;
             setLastVideo(last);
             const videoNotesRef = doc(firestore, "videoNotes", `${videos[last - 1].videoId}_${user.uid}`);
             const vnSnap = await getDoc(videoNotesRef);
             console.log(vnSnap.data());
-            if(vnSnap.exists()){
+            if (vnSnap.exists()) {
                 const vnData = vnSnap.data();
                 const percent = (vnData.lastProgressTime / vnData.duration) * 100;
                 setPercentage(percent);
@@ -117,7 +117,6 @@ const learnPage = () => {
     }, [user, courseId, videos])
 
     const handleCourseSelect = async (selectedCourse) => {
-        // Update topCourses and set the title to the selected course
         const updatedCourses = setLatestCourse(userData.enrolledCourses, selectedCourse);
         setCourseId(updatedCourses[0]);
         if (userData.enrolledCourses?.length <= 3)
@@ -138,31 +137,31 @@ const learnPage = () => {
     if (topCourses.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 sm:p-8 md:p-12 lg:p-20 xl:p-40 text-center">
-            <div className="bg-[#f8e8c8] border border-yellow-700 shadow-lg rounded-xl w-full max-w-md p-4 sm:p-6">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-900">
-                No Courses Yet!
-              </h1>
-              <p className="text-gray-800 mt-2 text-xs sm:text-sm md:text-base">
-                Your course library is empty. Discover courses that match your
-                interests.
-              </p>
-              <button 
-                className="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg shadow-md transition-all duration-300 text-sm sm:text-base"
-                onClick={() => {router.push('/shop')}}
-              >
-                Go To Shop
-              </button>
+                <div className="bg-[#f8e8c8] border border-yellow-700 shadow-lg rounded-xl w-full max-w-md p-4 sm:p-6">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-900">
+                        No Courses Yet!
+                    </h1>
+                    <p className="text-gray-800 mt-2 text-xs sm:text-sm md:text-base">
+                        Your course library is empty. Discover courses that match your
+                        interests.
+                    </p>
+                    <button
+                        className="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg shadow-md transition-all duration-300 text-sm sm:text-base"
+                        onClick={() => { router.push('/shop') }}
+                    >
+                        Go To Shop
+                    </button>
+                </div>
             </div>
-          </div>
         );
-      }
+    }
 
     if (userProgress && topCourses.length !== 0) {
         return (
-            <div className="flex flex-row-reverse gap-[48px] px-6" >
+            <div className="flex flex-row-reverse gap-[48px] px-6">
                 <StickyWrapper>
-                    <StreakIcons streak={39}/>
-                    <Stats userProgress={userProgress} courseId = {topCourses[0]} setIsModalOpen={setIsModalOpen} />
+                    <StreakIcons streak={39} />
+                    <Stats userProgress={userProgress} courseId={topCourses[0]} setIsModalOpen={setIsModalOpen} />
                     <LeaderboardPos />
                 </StickyWrapper>
                 <StreakGoalModal
@@ -192,11 +191,54 @@ const learnPage = () => {
                             );
                         })}
 
+                        <div className="relative mt-8"
+                        >
+                            {(!isChestOpened) &&
+                                <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-yellow-400 px-3 py-2.5 font-bold uppercase tracking-wide text-white">
+                                    Open
+                                    <div
+                                        className="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 transform border-x-8 border-t-8 border-x-transparent"
+                                        aria-hidden
+                                    />
+                                </div>
+                            }
+                            <img
+                                src={isChestOpened ? "images/chest_opened.png" : "images/chest_closed.png"}
+                                alt="Treasure Chest"
+                                onClick={() => {
+                                    if (!isChestOpened) {
+                                        setModalOpen(true);
+                                    }
+                                }}
+                                className="mt-4 cursor-pointer w-24 h-24"
+                            />
+                        </div>
                     </div>
-                </FeedWrapper>
-            </div>
-        )
-    }
 
+
+                </FeedWrapper>
+
+
+
+                {/* Modal for Chest Opening GIF */}
+                <div className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                    <div className="relative w-80 h-80">
+                        <img src="images/chest_gif.gif" alt="Opening Chest" className="w-full h-full shadow-lg" />
+                        <button
+                            onClick={() => {
+                                setModalOpen(false);
+                                setIsChestOpened(true);
+                            }}
+                            className="absolute -top-4 -right-4 text-white bg-black rounded-full p-1"
+                            aria-label="Close modal"
+                        >
+                            <IoClose size={24} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
-export default learnPage;
+
+export default LearnPage;
