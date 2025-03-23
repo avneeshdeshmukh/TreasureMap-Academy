@@ -34,6 +34,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
     const lastAllowedTimeRef = useRef(0);
+    const recentlyCompletedMarkers = useRef(new Set());
 
     useEffect(() => {
         if (allowedTs) {
@@ -161,6 +162,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
             setIsQuizCompleted(true);
             setCurrentQuiz(null);
             setCurrentQuestionIndex(0);
+            recentlyCompletedMarkers.current.add(currentQuizTimestamp);
             if (!preview) {
                 const videoNotesRef = doc(firestore, "videoNotes", `${videoId}_${auth.currentUser.uid}`);
                 const userProgressRef = doc(firestore, "userProgress", auth.currentUser.uid);
@@ -247,7 +249,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
 
     const resumeVideo = () => {
         if (playerRef.current) {
-            const resumeTime = savedTimeRef.current + 1;
+            const resumeTime = savedTimeRef.current + 0.5;
             playerRef.current.currentTime(resumeTime);
 
             // Ensure play() is only called after seek completes
@@ -291,6 +293,12 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                 lastAllowedTimeRef.current = currentTime;
             }
 
+            recentlyCompletedMarkers.current.forEach((markerTime) => {
+                if (currentTime > markerTime + 0.5) { // Adjust this threshold as needed
+                    recentlyCompletedMarkers.current.delete(markerTime);
+                }
+            });
+
             // Check if video is completed
             console.log(player.duration());
             if (currentTime >= player.duration() - 0.5) {  // Allow small margin for precision
@@ -316,11 +324,17 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
             }
 
             quizMarkers.forEach(marker => {
+                const timeDifference = Math.abs(currentTime - marker.time);
                 if (
-                    Math.abs(currentTime - marker.time) < 0.17   // Prevent repeat triggering
+                    recentlyCompletedMarkers.current.has(marker.time) ||
+                    timeDifference >= 0.17
                 ) {
+                    return;
+                }
+                
+                if (timeDifference < 0.17){
                     player.pause();
-                    savedTimeRef.current = Math.round(currentTime+1);
+                    savedTimeRef.current = Math.round(currentTime);
 
                     const questions = quizzes[marker.time]?.questions;
                     const timestamp = quizzes[marker.time]?.timestamp;
