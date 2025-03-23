@@ -38,3 +38,13 @@ else -> streak = 0
         
 
 
+leaderboardHistory : 
+
+lead1 : {
+        user : username
+        id : lead1,
+        position : 1;
+        coins : 90,
+        startDate : 17/03/2025,
+        endDate : 23/03/2025
+}

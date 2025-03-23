@@ -82,6 +82,7 @@ export default function SignUpPage() {
       streakGoal: 0,
       coins: 0,
       courseProgress: {},
+      nextLeaderBoardType : "seafarer",
       PLUH : {
         DS :{
           sample : 0,
