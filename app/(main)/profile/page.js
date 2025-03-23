@@ -7,20 +7,19 @@ import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { useAuth } from "@/app/context/AuthProvider";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 const firestore = getFirestore();
 
-export default async function ProfilePage() {
-
+export default function ProfilePage() {  // ❌ Removed async
   const router = useRouter();
   const { user } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); // Firebase signOut method
+      await signOut(auth); 
       console.log("User logged out successfully!");
-
-      // Redirect to the login page or home page after logout
       router.push("/login");
     } catch (error) {
       console.error("Error during logout:", error.message);
@@ -29,81 +28,142 @@ export default async function ProfilePage() {
 
   if (!user) {
     router.push("/login");
-    return null; // Prevent rendering of ProfilePage if user is null
+    return null; 
   }
 
-  const userRef = doc(firestore, "users", user.uid);
-  const userSnap = await getDoc(userRef);
-  const userData = userSnap.data();
+  const [userData, setUserData] = useState(null);
+  const [coins, setCoins] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [lessonsCompleted, setLessonsCompleted] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(0);
+ // const[createdDate, setCreatedDate] = useState(0);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userRef = doc(firestore, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+    
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+    
+          // Extract and format the createdAt field
+          if (userData.createdAt) {
+            const createdAtDate = userData.createdAt.toDate(); // Convert Firestore Timestamp to Date
+            const formattedDate = createdAtDate.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            });
+    
+            userData.formattedCreatedAt = formattedDate; // Store the formatted date
+          }
+    
+          setUserData(userData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    const getUserProgress = async () => {
+      try {
+        const userProgRef = doc(firestore, "userProgress", user.uid);
+        const userSnap = await getDoc(userProgRef);
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setCoins(data.coins || 0);
+          setStreak(data.streak || 0);
+
+          let totalLessons = 0;
+          let totalQuizzes = 0;
+
+          if (data.courseProgress) {
+            Object.values(data.courseProgress).forEach((course) => {
+              totalLessons += course.currentVideo-1 || 0;
+              totalQuizzes += course.quizzesCompleted || 0;
+            });
+          }
+
+          setLessonsCompleted(totalLessons);
+          setQuizCompleted(totalQuizzes);
+        }
+      } catch (error) {
+        console.error("Error fetching user progress:", error);
+      }
+    };
+
+    getUserData();
+    getUserProgress();
+  }, [user.uid]); 
 
   return (
-    <div className="flex items-center justify-center min-h-screen py-10">
-      <div className="bg-[#2c3748] shadow-2xl rounded-3xl p-8 w-11/12 md:w-3/4 lg:w-1/2">
+    <div className="min-h-screen bg-[#1a2332] text-white py-12">
+      <div className="max-w-5xl mx-auto px-6">
         {/* User Info Section */}
-        <div className="flex flex-col sm:flex-row items-center sm:space-x-6 border-b pb-6">
-          <div className="w-24 h-24 relative mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-8 border-b border-gray-600">
+          <div className="w-28 h-28 relative">
             <Image
-              src={user.photoURL || "/images/login_pirate.png"}// Replace with dynamic user avatar
+              src={user.photoURL || "/images/login_pirate.png"}
               alt="User Avatar"
               layout="fill"
               className="rounded-full border-4 border-yellow-400"
             />
           </div>
           <div className="text-center sm:text-left">
-            <h1 className="text-3xl font-extrabold text-white">
-              {user.displayName}
-            </h1>
-            <p className="text-white text-sm italic">@{userData.username}</p>
+            <h1 className="text-4xl font-extrabold">{user.displayName}</h1>
+            <p className="text-yellow-400 text-lg">@{userData?.username}</p>
           </div>
         </div>
 
         {/* Stats Section */}
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-6 text-center">
-          <div className="bg-[#daa520] rounded-lg p-4 shadow-md">
-            <p className="text-2xl font-bold text-white break-words">14</p>
-            <p className="font-bold text-[#9e5610] break-words">📚 Lessons</p>
-          </div>
-          <div className="bg-[#daa520] rounded-lg p-4 shadow-md">
-            <p className="text-2xl font-bold text-white break-words">70</p>
-            <p className="font-bold text-[#9e5610] break-words">📝 Quizzes</p>
-          </div>
-          <div className="bg-[#daa520] rounded-lg p-4 shadow-md">
-            <p className="text-2xl font-bold text-white break-words">300</p>
-            <p className="font-bold text-[#9e5610] break-words">💰 Coins</p>
-          </div>
-          <div className="bg-[#daa520] rounded-lg p-4 shadow-md">
-            <p className="text-2xl font-bold text-white break-words">45</p>
-            <p className="font-bold text-[#9e5610] break-words">🔥 Streak</p>
-          </div>
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { value: lessonsCompleted, label: "📚 Lessons" },
+            { value: quizCompleted, label: "📝 Quizzes" },
+            { value: coins, label: "💰 Coins" },
+            { value: streak, label: "🔥 Streak" },
+          ].map((stat, index) => (
+            <div
+              key={index}
+              className="text-center bg-yellow-500 py-6 rounded-lg shadow-md"
+            >
+              <p className="text-3xl font-bold">{stat.value}</p>
+              <p className="font-semibold text-[#3d2205]">{stat.label}</p>
+            </div>
+          ))}
         </div>
 
         {/* Account Details Section */}
-        <div className="mt-8 border-t pt-6">
-          <h2 className="text-xl font-bold text-white">Account Details</h2>
-          <ul className="mt-4 space-y-3">
-            <li className="flex flex-col sm:flex-row justify-between bg-gray-100 p-4 rounded-lg shadow">
-              <span className="text-gray-500">Email:</span>
-              <span className="font-semibold text-gray-700">{user.email}</span>
-            </li>
-            <li className="flex flex-col sm:flex-row justify-between bg-gray-100 p-4 rounded-lg shadow">
-              <span className="text-gray-500">Joined:</span>
-              <span className="font-semibold text-gray-700">January 1, 2024</span>
-            </li>
-          </ul>
+        <div className="mt-12 pt-6 border-t border-gray-600">
+          <h2 className="text-2xl font-bold">Account Details</h2>
+          <div className="mt-4 space-y-3">
+            {[
+              { label: "Email:", value: user.email },
+              { label: "Joined:", value: userData?.formattedCreatedAt },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="flex justify-between bg-gray-800 p-4 rounded-lg shadow"
+              >
+                <span className="text-gray-400">{item.label}</span>
+                <span className="font-semibold">{item.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Buttons Section */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row gap-4">
           <Link href="/editProfile">
-            <button className="w-full sm:w-auto bg-gradient-to-r from-[#daa520] to-[#9e5610] text-[white] py-2 px-6 rounded-lg font-bold shadow-md hover:from-[#9e5610] hover:to-[#daa520] transition">
+            <Button variant={"secondary"} className="w-full">
               Edit Profile
-            </button>
+            </Button>
           </Link>
 
-          <button className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-6 rounded-lg font-bold shadow-md hover:from-red-600 hover:to-red-700 transition"
-            onClick={handleLogout}>
+          <Button variant={"danger"} className="" onClick={handleLogout}>
             Log Out
-          </button>
+          </Button>
         </div>
       </div>
     </div>
