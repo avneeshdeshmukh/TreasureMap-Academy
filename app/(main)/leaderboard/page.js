@@ -94,10 +94,19 @@ export default function LeaderboardPage() {
 
     return (
         userData &&
-        <div className="flex-col justify-center items-center px-5 py-5 lg:px-0">
-            {/* Added flex-col to stack components vertically */}
-            <RankCard user={userData} level={level} rank={userRank}/>
-            <Leaderboard users={allUsersProgress} />
+        <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center py-10 px-5 lg:px-0">
+        {/* Rank Card */}
+        <div className="mb-6 w-full max-w-2xl">
+            <RankCard user={userData} level={level} rank={userRank} />
         </div>
+
+        {/* Leaderboard Section */}
+        <div className="w-full max-w-3xl bg-gray-800 text-white p-6 rounded-2xl shadow-xl border-2 border-yellow-400">
+            <h1 className="text-3xl font-bold text-yellow-400 text-center mb-4">
+                Leaderboard 🏆
+            </h1>
+            <Leaderboard users={allUsersProgress} user={userData}/>
+        </div>
+    </div>
     );
 }
