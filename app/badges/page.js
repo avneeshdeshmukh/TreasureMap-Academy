@@ -47,7 +47,7 @@ const BadgesPage = () => {
           totalQuizzes += course.quizzesCompleted || 0;
         });
       }
-
+      
       setCoins(data.coins);
       setLessonsCompleted(totalLessons);
       setQuizCompleted(totalQuizzes);
@@ -57,7 +57,7 @@ const BadgesPage = () => {
   }, [userId])
 
   const isBadgeUnlockable = (givenCoins, givenLessons, givenQuizzes) => {
-    if (givenCoins >= coins && givenLessons >= lessonsCompleted && givenQuizzes >= quizCompleted) {
+    if (givenCoins <= coins && givenLessons <= lessonsCompleted && givenQuizzes <= quizCompleted) {
       return true;
     }
     return false;
@@ -66,8 +66,8 @@ const BadgesPage = () => {
 
   // Function to unlock a badge
   const unlockBadge = async (name) => {
-    const unlockedBadge = badges.find((badge) => badge.name === name);
-    if (!isBadgeUnlockable(unlockBadge.coins, unlockBadge.lesson, unlockBadge.quizzes)) {
+    const currentBadge = badges.find((badge) => badge.name === name);
+    if (!isBadgeUnlockable(currentBadge.coins, currentBadge.lessons, currentBadge.quizzes)) {
       alert("Not eligible for badge");
       return;
     }
@@ -94,7 +94,7 @@ const BadgesPage = () => {
     } catch (error) {
       console.error("Error updating unlockedBadges in Firestore:", error);
     }
-    setUnlockedBadge(unlockedBadge);
+    setUnlockedBadge(currentBadge);
     setShowModal(true);
   };
 
