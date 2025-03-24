@@ -1,114 +1,105 @@
 "use client";
 import { CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StreakIcons } from "@/components/streak-icons";
 import BadgeUnlockedPreview from "./badge-modal";
+import { badgeObjects } from "@/lib/data";
+import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
+
+
 
 const BadgesPage = () => {
-  const [badges, setBadges] = useState([
-    {
-      id: 1,
-      name: "Pirate Captain",
-      imagePath: "/TMA-badges/TMAbadge-1.jpeg",
-      unlocked: false,
-      condition: "Complete first mission",
-    },
-    {
-      id: 2,
-      name: "Treasure Hunter",
-      imagePath: "/TMA-badges/TMAbadge-2.jpeg",
-      unlocked: false,
-      condition: "Find 5 treasures",
-    },
-    {
-      id: 3,
-      name: "Sea Navigator",
-      imagePath: "/TMA-badges/TMAbadge-3.jpeg",
-      unlocked: false,
-      condition: "Sail all 7 seas",
-    },
-    {
-      id: 4,
-      name: "Ghost Ship",
-      imagePath: "/TMA-badges/TMAbadge-4.jpeg",
-      unlocked: false,
-      condition: "Defeat the ghost ship",
-    },
-    {
-      id: 5,
-      name: "Legendary Sword",
-      imagePath: "/TMA-badges/TMAbadge-5.jpeg",
-      unlocked: false,
-      condition: "Find the legendary sword",
-    },
-    {
-      id: 6,
-      name: "Kraken Slayer",
-      imagePath: "/TMA-badges/TMAbadge-6.jpeg",
-      unlocked: false,
-      condition: "Defeat the kraken",
-    },
-    {
-      id: 7,
-      name: "Gold Hoarder",
-      imagePath: "/TMA-badges/TMAbadge-7.jpeg",
-      unlocked: false,
-      condition: "Collect 1000 gold",
-    },
-    {
-      id: 8,
-      name: "Master Gunner",
-      imagePath: "/TMA-badges/TMAbadge-8.jpeg",
-      unlocked: false,
-      condition: "Hit 50 targets",
-    },
-    {
-      id: 9,
-      name: "Crew Leader",
-      imagePath: "/TMA-badges/TMAbadge-9.jpeg",
-      unlocked: false,
-      condition: "Recruit 10 crew members",
-    },
-    {
-      id: 10,
-      name: "Island Explorer",
-      imagePath: "/TMA-badges/TMAbadge-10.jpeg",
-      unlocked: false,
-      condition: "Discover 20 islands",
-    },
-    {
-      id: 11,
-      name: "Legendary Captain",
-      imagePath: "/TMA-badges/TMAbadge-11.jpeg",
-      unlocked: false,
-      condition: "Reach max level",
-    },
-    {
-      id: 12,
-      name: "Davy Jones' Nemesis",
-      imagePath: "/TMA-badges/TMAbadge-12.jpeg",
-      unlocked: false,
-      condition: "Escape Davy Jones' locker",
-    },
-  ]);
+  const firestore = getFirestore();
+
+  const userId = auth.currentUser.uid;
+  const userProgRef = doc(firestore, "userProgress", userId);
+  const [userData, setUserData] = useState(null);
+  const [badges, setBadges] = useState(badgeObjects);
+  const [coins, setCoins] = useState(0);
+  const [lessonsCompleted, setLessonsCompleted] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(0);
 
   const [unlockedBadge, setUnlockedBadge] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  useEffect(() => {
+    const getUserData = async () => {
+      const userSnap = await getDoc(userProgRef);
+      const data = userSnap.data();
+
+      setUserData(data);
+      const unlockedBadges = data.unlockedBadges ?? [];
+      const updatedBadges = badgeObjects.map((badge) => ({
+        ...badge,
+        unlocked: unlockedBadges.includes(badge.name), // Set unlocked to true if name is in unlockedBadges
+      }));
+      console.log(updatedBadges);
+      setBadges(updatedBadges);
+
+      let totalLessons = 0;
+      let totalQuizzes = 0;
+
+
+      if (data.courseProgress) {
+        Object.values(data.courseProgress).forEach((course) => {
+          totalLessons += course.currentVideo - 1 || 0;
+          totalQuizzes += course.quizzesCompleted || 0;
+        });
+      }
+
+      setCoins(data.coins);
+      setLessonsCompleted(totalLessons);
+      setQuizCompleted(totalQuizzes);
+    }
+
+    getUserData();
+  }, [userId])
+
+  const isBadgeUnlockable = (givenCoins, givenLessons, givenQuizzes) => {
+    if (givenCoins >= coins && givenLessons >= lessonsCompleted && givenQuizzes >= quizCompleted) {
+      return true;
+    }
+    return false;
+  }
+
+
   // Function to unlock a badge
-  const unlockBadge = (id) => {
+  const unlockBadge = async (name) => {
+    const unlockedBadge = badges.find((badge) => badge.name === name);
+    if (!isBadgeUnlockable(unlockBadge.coins, unlockBadge.lesson, unlockBadge.quizzes)) {
+      alert("Not eligible for badge");
+      return;
+    }
     const updatedBadges = badges.map((badge) =>
-      badge.id === id ? { ...badge, unlocked: true } : badge
+      badge.name === name ? { ...badge, unlocked: true } : badge
     );
-  
+
     setBadges(updatedBadges);
-  
-    const unlockedBadge = updatedBadges.find((badge) => badge.id === id);
-    setUnlockedBadge(unlockedBadge); 
+
+
+
+    const currentBadges = userData?.unlockedBadges ?? []; // Fallback to empty array if undefined
+    const newBadgeArray = [...currentBadges, name]; // Add new badge name to array
+
+    try {
+      await updateDoc(userProgRef, {
+        unlockedBadges: newBadgeArray, // Update the unlockedBadges field
+      });
+      // Update local userData state to reflect the change
+      setUserData((prev) => ({
+        ...prev,
+        unlockedBadges: newBadgeArray,
+      }));
+    } catch (error) {
+      console.error("Error updating unlockedBadges in Firestore:", error);
+    }
+    setUnlockedBadge(unlockedBadge);
     setShowModal(true);
   };
 
   return (
+    userData &&
     <div className="p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">
         Pirate Badges Collection
@@ -125,11 +116,10 @@ const BadgesPage = () => {
           <div
             className="bg-yellow-400 h-5 rounded-full transition-all duration-500 ease-in-out"
             style={{
-              width: `${
-                (badges.filter((badge) => badge.unlocked).length /
-                  badges.length) *
+              width: `${(badges.filter((badge) => badge.unlocked).length /
+                badges.length) *
                 100
-              }%`,
+                }%`,
             }}
           ></div>
         </div>
@@ -138,7 +128,7 @@ const BadgesPage = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {badges.map((badge) => (
           <div key={badge.id} className="relative h-80">
-            
+
             <div
               className={`bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col p-3
                 ${badge.unlocked ? "border-2 border-green-500" : "opacity-70"}`}
@@ -148,9 +138,8 @@ const BadgesPage = () => {
                 <img
                   src={badge.imagePath}
                   alt={badge.name}
-                  className={`w-full h-full object-cover ${
-                    !badge.unlocked ? "grayscale" : ""
-                  }`}
+                  className={`w-full h-full object-cover ${!badge.unlocked ? "grayscale" : ""
+                    }`}
                 />
                 {!badge.unlocked && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -187,7 +176,7 @@ const BadgesPage = () => {
                 <div className="mt-auto">
                   {!badge.unlocked ? (
                     <button
-                      onClick={() => unlockBadge(badge.id)}
+                      onClick={() => unlockBadge(badge.name)}
                       className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-3 rounded text-sm transition-colors"
                     >
                       Unlock

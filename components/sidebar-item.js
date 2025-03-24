@@ -1,4 +1,4 @@
-import { Lightbulb, Medal, House, CircleUser, Store, Book, BarChart, Users, Settings, WandSparkles } from "lucide-react";
+import { Lightbulb, Medal, House, CircleUser, Store, Book, BarChart, Users, Settings, WandSparkles, Award, Swords } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -12,7 +12,9 @@ const iconMap = {
   chart: BarChart,
   users: Users,
   settings: Settings,
-  wand : WandSparkles
+  wand : WandSparkles,
+  award : Award,
+  swords : Swords,
 };
 
 const SidebarItem = ({ variant, href, icon, label }) => {
