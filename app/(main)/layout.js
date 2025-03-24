@@ -9,7 +9,7 @@ export default function MainLayout({ children }) {
     return (
         <ProtectedRoute>
             <div
-                className="min-h-full"
+                className="min-h-full bg-amber-50"
             >
                 <MobileHeader platform={"learner"} />
                 <Sidebar className="hidden lg:flex" />

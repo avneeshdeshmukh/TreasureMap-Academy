@@ -1,4 +1,4 @@
-import { Flame, CircleDollarSign, X } from "lucide-react";
+import { Flame, CircleDollarSign, X, CompassIcon} from "lucide-react";
 import Link from "next/link";
 
 const iconMap = {

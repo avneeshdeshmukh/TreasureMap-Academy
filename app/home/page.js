@@ -1,10 +1,18 @@
+"use client"
+
 import Homehero from "@/components/homepage/Homehero";
 import Rolesection from "@/components/homepage/Rolesection";
 import Whytma from "@/components/homepage/Whytma";
 import Howitworks from "@/components/homepage/Howitworks";
 import Newsletter from "@/components/homepage/Newsletter";
+import { auth } from "@/lib/firebase";
+import { redirect, useRouter } from 'next/navigation';
 
 export default function HomePage() {
+  const router = useRouter();
+  if(auth.currentUser){
+    router.push("/learn");
+  }
   return (
     <div className="flex flex-col">
       <Homehero />
@@ -25,9 +33,6 @@ export default function HomePage() {
       </div>
       <div className="px-4 md:px-6 lg:px-8 mt-8 md:mt-12 lg:mt-16">
         <Whytma />
-      </div>
-      <div className="px-4 md:px-6 lg:px-8 mt-8 md:mt-12 lg:mt-16 mb-8 md:mb-12 lg:mb-16">
-        <Newsletter />
       </div>
     </div>
   );

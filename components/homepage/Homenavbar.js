@@ -10,7 +10,7 @@ const Homenavbar = () => {
                         alt=""
                         className="h-14 w-auto object-contain mt-0.5"
                     />
-                    <h4 className="font-bold mt-2 text-3xl">Tresure Map Academy</h4>
+                    <h4 className="font-bold mt-2 text-3xl">Treasure Map Academy</h4>
                 </span>
             </div>
         </nav>

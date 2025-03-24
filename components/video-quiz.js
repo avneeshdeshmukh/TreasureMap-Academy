@@ -30,6 +30,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [factors, setFactors] = useState(null);
+    const [isIncremented, setIsIncremented] = useState(false);
 
     const playerRef = useRef(null);
     const savedTimeRef = useRef(0);
@@ -312,12 +313,14 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                         if (vnSnap.exists() && vnSnap.data().isCompleted) {
                             return; // Don't update if already true
                         }
-
-                        await updateDoc(videoNotesRef, { isCompleted: true }, { merge: true });
-                        await updateDoc(userProgressRef, {
-                            [`courseProgress.${courseId}.currentVideo`]: increment(1)
-                        }, { merge: true })
-                        console.log("Video marked as completed");
+                        if(!isIncremented){
+                            await updateDoc(videoNotesRef, { isCompleted: true }, { merge: true });
+                            await updateDoc(userProgressRef, {
+                                [`courseProgress.${courseId}.currentVideo`]: increment(1)
+                            }, { merge: true })
+                            setIsIncremented(true);
+                            console.log("Video marked as completed");
+                        }
                     } catch (error) {
                         console.error("Error updating completion status:", error);
                     }

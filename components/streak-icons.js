@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Anchor, CircleDollarSign, Flame } from "lucide-react"
+import { Anchor, CircleDollarSign, Flame, CompassIcon } from "lucide-react"
 import { doc, getDoc, getFirestore } from "firebase/firestore"
 import { auth } from "@/lib/firebase"
 import { useState, useEffect } from "react"
@@ -49,7 +49,7 @@ export const StreakIcons = () => {
                 </Link>
                 <Link href={"/badges"}>
                     <Button variant="ghost" >
-                        <Anchor size={30} fill={"none"} />
+                        <CompassIcon size={30} fill={"none"} />
                     </Button>
                 </Link>
 
