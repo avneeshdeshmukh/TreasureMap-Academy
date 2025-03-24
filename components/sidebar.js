@@ -12,6 +12,7 @@ export const Sidebar = ({ className }) => { //#2c3748
     const getActiveItem = () => {
         if (pathname.includes("/leaderboard")) return "Leaderboard";
         if (pathname.includes("/learn")) return "Learn";
+        if (pathname.includes("/badges")) return "Badges";
         if (pathname.includes("/shop")) return "Shop";
         if (pathname.includes("/profile")) return "Profile";
         return "";
@@ -32,9 +33,15 @@ export const Sidebar = ({ className }) => { //#2c3748
                     />
                     <SidebarItem
                         variant={activeItem === "Leaderboard" ? "sidebarOutlineActive" : "sidebarOutline"}
-                        icon={"medal"}
+                        icon={"swords"}
                         href={"/leaderboard"}
                         label={"Leaderboard"}
+                    />
+                    <SidebarItem
+                        variant={activeItem === "Badges" ? "sidebarOutlineActive" : "sidebarOutline"}
+                        icon={"award"}
+                        href={"/badges"}
+                        label={"Badges"}
                     />
                     <SidebarItem
                         variant={activeItem === "Shop" ? "sidebarOutlineActive" : "sidebarOutline"}
