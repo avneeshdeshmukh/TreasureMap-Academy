@@ -27,13 +27,13 @@
 // console.log(yesterday.getHours())
 
 const oldRPS = {
-    minValue: undefined, // Use old min or set to first value
-    maxValue: 60, // Use old max or set to first value
-    currentValue: 5, // Default midpoint
+    minValue: 20, // Use old min or set to first value
+    maxValue: 40, // Use old max or set to first value
+    currentValue: 0, // Default midpoint
 }
 
-function getRPS(data, newCoins) {
-    const oldRPS = data.PLUH.RPS || {};
+function getRPS(oldRPS, newCoins) {
+    // const oldRPS = data.PLUH.RPS || {};
 
     let newRPS = {
         minValue: oldRPS?.minValue ?? newCoins, // Use old min or set to first value
@@ -52,11 +52,13 @@ function getRPS(data, newCoins) {
         newRPS.currentValue = 2.5;
     } else {
         // Normalize value between 0 and 5
-        newRPS.currentValue = ((newCoins - newRPS.minValue) /
-            (newRPS.maxValue - newRPS.minValue)) * 5;
+        let normalized = ((newCoins - newRPS.minValue) / (newRPS.maxValue - newRPS.minValue)) * 5;
+
+        // Avoid exactly 0 when newCoins == minValue by applying a small offset
+        newRPS.currentValue = normalized === 0 ? 0.5 : normalized;
     }
 
     return newRPS;
 }
 
-console.log(oldRPS.minValue)
+console.log(getRPS(oldRPS, 0))

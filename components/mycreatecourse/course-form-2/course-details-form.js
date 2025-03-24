@@ -98,7 +98,7 @@ export default function VideoUploadForm({ onNext }) {
         await updateDoc(courseRef, {
           totalVideos : increment(-1),
           totalQuizzes : increment(-1),
-          totalDuration : increment(-1 * currentDuration),
+          courseDuration : increment(-1 * currentDuration),
         }, {merge : true })
         setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
         setOriginalVideos((prev) => prev.filter((video) => video.videoId !== videoId));
