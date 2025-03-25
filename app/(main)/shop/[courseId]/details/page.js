@@ -128,17 +128,7 @@ export default function Details() {
     fetchThumbnailUrl();
   }, [course]);
 
-  // const course = {
-  //   title: "Advanced Web Development with React & Next.js",
-  //   thumbnail: "/images/homelearner.png",
-  //   creator: "Sarah Johnson",
-  //   price: 199,
-  //   description: "",
-  //   duration: "12 weeks",
-  //   level: "Intermediate",
-  //   totalLessons: 48,
-  //   studentsEnrolled: 1234,
-  // };
+ 
 
   const handleEnroll = async () => {
     try {
@@ -187,6 +177,70 @@ export default function Details() {
     })
     router.push('/learn');
   }
+
+  // Star Rating Component
+const StarRating = ({ rating, setRating }) => {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span 
+          key={star}
+          onClick={() => setRating(star)}
+          className={`cursor-pointer text-2xl ${
+            star <= rating ? 'text-yellow-500' : 'text-gray-300'
+          }`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const [reviews, setReviews] = useState([]);
+const [newReview, setNewReview] = useState({
+  rating: 0,
+  comment: ''
+});
+
+// Format timestamp
+const formatTimestamp = (timestamp) => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(timestamp);
+};
+
+ // Handle review submission
+ const handleSubmitReview = (e) => {
+  e.preventDefault();
+
+  if (!newReview.rating || !newReview.comment) {
+    alert('Please select a rating and write a comment');
+    return;
+  }
+
+  const submittedReview = {
+    id: reviews.length + 1,
+    name: "joedoe",
+    rating: newReview.rating,
+    comment: newReview.comment,
+    timestamp: new Date()
+  };
+
+  console.log("Review submitted:", submittedReview);
+
+  // Update reviews state
+  setReviews([...reviews, submittedReview]);
+
+  setNewReview({
+    rating: 0,
+    comment: ''
+  });
+};
 
   if (course) {
     return (
@@ -300,57 +354,81 @@ export default function Details() {
 
               {/* Student Reviews Section */}
               <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                  Student Reviews
-                </h2>
+  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+    Student Reviews
+  </h2>
 
-                {/* Review 1 */}
-                <div className="border-b border-gray-300 pb-4 mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Image
-                      src="/images/user1.jpg"
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                      alt="User 1"
-                    />
-                    <div>
-                      <p className="font-semibold text-gray-800">John Doe</p>
-                      <p className="text-yellow-500">⭐⭐⭐⭐⭐</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-gray-700">
-                    "This course is fantastic! The content is well-structured and easy to follow."
-                  </p>
-                </div>
-
-                {/* Review 2 */}
-                <div className="border-b border-gray-300 pb-4 mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Image
-                      src="/images/user2.jpg"
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                      alt="User 2"
-                    />
-                    <div>
-                      <p className="font-semibold text-gray-800">Jane Smith</p>
-                      <p className="text-yellow-500">⭐⭐⭐⭐</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-gray-700">
-                    "Great course! I learned so much about Next.js. Highly recommended."
-                  </p>
-                </div>
-
-                {/* Write a Review Button */}
-                <div className="mt-4">
-                  <Button className="w-full bg-yellow-500 text-white font-semibold py-2 rounded-lg transition duration-300 ease-in-out transform hover:bg-yellow-600 hover:scale-105 hover:shadow-lg">
-                    Write a Review
-                  </Button>
+  {/* Existing Reviews or No Reviews Message */}
+  {reviews.length === 0 ? (
+    <div className="text-center text-gray-500 py-6">
+      <p>No reviews available yet</p>
+      <p className="text-sm mt-2">Be the first to write a review!</p>
+    </div>
+  ) : (
+    <div className="space-y-6">
+      {reviews.map((review) => (
+        <div 
+          key={review.id} 
+          className="border-b border-gray-200 pb-4 last:border-b-0"
+        >
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex items-center space-x-3">
+              <div>
+                <p className="font-semibold text-gray-800">{review.name}</p>
+                <div className="text-yellow-500 flex">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className={i < review.rating ? 'text-yellow-500' : 'text-gray-300'}>
+                      ★
+                    </span>
+                  ))}
                 </div>
               </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              {formatTimestamp(review.timestamp)}
+            </p>
+          </div>
+          <p className="mt-2 text-gray-700">{review.comment}</p>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {/* Write a Review Form */}
+  <div className="mt-8 pt-6 border-t border-gray-200">
+    <h3 className="text-lg font-medium text-gray-800 mb-4">Write a Review</h3>
+    <form onSubmit={handleSubmitReview} className="space-y-4">
+      <div className="flex flex-col space-y-2">
+        <label className="text-gray-700 font-medium">Your Rating</label>
+        <StarRating 
+          rating={newReview.rating} 
+          setRating={(rating) => setNewReview(prev => ({...prev, rating}))}
+        />
+      </div>
+      
+      <textarea 
+        name="comment"
+        value={newReview.comment}
+        onChange={(e) => setNewReview(prev => ({...prev, comment: e.target.value}))}
+        placeholder="Write your review here..."
+        className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        required
+      />
+      
+      <Button 
+        type="submit"
+        disabled={newReview.rating === 0} // Add this disable condition
+        className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${
+          newReview.rating === 0 
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+            : 'bg-yellow-500 text-white hover:bg-yellow-600'
+        }`}
+      >
+        Submit Review
+      </Button>
+    </form>
+  </div>
+</div>
             </div>
           </div>
         </div>
