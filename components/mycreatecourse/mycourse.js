@@ -13,6 +13,7 @@ const MyCourses = () => {
   const userRef = doc(firestore, "users", userId);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [courses, setCourses] = useState([]);
+  const [inVerification, setInVerification] = useState([]);
 
 
   useEffect(() => {
@@ -25,16 +26,32 @@ const MyCourses = () => {
       const q = query(
         coursesRef,
         where("creator", "==", userData.username),
-        where("isPublished", "==", true)
       );
 
       // Fetch the query snapshot
       const querySnapshot = await getDocs(q);
 
       // Extract course data
-      const userCourses = querySnapshot.docs.map((doc) => doc.data());
-      console.log(userCourses)
-      setCourses(userCourses)
+      const allCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Filter for published courses
+      const publishedCourses = allCourses.filter(course => course.isPublished);
+
+      const courseProgressRef = doc(firestore, "courseProgress", userId);
+      const courseProSnap = await getDoc(courseProgressRef);
+      const courseProData = courseProSnap.exists() ? courseProSnap.data() : { courses: {} };
+
+      // Extract course data, filtering based on the conditions
+      const verified = allCourses
+        .filter(course => {
+          const courseId = course.id;
+          return courseProData.courses[courseId]?.status === "verification";
+        });
+
+      console.log(publishedCourses)
+      console.log(verified)
+      setCourses(publishedCourses);
+      setInVerification(verified);
     }
 
     fetchCourses();
@@ -54,6 +71,7 @@ const MyCourses = () => {
   };
 
   return (
+    courses &&
     <div>
       <div className="bg-white rounded-lg shadow-2xl p-6 mt-6 mx-auto max-w-3xl">
         <h1 className="text-3xl font-bold text-[#5a3b1a] mb-6">My Courses</h1>
@@ -81,6 +99,26 @@ const MyCourses = () => {
           Create New Course
         </button>
       </div>
+
+
+      {inVerification.length > 0 &&
+        <div className="bg-white rounded-lg shadow-2xl p-6 mt-6 mx-auto max-w-3xl">
+          <h1 className="text-3xl font-bold text-[#5a3b1a] mb-6">Courses in Verification</h1>
+
+          {/* Course List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {inVerification.length > 0 ? (
+              inVerification.map((course) => (
+                <div key={course.courseId} className="bg-[#f8f4eb] p-4 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-[#5a3b1a]">{course.title}</h2>
+                  <p className="text-sm text-green-600">In Verification</p>
+                </div>
+              ))
+            ) : (
+              <p>You have no published courses...</p>
+            )}
+          </div>
+        </div>}
 
       {/* Course Form */}
       {isFormOpen && (

@@ -1,13 +1,16 @@
 "use client";
 
-const Statistics = () => {
-  // Static data for now; dynamic data can replace this in the future
+
+
+const Statistics = ({data}) => {
+  
   const stats = [
-    { title: "Courses Created", value: 5 },
-    { title: "Total Enrollments", value: 30 },
-    { title: "Revenue Earned", value: 50 },
-    { title: "Average Content Rating", value: 4.5 },
+    { title: "Courses Created", value: data.totalCourses },
+    { title: "Courses Published", value: data.publishedCourses },
+    { title: "Total Enrollments", value: data.totalEnrollments },
+    { title: "Average Content Rating", value: data.averageRating },
   ];
+  
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mt-6 mx-auto max-w-3xl">
