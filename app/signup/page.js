@@ -34,6 +34,7 @@ import {
   FaBriefcase,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 const firestore = getFirestore();
 
@@ -41,6 +42,7 @@ export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [occupation, setOccupation] = useState("");
@@ -65,7 +67,7 @@ export default function SignUpPage() {
       uid: user.uid,
       email: user.email,
       isAdditionalInfoAdded: true,
-      enrolledCourses : [],
+      enrolledCourses: [],
       isCreator: false,
       name,
       username: username.toLowerCase(),
@@ -82,21 +84,21 @@ export default function SignUpPage() {
       streakGoal: 0,
       coins: 0,
       courseProgress: {},
-      nextLeaderBoardType : "seafarer",
-      PLUH : {
-        DS :{
-          sample : 0,
-          value : 0
+      nextLeaderBoardType: "seafarer",
+      PLUH: {
+        DS: {
+          sample: 0,
+          value: 0,
         },
-        ES :{
-          value : 0
+        ES: {
+          value: 0,
         },
-        QPS :{
-          sample : 0,
-          value : 0
+        QPS: {
+          sample: 0,
+          value: 0,
         },
-        RPS :{},
-      }
+        RPS: {},
+      },
     };
 
     await setDoc(userRef, userData, { merge: true });
@@ -179,7 +181,7 @@ export default function SignUpPage() {
           email: user.email,
           isCreator: false,
           isAdditionalInfoAdded: false,
-          enrolledCourses : [],
+          enrolledCourses: [],
           provider: user.providerData[0]?.providerId,
           createdAt: new Date(),
         };
@@ -304,12 +306,19 @@ export default function SignUpPage() {
                   <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
                     <MdLock className="text-gray-500 m-2" />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-500 m-2"
+                    >
+                      {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+                    </button>
                   </div>
 
                   <button

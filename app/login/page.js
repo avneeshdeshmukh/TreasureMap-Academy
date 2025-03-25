@@ -12,6 +12,7 @@ import {
   FaGithub,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import TopButton from "@/components/TopButton";
 
 
@@ -23,18 +24,8 @@ export default  function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
-  // const [showConfetti, setShowConfetti] = useState(false);
-  // const [showGif, setShowGif] = useState(false); // State to manage GIF visibility
-
-  // const HandleLogin = () => {
-  //   setShowConfetti(true);
-  //   setShowGif(true); // Show GIF
-
-  //   setTimeout(() => {
-  //     router.push("/learn");
-  //   }, 4500);
-  // };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -152,22 +143,29 @@ export default  function LoginPage() {
                   <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
                     <MdLock className="text-gray-500 m-2" />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-500 m-2"
+                    >
+                      {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+                    </button>
                   </div>
                   <div className="flex w-full max-w-xs mb-5 justify-between px-2">
                     <label className="flex items-center text-xs">
                       <input type="checkbox" name="remember" className="mr-1" />
                       Remember me
                     </label>
-                    <a href="#" className="text-xs">
+                    {/* <a href="#" className="text-xs">
                       Forgot Password
-                    </a>
+                    </a> */}
                   </div>
                   <button
                     type="submit"
