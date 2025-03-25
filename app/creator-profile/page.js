@@ -29,7 +29,7 @@ export default function CompleteCreatorProfile() {
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     if (userData.isCreator) {
-                        router.push('/create/creatordashboard');
+                        router.push('/create/dashboard');
                     }
                 }
             } catch (err) {
@@ -72,7 +72,7 @@ export default function CompleteCreatorProfile() {
             };
 
             await setDoc(userRef, creatorData, { merge: true });
-            router.push("/create/creatordashboard");
+            router.push("/create/dashboard");
         } catch (err) {
             console.error("Error updating profile:", err);
             setError("Failed to update your profile. Please try again.");
