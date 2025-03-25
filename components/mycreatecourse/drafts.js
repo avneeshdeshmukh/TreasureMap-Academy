@@ -39,13 +39,24 @@ const Drafts = ({ onEdit }) => {
         where("creator", "==", userData.username),
         where("isPublished", "==", false)
       );
-
-      // Fetch the query snapshot
       const querySnapshot = await getDocs(q);
 
-      // Extract course data
-      const userCourses = querySnapshot.docs.map((doc) => doc.data());
-      console.log("User's courses:", userCourses);
+
+      // Fetch the query snapshot
+      const courseProgressRef = doc(firestore, "courseProgress", user.uid);
+      const courseProSnap = await getDoc(courseProgressRef);
+      const courseProData = courseProSnap.exists() ? courseProSnap.data() : { courses: {} };
+
+      const courseProgressMap = courseProData.courses ?? {};
+
+      // Extract course data, filtering based on the conditions
+      const userCourses = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() })) // Include the document ID
+        .filter(course => {
+          const courseId = course.id;
+          // Check if the course is in courseProData.course
+          return !(courseId in courseProgressMap) || courseProgressMap[courseId]?.status === "rejected";// Include courses not present in courseProData.course
+        });
       return userCourses; // Return the array of courses
     } catch (error) {
       console.error("Error fetching user courses:", error);

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button"
 import { courseCategories, courseLanguages } from "@/lib/data";
 import Select from "react-select";
-import { getFirestore, getDoc, setDoc, doc } from "firebase/firestore";
+import { getFirestore, getDoc, setDoc, doc, increment } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { auth } from "@/lib/firebase";
 
@@ -169,13 +169,33 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
         price: parseFloat(courseDetails.price),
         language: courseDetails.language,
         difficulty: courseDetails.difficulty,
-        isPublished : false,
-        totalVideos : 0,
-        totalQuizzes : 0,
+        isPublished: false,
+        totalVideos: 0,
+        totalQuizzes: 0,
         thumbnailURL: `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`,
       };
 
       const courseRef = doc(firestore, "courses", courseId);
+      const courseProgressRef = doc(firestore, "courseProgress", user.uid);
+      const courseProSnap = getDoc(courseProgressRef);
+      if (courseProSnap.data()) {
+        await updateDoc(courseProgressRef, {
+          totalCourses : increment(1),
+        }, {merge : true})
+      } else {
+        const progress = {
+          userId : user.uid,
+          username: userData.username,
+          totalCourses: 1,
+          publishedCourses: 0,
+          totalRevenue: 0,
+          averageRating: 0,
+          totalEnrollments: 0,
+          courses : {},
+        }
+
+        await setDoc(courseProgressRef, progress);
+      }
       await setDoc(courseRef, newCourse, { merge: true });
 
       // Call the onCourseSubmit function to propagate changes

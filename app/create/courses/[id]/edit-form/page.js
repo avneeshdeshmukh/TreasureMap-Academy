@@ -10,6 +10,7 @@ import { getFirestore, doc, collection, query, where, getDocs, deleteDoc, getDoc
 
 export default function EditFormPage() {
   const firestore = getFirestore();
+  const userId = auth.currentUser.uid;
 
   const router = useRouter();
   const { id } = useParams();
@@ -22,7 +23,7 @@ export default function EditFormPage() {
 
   // Handle the submit logic
   const handlePublish = () => {
-    if(course.totalVideos < 10){
+    if (course.totalVideos < 10) {
       alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
       return;
     }
@@ -30,10 +31,24 @@ export default function EditFormPage() {
   };
 
   const handlePublishAfterTerms = async () => {
-    await updateDoc(courseRef, {
-      isPublished: true,
+    const courseProgressRef = doc(firestore, "courseProgress", userId);
+
+    const progress = {
+      status: "verification",
       enrollments: 0,
-    });
+      revenue: 0,
+      ratings: 0,
+      comments : [],
+    }
+
+    await updateDoc(courseProgressRef, {
+      [`courses.${id}`]: progress,
+    }, { merge: true })
+
+    // await updateDoc(courseRef, {
+    //   enrollments: 0,
+    // });
+
     alert("Course Published Successfully");
     setShowTermsModal(false);
     router.push("/create/mycourses");
@@ -54,6 +69,7 @@ export default function EditFormPage() {
     }
     getCourse();
   }, [id])
+
 
   const deleteVideos = async () => {
     if (!id) return;
