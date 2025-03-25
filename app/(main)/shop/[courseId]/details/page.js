@@ -288,6 +288,70 @@ export default function Details() {
     }
   };
 
+  // Star Rating Component
+const StarRating = ({ rating, setRating }) => {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span 
+          key={star}
+          onClick={() => setRating(star)}
+          className={`cursor-pointer text-2xl ${
+            star <= rating ? 'text-yellow-500' : 'text-gray-300'
+          }`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const [reviews, setReviews] = useState([]);
+const [newReview, setNewReview] = useState({
+  rating: 0,
+  comment: ''
+});
+
+// Format timestamp
+const formatTimestamp = (timestamp) => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(timestamp);
+};
+
+ // Handle review submission
+ const handleSubmitReview = (e) => {
+  e.preventDefault();
+
+  if (!newReview.rating || !newReview.comment) {
+    alert('Please select a rating and write a comment');
+    return;
+  }
+
+  const submittedReview = {
+    id: reviews.length + 1,
+    name: "joedoe",
+    rating: newReview.rating,
+    comment: newReview.comment,
+    timestamp: new Date()
+  };
+
+  console.log("Review submitted:", submittedReview);
+
+  // Update reviews state
+  setReviews([...reviews, submittedReview]);
+
+  setNewReview({
+    rating: 0,
+    comment: ''
+  });
+};
+
   if (course) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -404,6 +468,7 @@ export default function Details() {
 
               {/* Student Reviews Section */}
               <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
+
                 <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                   Student Reviews
                 </h2>
@@ -499,8 +564,55 @@ export default function Details() {
                       Submit Review
                     </Button>
                   </form>
+
                 </div>
               </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              {formatTimestamp(review.timestamp)}
+            </p>
+          </div>
+          <p className="mt-2 text-gray-700">{review.comment}</p>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {/* Write a Review Form */}
+  <div className="mt-8 pt-6 border-t border-gray-200">
+    <h3 className="text-lg font-medium text-gray-800 mb-4">Write a Review</h3>
+    <form onSubmit={handleSubmitReview} className="space-y-4">
+      <div className="flex flex-col space-y-2">
+        <label className="text-gray-700 font-medium">Your Rating</label>
+        <StarRating 
+          rating={newReview.rating} 
+          setRating={(rating) => setNewReview(prev => ({...prev, rating}))}
+        />
+      </div>
+      
+      <textarea 
+        name="comment"
+        value={newReview.comment}
+        onChange={(e) => setNewReview(prev => ({...prev, comment: e.target.value}))}
+        placeholder="Write your review here..."
+        className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+        required
+      />
+      
+      <Button 
+        type="submit"
+        disabled={newReview.rating === 0} // Add this disable condition
+        className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${
+          newReview.rating === 0 
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+            : 'bg-yellow-500 text-white hover:bg-yellow-600'
+        }`}
+      >
+        Submit Review
+      </Button>
+    </form>
+  </div>
+</div>
             </div>
           </div>
         </div>
