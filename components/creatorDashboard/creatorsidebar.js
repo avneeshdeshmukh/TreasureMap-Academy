@@ -37,7 +37,7 @@ export const CreatorSidebar = ({ className }) => {
                     <SidebarItem
                         variant={activeItem === "Progress" ? "sidebarOutlineActive" : "sidebarOutline"}
                         icon={"chart"}
-                        href={"/progress"}
+                        href={"/create/progress"}
                         label={"Progress"}
                     />
                     <SidebarItem
@@ -45,6 +45,12 @@ export const CreatorSidebar = ({ className }) => {
                         icon={"settings"}
                         href={"/create/settings"}
                         label={"Settings"}
+                    />
+                    <SidebarItem
+                        variant={activeItem === "Learner" ? "sidebarOutlineActive" : "sidebarOutline"}
+                        icon={"wand"}
+                        href={"/profile"}
+                        label={"Learner"}
                     />
                 </div>
             </div>
