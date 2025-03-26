@@ -5,7 +5,6 @@ import { Header } from './header'
 import YourCourses from '@/components/creatorDashboard/yourcourses'
 import CreatorStats from '@/components/creatorDashboard/creatorStats'
 import FeaturedCourses from "@/components/creatorDashboard/featuredcourses";
-import Notifications from '@/components/creatorDashboard/notifications'
 import { auth } from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState, useEffect } from "react";
@@ -41,7 +40,6 @@ const creatordashboard = () => {
             <YourCourses data = {courseProgress}/>
             <CreatorStats data={courseProgress} />
             <FeaturedCourses />
-            <Notifications />
         </FeedWrapper>
     )
 }

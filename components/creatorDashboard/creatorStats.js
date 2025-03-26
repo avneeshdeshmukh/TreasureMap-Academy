@@ -1,7 +1,5 @@
 "use client";
 
-
-
 const Statistics = ({data}) => {
   
   const stats = [
@@ -10,6 +8,8 @@ const Statistics = ({data}) => {
     { title: "Total Enrollments", value: data.totalEnrollments },
     { title: "Average Content Rating", value: data.averageRating },
   ];
+
+  console.log(stats);
   
 
   return (
