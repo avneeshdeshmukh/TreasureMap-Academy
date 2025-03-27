@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs";
 import {
@@ -19,6 +19,8 @@ import {
 import { useParams } from "next/navigation";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import VideoPreviewCard from "./video-preview-card";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MAX_HOURS = 23;
 
@@ -129,17 +131,31 @@ export default function QuizCreator() {
   const handleAddTimestamp = async () => {
     if (currentTimestamp >= videoDoc.duration || currentTimestamp === 0) {
       handleCancel();
-      alert("Please enter a valid timestamp");
+      toast.error("Please enter a valid timestamp", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+      });
       return;
-    }
+  }
 
-    if (editingTimestampIndex === null) {
-      if (timestamps.some((item) => item.timestamp === currentTimestamp)) {
+  if (editingTimestampIndex === null) {
+    if (timestamps.some((item) => item.timestamp === currentTimestamp)) {
         handleCancel();
-        alert("The timestamp already exists. Please update the same.");
+        toast.error("The timestamp already exists. Please update the same.", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
         return;
-      }
     }
+}
 
     if (currentTimestamp !== null) {
       const newQuestion = {
@@ -189,9 +205,13 @@ export default function QuizCreator() {
           [`quizzes.${currentTimestamp}`]: newQuestion, // Add new timestamp to Firestore
         });
 
-        await updateDoc(courseRef, {
-          totalQuizzes : increment(1),
-        }, {merge : true})
+        await updateDoc(
+          courseRef,
+          {
+            totalQuizzes: increment(1),
+          },
+          { merge: true }
+        );
 
         setPreviousTimestamp(null); // Clear previous timestamp when adding a new one
       }
@@ -244,9 +264,13 @@ export default function QuizCreator() {
       [`quizzes.${timestampToDelete}`]: deleteField(),
     });
 
-    await updateDoc(courseRef, {
-      totalQuizzes : increment(-1),
-    }, {merge : true})
+    await updateDoc(
+      courseRef,
+      {
+        totalQuizzes: increment(-1),
+      },
+      { merge: true }
+    );
 
     setTimestamps(timestamps.filter((_, i) => i !== index));
     handleCancel();
@@ -369,15 +393,15 @@ export default function QuizCreator() {
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white">
       <div className="flex justify-between items-center">
-  <h2 className="text-2xl font-bold">Quiz Creator</h2>
-  <Button 
-    variant={"secondary"} 
-    onClick={() => router.push(`/create/courses/${id}/edit-form`)}
-  >
-    Done
-  </Button>
-</div>
-      
+        <h2 className="text-2xl font-bold">Quiz Creator</h2>
+        <Button
+          variant={"secondary"}
+          onClick={() => router.push(`/create/courses/${id}/edit-form`)}
+        >
+          Done
+        </Button>
+      </div>
+
       {videoDoc && (
         <div>
           <VideoPreviewCard videoData={videoDoc} />
@@ -576,6 +600,7 @@ export default function QuizCreator() {
           ))}
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 }
@@ -622,9 +647,16 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
 
   const addOption = () => {
     if (options.length + 1 > 4) {
-      alert("You can add maximum of 4 options");
+      toast.error("You can add maximum of 4 options", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+      });
       return;
-    }
+  }
     setOptions([...options, ""]);
   };
 
@@ -759,7 +791,14 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
 
   const handleSubmit = () => {
     if (!hasBlank) {
-      alert("Each fill-in-the-blank question must contain a blank.");
+      toast.error("Each fill-in-the-blank question must contain a blank", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
       return;
     }
     onSubmit({
@@ -821,7 +860,6 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
     </div>
   );
 };
-
 
 const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
   const [question, setQuestion] = useState(existingQuestion?.question || "");
