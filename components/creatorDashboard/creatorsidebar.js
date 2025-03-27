@@ -49,7 +49,7 @@ export const CreatorSidebar = ({ className }) => {
                     <SidebarItem
                         variant={activeItem === "Learner" ? "sidebarOutlineActive" : "sidebarOutline"}
                         icon={"wand"}
-                        href={"/profile"}
+                        href={"/learn"}
                         label={"Learner"}
                     />
                 </div>
