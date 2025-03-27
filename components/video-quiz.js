@@ -11,6 +11,8 @@ import SliderQuizModal from "@/components/modals/SliderQuizModal";
 import { getQPS, getQuizMetrics, getDS, getES, getRPS } from "@/lib/pluh-calculations";
 import { useCoins } from "@/app/context/CoinsContext";
 import { useStreak } from "@/app/context/StreakContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function VideoQuiz({ courseId, videoId, preview, startTime, allowedTs }) {
     const { setCoins } = useCoins();
@@ -46,11 +48,11 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
     function isYesterdayOrBefore(date) {
         const givenDate = new Date(date);
         const now = new Date();
-    
+
         // Convert both dates to local timezone by resetting time to midnight
         const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
         givenDate.setHours(0, 0, 0, 0);
-    
+
         return givenDate.getTime() <= yesterday.getTime();
     }
 
@@ -207,8 +209,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                         [`courseProgress.${courseId}.courseCoins`]: increment(currentQuizPoints),
                         "PLUH.QPS": QPS,
                         "PLUH.DS": DS,
-                        "PLUH.RPS" : getRPS(userProgSnap.data(), currentQuizPoints),
-                        leaderboardCoins : increment(currentQuizPoints),
+                        "PLUH.RPS": getRPS(userProgSnap.data(), currentQuizPoints),
+                        leaderboardCoins: increment(currentQuizPoints),
                     };
 
                     // Add additional properties if `att - 1 === 0`
@@ -219,7 +221,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                             updateData["streak"] = increment(1);
                             updateData["PLUH.ES"] = getES(userProgSnap.data());
                             setStreak(prevStreak => prevStreak + 1);
-                        } else if(!userProgSnap.data().lastLesson){
+                        } else if (!userProgSnap.data().lastLesson) {
                             updateData["lastLesson"] = new Date();
                             updateData["streak"] = increment(1);
                             updateData["PLUH.ES"] = getES(userProgSnap.data());
@@ -237,7 +239,16 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
             }
 
             setCurrentQuizPoints(0);
-            if (!preview) alert(`Your coins : ${currentQuizPoints}`);
+            if (!preview) {
+                toast.success(`Your coins: ${currentQuizPoints}`, {
+                    position: "bottom-center",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+            }
             resumeVideo();
         }
     };
@@ -304,7 +315,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                         if (vnSnap.exists() && vnSnap.data().isCompleted) {
                             return; // Don't update if already true
                         }
-                        if(!isIncremented){
+                        if (!isIncremented) {
                             await updateDoc(videoNotesRef, { isCompleted: true }, { merge: true });
                             await updateDoc(userProgressRef, {
                                 [`courseProgress.${courseId}.currentVideo`]: increment(1)
@@ -325,8 +336,8 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
                 ) {
                     return;
                 }
-                
-                if (timeDifference < 0.17){
+
+                if (timeDifference < 0.17) {
                     player.pause();
                     savedTimeRef.current = Math.round(currentTime);
 
@@ -432,6 +443,7 @@ export default function VideoQuiz({ courseId, videoId, preview, startTime, allow
             {currentQuestion && currentQuestion.type === "slider" && (
                 <SliderQuizModal questionData={currentQuestion} onSubmit={handleNextQuestion} onClose={handleNextQuestion} preview={preview} currentPoints={currentQuizPoints} setCoins={setCurrentQuizPoints} factor={factors} time={currentQuizTimestamp} />
             )}
+            <ToastContainer />
         </>
     );
 }
