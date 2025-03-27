@@ -162,6 +162,7 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
       // Create a new course object
       const newCourse = {
         courseId,
+        creatorId : user.uid,
         creator: userData.username,
         title: courseDetails.courseTitle,
         description: courseDetails.description,

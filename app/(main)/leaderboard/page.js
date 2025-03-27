@@ -55,15 +55,7 @@ export default function LeaderboardPage() {
                 }));
 
             const sortedUsers = usersProgressData
-                .map(user => {
-                    const totalScore =
-                        (user.PLUH?.DS?.value || 0) +
-                        (user.PLUH?.ES?.value || 0) +
-                        (user.PLUH?.QPS?.value || 0) +
-                        (user.PLUH?.RPS?.currentValue || 0);
-                    return { ...user, totalScore };
-                })
-                .sort((a, b) => b.totalScore - a.totalScore);
+                .sort((a, b) => b.leaderboardCoins - a.leaderboardCoins);
 
             console.log("Fetched user progress data:", sortedUsers);
             setAllUsersProgress(sortedUsers);
