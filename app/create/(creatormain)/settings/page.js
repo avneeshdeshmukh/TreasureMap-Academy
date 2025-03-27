@@ -1,9 +1,14 @@
 "use client"
 import React, { useState } from 'react';
+import { useAuth } from "@/app/context/AuthProvider";
+import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { User, Phone, Star, Plus, X  } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const SettingsPage = () => {
+  
+const firestore = getFirestore();
+const { user } = useAuth();
   const [profile, setProfile] = useState({
     username: '',
     contactNumber: '',

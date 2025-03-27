@@ -40,12 +40,12 @@ export const CreatorSidebar = ({ className }) => {
                         href={"/create/progress"}
                         label={"Progress"}
                     />
-                    <SidebarItem
+                    {/* <SidebarItem
                         variant={activeItem === "Settings" ? "sidebarOutlineActive" : "sidebarOutline"}
                         icon={"settings"}
                         href={"/create/settings"}
                         label={"Settings"}
-                    />
+                    /> */}
                     <SidebarItem
                         variant={activeItem === "Learner" ? "sidebarOutlineActive" : "sidebarOutline"}
                         icon={"wand"}

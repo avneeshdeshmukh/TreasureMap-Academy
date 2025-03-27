@@ -39,7 +39,7 @@ const creatordashboard = () => {
             <Header user={user} />
             <YourCourses data = {courseProgress}/>
             <CreatorStats data={courseProgress} />
-            <FeaturedCourses />
+            {/* <FeaturedCourses /> */}
         </FeedWrapper>
     )
 }
