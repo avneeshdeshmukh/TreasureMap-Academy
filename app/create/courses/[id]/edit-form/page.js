@@ -34,6 +34,9 @@ export default function EditFormPage() {
     const courseProgressRef = doc(firestore, "courseProgress", userId);
 
     const progress = {
+      courseId : id,
+      title : course.title,
+      creator : course.creator,
       status: "verification",
       enrollments: 0,
       revenue: 0,
@@ -44,10 +47,6 @@ export default function EditFormPage() {
     await updateDoc(courseProgressRef, {
       [`courses.${id}`]: progress,
     }, { merge: true })
-
-    // await updateDoc(courseRef, {
-    //   enrollments: 0,
-    // });
 
     alert("Course Published Successfully");
     setShowTermsModal(false);

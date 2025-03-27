@@ -10,7 +10,7 @@ import { auth } from "@/lib/firebase";
 
 const firestore = getFirestore();
 
-const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
+const CourseForm = ({ closeForm, onCourseSubmit }) => {
 
   const { user } = useAuth();
 
@@ -191,7 +191,6 @@ const CourseForm = ({ closeForm, onCourseSubmit, chg }) => {
           totalRevenue: 0,
           averageRating: 0,
           totalEnrollments: 0,
-          courses : {},
         }
 
         await setDoc(courseProgressRef, progress);

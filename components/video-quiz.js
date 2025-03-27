@@ -63,11 +63,11 @@ export default function VideoQuiz({
     }
   }, [allowedTs]);
 
-  function isYesterday(date) {
+  function isYesterdayOrBefore(date) {
     const givenDate = new Date(date);
     const now = new Date();
 
-    // Convert both dates to the user's local timezone by resetting time to midnight
+    // Convert both dates to local timezone by resetting time to midnight
     const yesterday = new Date(
       now.getFullYear(),
       now.getMonth(),
@@ -75,7 +75,7 @@ export default function VideoQuiz({
     );
     givenDate.setHours(0, 0, 0, 0);
 
-    return givenDate.getTime() === yesterday.getTime();
+    return givenDate.getTime() <= yesterday.getTime();
   }
 
   const fetchAttempts = async () => {
@@ -92,9 +92,6 @@ export default function VideoQuiz({
     // Extract current quizzes map or initialize an empty object
     const quiz = vnSnap.exists() ? vnSnap.data().quizzes || {} : null;
     const quizTimes = quizMarkers.map((marker) => marker.time);
-
-    console.log(quiz);
-    console.log(quizTimes);
     let factor = {}; // Initialize an empty object
 
     if (quiz) {
@@ -117,7 +114,6 @@ export default function VideoQuiz({
         }
       });
     }
-    console.log(factor);
     setFactors(factor);
   };
 
@@ -210,7 +206,6 @@ export default function VideoQuiz({
 
           // Extract current quizzes map or initialize an empty object
           let quizzes = vnSnap.exists() ? vnSnap.data().quizzes || {} : {};
-          console.log(quizzes);
 
           // Check if the current quiz timestamp exists, otherwise initialize it
           if (!quizzes[currentQuizTimestamp]) {
@@ -218,11 +213,13 @@ export default function VideoQuiz({
               attempt: 0, // Default attempt count
               timestamp: currentQuizTimestamp,
             };
+            console.log("boobs");
           }
 
           // Increment attempt count
           quizzes[currentQuizTimestamp].attempt += 1;
           att = quizzes[currentQuizTimestamp].attempt;
+          console.log(att);
 
           // Perform the update
           await updateDoc(videoNotesRef, {
@@ -240,8 +237,6 @@ export default function VideoQuiz({
             currentQuizPoints,
             factors[currentQuizTimestamp]
           );
-          console.log(difficulty);
-          console.log(ratio);
 
           const userProgSnap = await getDoc(userProgressRef);
           const QPS = getQPS(userProgSnap.data(), ratio, att);
@@ -263,19 +258,17 @@ export default function VideoQuiz({
               increment(1);
             if (
               userProgSnap.data().lastLesson &&
-              isYesterday(userProgSnap.data().lastLesson.toDate())
+              isYesterdayOrBefore(userProgSnap.data().lastLesson.toDate())
             ) {
               updateData["lastLesson"] = new Date();
               updateData["streak"] = increment(1);
               updateData["PLUH.ES"] = getES(userProgSnap.data());
-              console.log(getES(userProgSnap.data()));
-              setStreak(userProgSnap.data().streak + 1);
+              setStreak((prevStreak) => prevStreak + 1);
             } else if (!userProgSnap.data().lastLesson) {
               updateData["lastLesson"] = new Date();
               updateData["streak"] = increment(1);
               updateData["PLUH.ES"] = getES(userProgSnap.data());
-              console.log(getES(userProgSnap.data()));
-              setStreak(userProgSnap.data().streak + 1);
+              setStreak((prevStreak) => prevStreak + 1);
             }
           }
 
@@ -357,8 +350,6 @@ export default function VideoQuiz({
           }
         });
 
-        // Check if video is completed
-        console.log(player.duration());
         if (currentTime >= player.duration() - 0.5) {
           // Allow small margin for precision
           if (!preview) {
@@ -392,7 +383,6 @@ export default function VideoQuiz({
                   { merge: true }
                 );
                 setIsIncremented(true);
-                console.log("Video marked as completed");
               }
             } catch (error) {
               console.error("Error updating completion status:", error);
@@ -417,7 +407,6 @@ export default function VideoQuiz({
             const timestamp = quizzes[marker.time]?.timestamp;
             if (questions) {
               setCurrentQuiz(questions);
-              console.log(JSON.stringify(questions));
               setCurrentQuizTimestamp(timestamp);
               setIsQuizCompleted(false); // Set first question
 
@@ -558,7 +547,6 @@ export default function VideoQuiz({
           time={currentQuizTimestamp}
         />
       )}
-
       <ToastContainer />
     </>
   );
