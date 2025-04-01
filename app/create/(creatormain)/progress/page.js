@@ -77,7 +77,7 @@
                     </div>
                     <div className="flex items-center space-x-2">
                       <Star className="h-5 w-5 text-yellow-500" />
-                      <span className="text-gray-700">{course.ratings}</span>
+                      <span className="text-gray-700">{course.ratings.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-gray-700 text-sm">
                       <div className="flex items-center space-x-2">

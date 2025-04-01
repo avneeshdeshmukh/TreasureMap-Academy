@@ -351,8 +351,6 @@ export default function Details() {
                 <div className="text-sm text-gray-700 space-y-2">
                   <p>✓ Full lifetime access</p>
                   <p>✓ Access on mobile and desktop</p>
-                  <p>✓ Certificate of completion</p>
-                  <p>✓ 30-day money-back guarantee</p>
                 </div>
               </CardContent>
             </Card>

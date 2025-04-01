@@ -6,8 +6,8 @@ import BadgeUnlockedPreview from "./badge-modal";
 import { badgeObjects } from "@/lib/data";
 import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
-
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BadgesPage = () => {
   const firestore = getFirestore();
@@ -68,7 +68,14 @@ const BadgesPage = () => {
   const unlockBadge = async (name) => {
     const currentBadge = badges.find((badge) => badge.name === name);
     if (!isBadgeUnlockable(currentBadge.coins, currentBadge.lessons, currentBadge.quizzes)) {
-      alert("Not eligible for badge");
+      toast.error("Not eligible for this badge yet!", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
       return;
     }
     const updatedBadges = badges.map((badge) =>
@@ -210,6 +217,7 @@ const BadgesPage = () => {
       {showModal && unlockedBadge && (
         <BadgeUnlockedPreview badge={unlockedBadge} onClose={() => setShowModal(false)} />
       )}
+      <ToastContainer />
     </div>
   );
 };

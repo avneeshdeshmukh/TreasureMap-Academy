@@ -18,11 +18,15 @@ export default function LeaderboardPage() {
 
     const fetchUserData = async () => {
         const userSnap = await getDoc(userProgRef);
-        console.log(userSnap.data())
+        console.log(userSnap.data());
+        const userData = userSnap.data();
+        const keys = Object.keys(userSnap.data());
+        if(!keys.includes('currentLeaderboard'))  userData.currentLeaderboard = null;
         setUserData(userSnap.data());
     }
 
     const fetchLeaderBoard = async () => {
+        if (!userData || !userData.currentLeaderboard) return;
         if (!userData) return;
         const leadId = userData.currentLeaderboard;
         const leaderboardRef = doc(firestore, "leaderboard", leadId);
@@ -82,6 +86,18 @@ export default function LeaderboardPage() {
     useEffect(() => {
         fetchAllUsersData();
     }, [userData, allUsers])
+
+    if (userData && !userData.currentLeaderboard) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+                <div className="bg-gray-800 text-white p-6 rounded-2xl shadow-xl border-2 border-yellow-400">
+                    <h1 className="text-2xl font-bold text-yellow-400 text-center">
+                        You are not in a leaderboard yet
+                    </h1>
+                </div>
+            </div>
+        );
+    }
 
 
     return (

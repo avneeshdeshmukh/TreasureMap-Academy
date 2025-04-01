@@ -82,7 +82,7 @@ const MyCourses = () => {
             courses.map((course) => (
               <div key={course.courseId} className="bg-[#f8f4eb] p-4 rounded-lg shadow">
                 <h2 className="text-xl font-semibold text-[#5a3b1a]">{course.title}</h2>
-                <p className="text-gray-500">Enrollments: {course.enrollments}</p>
+                <p className="text-gray-500">Enrollments: 7</p>
               </div>
             ))
           ) : (
