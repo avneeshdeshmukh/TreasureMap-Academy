@@ -20,12 +20,12 @@ export default function CompleteCreatorProfile() {
     useEffect(() => {
         const checkCreatorFlag = async () => {
             if (!user) return;
-            
+
             try {
                 setLoading(true);
                 const userRef = doc(firestore, "users", user.uid);
                 const userSnap = await getDoc(userRef);
-                
+
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     if (userData.isCreator) {
@@ -39,10 +39,10 @@ export default function CompleteCreatorProfile() {
                 setLoading(false);
             }
         };
-        
+
         checkCreatorFlag();
     }, [user, router]);
-    
+
     const addExpertise = () => {
         if (currentExpertise.trim()) {
             setExpertise([...expertise, currentExpertise.trim()]);
@@ -62,6 +62,9 @@ export default function CompleteCreatorProfile() {
             setSubmitting(true);
             setError(null);
             const userRef = doc(firestore, "users", user.uid);
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data();
+            const courseProgressRef = doc(firestore, "courseProgress", user.uid);
 
             const creatorData = {
                 isCreator: true,
@@ -70,6 +73,19 @@ export default function CompleteCreatorProfile() {
                     updatedAt: new Date().toISOString()
                 }
             };
+
+            const progress = {
+                userId: user.uid,
+                username : userData.username,
+                totalCourses: 0,
+                publishedCourses: 0,
+                totalRevenue: 0,
+                averageRating: 0,
+                totalEnrollments: 0,
+                courses : {},
+            }
+
+            await setDoc(courseProgressRef, progress);
 
             await setDoc(userRef, creatorData, { merge: true });
             router.push("/create/dashboard");
@@ -93,7 +109,7 @@ export default function CompleteCreatorProfile() {
         <div className="h-screen w-full flex items-center justify-center">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
                 <h1 className="text-2xl font-bold text-center text-slate-900 mb-6">Complete Your Creator Profile</h1>
-                
+
                 <form onSubmit={handleSubmit}>
                     <div className="mb-6">
                         <label className="block text-gray-700 text-sm font-semibold mb-2">
@@ -121,7 +137,7 @@ export default function CompleteCreatorProfile() {
                                 <FaPlus />
                             </button>
                         </div>
-                        
+
                         {expertise.length > 0 ? (
                             <div className="flex flex-wrap gap-2 mt-4">
                                 {expertise.map((item, index) => (
@@ -159,11 +175,10 @@ export default function CompleteCreatorProfile() {
                         <button
                             type="submit"
                             disabled={submitting || expertise.length === 0}
-                            className={`border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400 mt-3 ${
-                                submitting || expertise.length === 0
+                            className={`border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400 mt-3 ${submitting || expertise.length === 0
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                            }`}
+                                }`}
                         >
                             {submitting ? (
                                 <span className="flex items-center justify-center">

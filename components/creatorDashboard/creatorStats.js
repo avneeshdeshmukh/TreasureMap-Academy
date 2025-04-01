@@ -6,7 +6,7 @@ const Statistics = ({data}) => {
     { title: "Courses Created", value: data.totalCourses },
     { title: "Courses Published", value: data.publishedCourses },
     { title: "Total Enrollments", value: data.totalEnrollments },
-    { title: "Average Content Rating", value: data.averageRating },
+    { title: "Average Content Rating", value: data.averageRating.toFixed(2) },
   ];
 
   console.log(stats);

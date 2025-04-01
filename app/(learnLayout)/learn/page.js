@@ -33,6 +33,8 @@ const LearnPage = () => {
     const [userProgress, setUserProgress] = useState(null);
     const [lastVideo, setLastVideo] = useState(0);
     const [percentage, setPercentage] = useState(0);
+    const [position, setPosition] = useState(null);
+    const [level, setLevel] = useState(null);
 
     const fetchUserDetails = async () => {
         const usr = await getDoc(userRef);
@@ -116,6 +118,31 @@ const LearnPage = () => {
         fetchUserProgress();
     }, [user, courseId, videos])
 
+    useEffect(() => {
+        const setLeaderboardPosition = async () => {
+            const userSnap = await getDoc(userProgRef);
+            const userData = userSnap.data();
+
+            if (!Object.keys(userData).includes("currentLeaderboard")) {
+                userData.currentLeaderboard = null;
+                setPosition(0);
+                setLeadType(null);
+                return;
+            }
+
+            const leaderboardRef = doc(firestore, "leaderboard", userData.currentLeaderboard);
+            const leaderboardSnap = await getDoc(leaderboardRef);
+            const allUsers = leaderboardSnap.data().users;
+
+            const position = allUsers.indexOf(userData.username) + 1;
+
+            setPosition(position);
+            setLevel(leaderboardSnap.data().level)
+        }
+
+        setLeaderboardPosition();
+    }, [user])
+
     const handleCourseSelect = async (selectedCourse) => {
         const updatedCourses = setLatestCourse(userData.enrolledCourses, selectedCourse);
         setCourseId(updatedCourses[0]);
@@ -162,7 +189,7 @@ const LearnPage = () => {
                 <StickyWrapper>
                     <StreakIcons streak={39} />
                     <Stats userProgress={userProgress} courseId={topCourses[0]} setIsModalOpen={setIsModalOpen} />
-                    <LeaderboardPos />
+                    <LeaderboardPos position={position} level={level} />
                 </StickyWrapper>
                 <StreakGoalModal
                     isOpen={isModalOpen}
