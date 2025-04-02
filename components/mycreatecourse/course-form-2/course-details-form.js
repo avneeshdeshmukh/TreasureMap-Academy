@@ -13,6 +13,8 @@ import { auth } from "@/lib/firebase";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { LanguageForm } from "./language-form";
 import { PriceForm } from "./price-form";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function VideoUploadForm({ onNext }) {
   const firestore = getFirestore();
@@ -109,8 +111,15 @@ export default function VideoUploadForm({ onNext }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (videos.length === 0) {
-      alert("Please add at least one video.");
-      return;
+      toast("Please add at least one video", {
+        icon:"⚠️",
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
     }
     console.log("Upload to AWS")
   };
@@ -190,7 +199,14 @@ export default function VideoUploadForm({ onNext }) {
 
       await Promise.all(batchUpdates);
       setIsEditing(false);
-      alert("Video order updated!");
+      toast.success("Video order updated", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (error) {
       console.error("Error updating video order:", error);
     }
@@ -339,6 +355,7 @@ export default function VideoUploadForm({ onNext }) {
 
           </div>
         </div>
+        <ToastContainer/>
       </div>
     );
   }

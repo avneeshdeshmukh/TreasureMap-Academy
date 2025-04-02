@@ -39,7 +39,7 @@ export default function CreateLayout({ children }) {
         <ProtectedRoute>
             <CoinsProvider>
                 <StreakProvider>
-                    <div className="min-h-screen bg-[#efeeea] max-w-full">
+                    <div className="min-h-screen bg-[#efeeea] py-10">
                         {children}
                     </div>
                 </StreakProvider>
