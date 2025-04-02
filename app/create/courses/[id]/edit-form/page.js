@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import DeleteModal from "@/components/mycreatecourse/course-form-2/DeleteModal";
 import { auth } from "@/lib/firebase";
-import { getFirestore, doc, collection, query, where, getDocs, getDoc, updateDoc, deleteDoc} from "firebase/firestore";
+import { getFirestore, doc, collection, query, where, getDocs, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function EditFormPage() {
   const firestore = getFirestore();
@@ -21,34 +21,85 @@ export default function EditFormPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
 
+  function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+  }
+
+  const checkQuizzes = async () => {
+    const videosRef = collection(firestore, "videos");
+    const q = query(videosRef, where("course", "==", id));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      const videoList = querySnapshot.docs.map(doc => ({
+        videoId: doc.data().videoId,
+        ...doc.data(),
+      }));
+
+      let allHaveQuizzes = true;
+
+      for(let i = 0; i < videoList.length; i++){
+        if(videoList[i].quizzes === null || isEmpty(videoList[i].quizzes)){
+          allHaveQuizzes = false;
+          return;
+        }
+      }
+
+      return allHaveQuizzes;
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    }
+  }
+
   // Handle the submit logic
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (course.totalVideos < 10) {
       alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
       return;
     }
+
+    const quizzesPresent = await checkQuizzes();
+    console.log(quizzesPresent);
+
+    if (!quizzesPresent) {
+      alert(`Please add at least one quiz in each video`);
+      return;
+    }
+
     setShowTermsModal(true);
   };
 
   const handlePublishAfterTerms = async () => {
     const courseProgressRef = doc(firestore, "courseProgress", userId);
+    const courseProgressSnap = await getDoc(courseProgressRef);
+    const data = courseProgressSnap.data();
+
+    if (Object.keys(data.courses).includes(id)) {
+      await updateDoc(courseProgressRef, {
+        [`courses.${id}.status`]: "verification",
+      })
+      alert("Course sent for verification successfully");
+      setShowTermsModal(false);
+      router.push("/create/mycourses");
+      return;
+    }
 
     const progress = {
-      courseId : id,
-      title : course.title,
-      creator : course.creator,
+      courseId: id,
+      title: course.title,
+      creator: course.creator,
       status: "verification",
       enrollments: 0,
       revenue: 0,
       ratings: 0,
-      comments : [],
+      comments: [],
     }
 
     await updateDoc(courseProgressRef, {
       [`courses.${id}`]: progress,
     }, { merge: true })
 
-    alert("Course Published Successfully");
+    alert("Course sent for verification successfully");
     setShowTermsModal(false);
     router.push("/create/mycourses");
   };
