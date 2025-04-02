@@ -35,6 +35,10 @@ export default function VideoUploadForm({ onNext }) {
     setOriginalVideos((prev) => [...prev, video]);
   };
 
+  function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+  }
+
   const handleManageVideo = (videoId) => {
     router.push(
       `/create/courses/${courseId}/edit-form/${videoId}/edit-video-details`
@@ -98,10 +102,10 @@ export default function VideoUploadForm({ onNext }) {
       if (response.ok) {
         await deleteDoc(videoRef);
         await updateDoc(courseRef, {
-          totalVideos : increment(-1),
-          totalQuizzes : increment(-1),
-          courseDuration : increment(-1 * currentDuration),
-        }, {merge : true })
+          totalVideos: increment(-1),
+          totalQuizzes: increment(-1),
+          courseDuration: increment(-1 * currentDuration),
+        }, { merge: true })
         setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
         setOriginalVideos((prev) => prev.filter((video) => video.videoId !== videoId));
       }
@@ -112,7 +116,7 @@ export default function VideoUploadForm({ onNext }) {
     e.preventDefault();
     if (videos.length === 0) {
       toast("Please add at least one video", {
-        icon:"⚠️",
+        icon: "⚠️",
         position: "top-center",
         autoClose: 3000,
         hideProgressBar: false,
@@ -251,19 +255,19 @@ export default function VideoUploadForm({ onNext }) {
             <div className="flex items-center justify-between">
               <h2 className="text-lg md:text-xl font-medium">Course Videos</h2>
               {/* Pass the handleAddVideo function to AddVideos */}
-              <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos = {fetchCourseVideos}/>
+              <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos={fetchCourseVideos} />
             </div>
-            {videos.length !== 0 && 
-            <div className="w-full flex">
-              <Button
-                size="sm"
-                className="flex items-center gap-x-1 ms-2"
-                onClick={handleEditButton}
-              >
-                <Edit size={16} />
-                {isEditing ? "Cancel" : "Edit Order"}
-              </Button>
-            </div>
+            {videos.length !== 0 &&
+              <div className="w-full flex">
+                <Button
+                  size="sm"
+                  className="flex items-center gap-x-1 ms-2"
+                  onClick={handleEditButton}
+                >
+                  <Edit size={16} />
+                  {isEditing ? "Cancel" : "Edit Order"}
+                </Button>
+              </div>
             }
 
 
@@ -295,7 +299,7 @@ export default function VideoUploadForm({ onNext }) {
                               </div>
                               {!isEditing && (
                                 <div className="flex space-x-3">
-                                  {video.quizzes && <p className="mt-1">✅</p>}
+                                  {video.quizzes && !isEmpty(video.quizzes) && <p className="mt-1">✅</p>}
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -355,7 +359,7 @@ export default function VideoUploadForm({ onNext }) {
 
           </div>
         </div>
-        <ToastContainer/>
+        <ToastContainer />
       </div>
     );
   }

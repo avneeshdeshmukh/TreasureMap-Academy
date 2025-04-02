@@ -453,8 +453,8 @@ export default function QuizCreator() {
                             <TabsTrigger
                                 onClick={() => setSelectedQuizType("mcq")}
                                 className={`${selectedQuizType === "mcq"
-                                        ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
-                                        : "h-10"
+                                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                                    : "h-10"
                                     }`}
                             >
                                 Multiple Choice
@@ -462,8 +462,8 @@ export default function QuizCreator() {
                             <TabsTrigger
                                 onClick={() => setSelectedQuizType("fillBlanks")}
                                 className={`${selectedQuizType === "fillBlanks"
-                                        ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
-                                        : "h-10"
+                                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                                    : "h-10"
                                     }`}
                             >
                                 Fill Blanks
@@ -471,8 +471,8 @@ export default function QuizCreator() {
                             <TabsTrigger
                                 onClick={() => setSelectedQuizType("trueFalse")}
                                 className={`${selectedQuizType === "trueFalse"
-                                        ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
-                                        : "h-10"
+                                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                                    : "h-10"
                                     }`}
                             >
                                 True/False
@@ -480,8 +480,8 @@ export default function QuizCreator() {
                             <TabsTrigger
                                 onClick={() => setSelectedQuizType("slider")}
                                 className={`${selectedQuizType === "slider"
-                                        ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
-                                        : "h-10"
+                                    ? "font-bold bg-yellow-300 text-yellow-700 h-10 rounded-xl"
+                                    : "h-10"
                                     }`}
                             >
                                 Slider
@@ -724,12 +724,27 @@ const MultipleChoiceForm = ({ onSubmit, existingQuestion }) => {
             <p className="text-sm text-gray-500 -mt-1">
                 1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
             </p>
-            <Input
+            <input
                 type="number"
                 value={points}
-                onChange={(e) =>
-                    setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
-                }
+                onKeyDown={(e) => {
+                    if (e.key >= "0" && e.key <= "9") {
+                        e.preventDefault(); // Stop default appending behavior
+                        const newValue = Number(e.key);
+                        if (newValue >= 1 && newValue <= 4) {
+                            setPoints(newValue);
+                        }
+                    } else if (e.key === "Backspace") {
+                        e.preventDefault();
+                        setPoints(1); // Reset to default on backspace
+                    }
+                }}
+                onChange={(e) => {
+                    const rawValue = e.target.value;
+                    if (rawValue !== "") {
+                        setPoints(Math.max(1, Math.min(4, Number(rawValue))));
+                    }
+                }}
                 min="1"
                 max="4"
                 className="w-20 text-center"
@@ -822,7 +837,7 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
                 className={
                     hasBlank
                         ? "bg-red-500 hover:bg-red-600 text-white"
-                        : "bg-yellow-500 hover:bg-yellow-600"
+                        : "bg-yellow-500 text-white hover:bg-yellow-600"
                 }
             >
                 {hasBlank ? "Remove Blank" : "Insert Blank"}
@@ -842,9 +857,24 @@ const FillBlanksForm = ({ onSubmit, existingQuestion }) => {
             <Input
                 type="number"
                 value={points}
-                onChange={(e) =>
-                    setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
-                }
+                onKeyDown={(e) => {
+                    if (e.key >= "0" && e.key <= "9") {
+                        e.preventDefault(); // Stop default appending behavior
+                        const newValue = Number(e.key);
+                        if (newValue >= 1 && newValue <= 4) {
+                            setPoints(newValue);
+                        }
+                    } else if (e.key === "Backspace") {
+                        e.preventDefault();
+                        setPoints(1); // Reset to default on backspace
+                    }
+                }}
+                onChange={(e) => {
+                    const rawValue = e.target.value;
+                    if (rawValue !== "") {
+                        setPoints(Math.max(1, Math.min(4, Number(rawValue))));
+                    }
+                }}
                 min="1"
                 max="4"
                 className="w-20 text-center"
@@ -912,12 +942,27 @@ const TrueFalseForm = ({ onSubmit, existingQuestion }) => {
             <p className="text-sm text-gray-500 -mt-1">
                 1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
             </p>
-            <Input
+            <input
                 type="number"
                 value={points}
-                onChange={(e) =>
-                    setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
-                }
+                onKeyDown={(e) => {
+                    if (e.key >= "0" && e.key <= "9") {
+                        e.preventDefault(); // Stop default appending behavior
+                        const newValue = Number(e.key);
+                        if (newValue >= 1 && newValue <= 4) {
+                            setPoints(newValue);
+                        }
+                    } else if (e.key === "Backspace") {
+                        e.preventDefault();
+                        setPoints(1); // Reset to default on backspace
+                    }
+                }}
+                onChange={(e) => {
+                    const rawValue = e.target.value;
+                    if (rawValue !== "") {
+                        setPoints(Math.max(1, Math.min(4, Number(rawValue))));
+                    }
+                }}
                 min="1"
                 max="4"
                 className="w-20 text-center"
@@ -1023,12 +1068,27 @@ const SliderForm = ({ onSubmit, existingQuestion }) => {
             <p className="text-sm text-gray-500 -mt-1">
                 1 - Easy, 2 - Medium, 3 - Difficult, 4 - Very Difficult
             </p>
-            <Input
+            <input
                 type="number"
                 value={points}
-                onChange={(e) =>
-                    setPoints(Math.max(1, Math.min(4, Number(e.target.value))))
-                }
+                onKeyDown={(e) => {
+                    if (e.key >= "0" && e.key <= "9") {
+                        e.preventDefault(); // Stop default appending behavior
+                        const newValue = Number(e.key);
+                        if (newValue >= 1 && newValue <= 4) {
+                            setPoints(newValue);
+                        }
+                    } else if (e.key === "Backspace") {
+                        e.preventDefault();
+                        setPoints(1); // Reset to default on backspace
+                    }
+                }}
+                onChange={(e) => {
+                    const rawValue = e.target.value;
+                    if (rawValue !== "") {
+                        setPoints(Math.max(1, Math.min(4, Number(rawValue))));
+                    }
+                }}
                 min="1"
                 max="4"
                 className="w-20 text-center"
