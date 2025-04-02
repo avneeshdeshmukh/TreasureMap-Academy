@@ -107,7 +107,7 @@ export default function Information() {
 
         {/* Footer */}
         <div className="text-gray-700 mt-8 text-center border-t pt-4">
-          Need help? Contact <span className="text-[#5a3b1a] font-semibold">support@treasuremapacademy.com</span>
+          Need help? Contact <span className="text-[#5a3b1a] font-semibold">treasuremapacademy@gmail.com</span>
         </div>
       </div>
     </div>

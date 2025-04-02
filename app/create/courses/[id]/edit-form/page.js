@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import DeleteModal from "@/components/mycreatecourse/course-form-2/DeleteModal";
 import { auth } from "@/lib/firebase";
-import { getFirestore, doc, collection, query, where, getDocs, getDoc, updateDoc} from "firebase/firestore";
+import { getFirestore, doc, collection, query, where, getDocs, getDoc, updateDoc, deleteDoc} from "firebase/firestore";
 
 export default function EditFormPage() {
   const firestore = getFirestore();
