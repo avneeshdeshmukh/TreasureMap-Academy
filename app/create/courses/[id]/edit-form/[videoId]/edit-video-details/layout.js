@@ -4,5 +4,9 @@ export const metadata = {
 };
 
 export default function EditVideoLayout({ children }) {
-    return <>{children}</>
+    return (
+    <div>
+        {children}
+    </div>
+    );
 }

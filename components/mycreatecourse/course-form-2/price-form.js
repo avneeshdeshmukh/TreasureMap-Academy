@@ -5,6 +5,8 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const PriceForm = ({initialData}) => {
   const firestore = getFirestore();
@@ -19,6 +21,18 @@ export const PriceForm = ({initialData}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!price.trim()) {
+          toast.error("Price cannot be empty", {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
+          return;
+        }
     try {
       const courseRef = doc(firestore, "courses", courseId);
 
@@ -32,10 +46,25 @@ export const PriceForm = ({initialData}) => {
       }
 
       setIsEditing(false); // Exit editing mode
-      alert("Price updated successfully!");
+       toast.success("Price updated successfully", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                        });
+      
     } catch (error) {
       console.error("Error updating price:", error);
-      alert("Failed to update price.");
+       toast.error("Failed to update price", {
+                            position: "top-center",
+                            autoClose: 3000,
+                            hideProgressBar: false,
+                            closeOnClick: true,
+                            pauseOnHover: true,
+                            draggable: true,
+                        });
     }
   };
 
@@ -68,7 +97,7 @@ export const PriceForm = ({initialData}) => {
             {isEditing ? "Cancel" : (
               <>
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit description
+                Edit Price
               </>
             )}
           </Button>
@@ -91,6 +120,7 @@ export const PriceForm = ({initialData}) => {
             </div>
           </form>
         )}
+        <ToastContainer />
       </div>
     );
   }
