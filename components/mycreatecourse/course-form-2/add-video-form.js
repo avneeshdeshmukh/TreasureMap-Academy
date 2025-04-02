@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { auth } from "@/lib/firebase";
 import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
   const firestore = getFirestore();
@@ -140,7 +142,14 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
 
   const handleAdd = async () => {
     if (!videoFile || !videoTitle.trim()) {
-      alert("Please provide a valid video title and file.");
+      toast.error("Please provide a valid video title and file", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
       return;
     }
 
@@ -259,6 +268,7 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
         )}
       </div>
       {status && <p className="mt-2 text-center">{status}</p>}
+      <ToastContainer/>
     </>
   );
 }
