@@ -5,6 +5,8 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const LanguageForm = ({initialData}) => {
   const firestore = getFirestore();
@@ -19,6 +21,19 @@ export const LanguageForm = ({initialData}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!language.trim()) {
+      toast.error("language cannot be empty", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
+      return;
+    }
+
     try {
       const courseRef = doc(firestore, "courses", courseId);
 
@@ -32,10 +47,30 @@ export const LanguageForm = ({initialData}) => {
       }
 
       setIsEditing(false); // Exit editing mode
-      alert("Language updated successfully!");
+      if (!price.trim()) {
+        toast.success("Language updated successfully", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+      });
+        return;
+      }
     } catch (error) {
       console.error("Error updating language:", error);
-      alert("Failed to update language.");
+      if (!price.trim()) {
+        toast.error("Failed to update language", {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+      });
+        return;
+      }
     }
   };
 
@@ -102,6 +137,7 @@ export const LanguageForm = ({initialData}) => {
             </div>
           </form>
         )}
+        <ToastContainer/>
       </div>
     );
   }
