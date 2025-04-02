@@ -4,5 +4,9 @@ export const metadata = {
 };
 
 export default function EditFormLayout({ children }) {
-    return <>{children}</>
+    return (
+        <div className="max-w-full bg-white">
+        {children}
+        </div>
+    );
 }

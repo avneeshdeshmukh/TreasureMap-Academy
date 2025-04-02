@@ -4,6 +4,8 @@ import { useRouter, useParams } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const DifficultyForm = ({ initialData }) => {
   const firestore = getFirestore();
@@ -31,10 +33,24 @@ export const DifficultyForm = ({ initialData }) => {
       }
 
       setIsEditing(false); // Exit editing mode
-      alert("Difficulty updated successfully!");
+      toast.success("Difficulty updated successfully", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
     } catch (error) {
       console.error("Error updating difficulty:", error);
-      alert("Failed to update difficulty.");
+      toast.success("Failed to update difficulty.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
     }
   };
 
@@ -96,6 +112,7 @@ export const DifficultyForm = ({ initialData }) => {
             </div>
           </form>
         )}
+        <ToastContainer/>
       </div>
     );
   }

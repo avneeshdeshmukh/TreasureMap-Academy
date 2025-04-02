@@ -5,6 +5,8 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const DescriptionForm = ({initialData}) => {
   const firestore = getFirestore();
@@ -19,6 +21,17 @@ export const DescriptionForm = ({initialData}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!description.trim()) {
+      toast.error("Description cannot be empty", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
+      return;
+    }
     try {
       const courseRef = doc(firestore, "courses", courseId);
 
@@ -32,10 +45,25 @@ export const DescriptionForm = ({initialData}) => {
       }
 
       setIsEditing(false); // Exit editing mode
-      alert("Description updated successfully!");
+      toast.success("Description updated successfully", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
+      
     } catch (error) {
       console.error("Error updating description:", error);
-      alert("Failed to update description.");
+      toast.error("Failed to update description", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+    });
     }
   };
 
@@ -90,6 +118,7 @@ export const DescriptionForm = ({initialData}) => {
             </div>
           </form>
         )}
+        <ToastContainer/>
       </div>
     );
   }

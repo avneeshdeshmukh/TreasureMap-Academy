@@ -27,16 +27,16 @@ export default function Details() {
   const courseRef = doc(firestore, "courses", courseId);
   const userRef = doc(firestore, "users", user.uid);
   const userProgRef = doc(firestore, "userProgress", user.uid);
+  const courseProgressRef = doc(firestore, "courseProgress", user.uid);
 
   const [course, setCourse] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [userProgData, setUserProgData] = useState(null);
   const [thumbnail, setThumbnail] = useState(null);
   const [enrolled, setEnrolled] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(null);
-  const [courseProgress, setCourseProgress] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [creatorId, setCreatorId] = useState(null);
   const [newReview, setNewReview] = useState({
     rating: 0,
     comment: "",
@@ -78,7 +78,6 @@ export default function Details() {
       if (crs.exists()) {
         const crsData = crs.data();
         setCourse(crsData);
-        setCreatorId(crsData.creatorId);
       } else {
         console.log("Course not found");
       }
@@ -99,28 +98,29 @@ export default function Details() {
       setEnrolled(usrData.enrolledCourses?.includes(courseId) || false);
     };
 
-    fetchCourseDetails();
-    fetchUserDetails();
-  }, [courseId, user, enrolled]);
-
-  useEffect(() => {
-    if(!creatorId) return;
-    const fetchCourseProgress = async () => {
-      const courseProgressRef = doc(firestore, "courseProgress", creatorId);
-      const cpro = await getDoc(courseProgressRef);
-      if (!cpro.exists()) {
+    const fetchUserProgress = async () => {
+      const prog = await getDoc(userProgRef);
+      if (prog.exists()) {
+        const progData = prog.data();
+        setUserProgData(progData);
+      } else {
         console.log("User not found");
-        return;
       }
-
-      const cproData = cpro.data();
-      setReviews(cproData.courses?.[courseId]?.comments || []);
-      console.log(cproData)
-      setCourseProgress(cproData);
     };
 
-    fetchCourseProgress();
-  }, [course])
+    const fetchReviews = async () => {
+      const progressDoc = await getDoc(courseProgressRef);
+      if (progressDoc.exists()) {
+        const progressData = progressDoc.data();
+        setReviews(progressData.courses?.[courseId]?.comments || []);
+      }
+    };
+
+    fetchCourseDetails();
+    fetchUserDetails();
+    fetchUserProgress();
+    fetchReviews();
+  }, [courseId, user, enrolled]);
 
   useEffect(() => {
     if (!course) return;
@@ -152,16 +152,14 @@ export default function Details() {
   }, [course]);
 
   const handleEnroll = async () => {
-    if (!creatorId) return;
     try {
       // Attempt to update the enrolledCourses array
       await updateDoc(userRef, {
         enrolledCourses: arrayUnion(courseId),
       });
-      const courseProgressRef = doc(firestore, "courseProgress", creatorId);
-      await updateDoc(courseProgressRef, {
-        totalEnrollments: increment(1),
-        [`courses[${courseId}].enrollments`]: increment(1),
+
+      await updateDoc(courseRef, {
+        enrollments: increment(1),
       });
 
       console.log("Course enrolled successfully!");
@@ -208,8 +206,9 @@ export default function Details() {
           <span
             key={star}
             onClick={() => setRating(star)}
-            className={`cursor-pointer text-2xl ${star <= rating ? "text-yellow-500" : "text-gray-300"
-              }`}
+            className={`cursor-pointer text-2xl ${
+              star <= rating ? "text-yellow-500" : "text-gray-300"
+            }`}
           >
             ★
           </span>
@@ -220,24 +219,19 @@ export default function Details() {
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
-    // Ensure the timestamp is converted to a JavaScript Date object
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
-  
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true, // Ensures AM/PM format
-    }).format(date);
+    }).format(timestamp);
   };
-  
 
   // Handle review submission
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-
+    
     if (!newReview.rating || !newReview.comment) {
       alert('Please select a rating and write a comment');
       return;
@@ -249,14 +243,17 @@ export default function Details() {
       comment: newReview.comment,
       rating: newReview.rating
     };
-    const courseProgressRef = doc(firestore, "courseProgress", creatorId);
 
     try {
       // Fetch current comments to calculate new average
-
+      const progressDoc = await getDoc(courseProgressRef);
+      const currentComments = progressDoc.exists()
+        ? progressDoc.data().courses?.[courseId]?.comments || []
+        : [];
+      
       // Add new review to comments array
-      const updatedComments = [...reviews, submittedReview];
-
+      const updatedComments = [...currentComments, submittedReview];
+      
       // Calculate average rating
       const totalRating = updatedComments.reduce((sum, review) => sum + review.rating, 0);
       const averageRating = totalRating / updatedComments.length;
@@ -357,152 +354,153 @@ export default function Details() {
           </div>
 
           {/* Course Details Section */}
-            <div className="mt-8 grid grid-cols-3 gap-12">
-              <div className="col-span-2 mr-10">
-                <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:shadow-xl hover:-translate-y-1">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                    Course Details
-                  </h2>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="flex items-center space-x-3">
-                      <Clock className="text-blue-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Duration</p>
-                        <p className="font-medium text-gray-900">
-                          {displayTime(course.courseDuration)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <BookOpen className="text-green-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Total Lessons</p>
-                        <p className="font-medium text-gray-900">
-                          {course.totalVideos}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <BarChart className="text-yellow-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Level</p>
-                        <p className="font-medium text-gray-900">
-                          {course.difficulty}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <User className="text-red-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Students Enrolled</p>
-                        <p className="font-medium text-gray-900">
-                          {courseProgress?.courses[courseId].enrollments}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Student Reviews Section */}
-                <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                    Student Reviews
-                  </h2>
-
-                  {/* Existing Reviews or No Reviews Message */}
-                  {reviews.length === 0 ? (
-                    <div className="text-center text-gray-500 py-6">
-                      <p>No reviews available yet</p>
-                      <p className="text-sm mt-2">
-                        Be the first to write a review!
+          <div className="mt-8 grid grid-cols-3 gap-12">
+            <div className="col-span-2 mr-10">
+              <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:shadow-xl hover:-translate-y-1">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                  Course Details
+                </h2>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="flex items-center space-x-3">
+                    <Clock className="text-blue-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Duration</p>
+                      <p className="font-medium text-gray-900">
+                        {displayTime(course.courseDuration)}
                       </p>
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {reviews.map((review, index) => (
-                        <div
-                          key={index}
-                          className="border-b border-gray-200 pb-4 last:border-b-0"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center space-x-3">
-                              <div>
-                                <p className="font-semibold text-gray-800">
-                                  {review.username}
-                                </p>
-                                <div className="text-yellow-500 flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <span
-                                      key={i}
-                                      className={
-                                        i < review.rating
-                                          ? "text-yellow-500"
-                                          : "text-gray-300"
-                                      }
-                                    >
-                                      ★
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-500">
-                              {formatTimestamp(review.timestamp)}
-                            </p>
-                          </div>
-                          <p className="mt-2 text-gray-700">{review.comment}</p>
-                        </div>
-                      ))}
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <BookOpen className="text-green-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Total Lessons</p>
+                      <p className="font-medium text-gray-900">
+                        {course.totalVideos}
+                      </p>
                     </div>
-                  )}
-
-                  {/* Write a Review Form */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-800 mb-4">
-                      Write a Review
-                    </h3>
-                    <form onSubmit={handleSubmitReview} className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <label className="text-gray-700 font-medium">
-                          Your Rating
-                        </label>
-                        <StarRating
-                          rating={newReview.rating}
-                          setRating={(rating) =>
-                            setNewReview((prev) => ({ ...prev, rating }))
-                          }
-                        />
-                      </div>
-
-                      <textarea
-                        name="comment"
-                        value={newReview.comment}
-                        onChange={(e) =>
-                          setNewReview((prev) => ({
-                            ...prev,
-                            comment: e.target.value,
-                          }))
-                        }
-                        placeholder="Write your review here..."
-                        className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        required
-                      />
-
-                      <Button
-                        type="submit"
-                        disabled={newReview.rating === 0} // Add this disable condition
-                        className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${newReview.rating === 0
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-yellow-500 text-white hover:bg-yellow-600"
-                          }`}
-                      >
-                        Submit Review
-                      </Button>
-                    </form>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <BarChart className="text-yellow-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Level</p>
+                      <p className="font-medium text-gray-900">
+                        {course.difficulty}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <User className="text-red-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Students Enrolled</p>
+                      <p className="font-medium text-gray-900">
+                        {course.enrollments}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Student Reviews Section */}
+              <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                  Student Reviews
+                </h2>
+
+                {/* Existing Reviews or No Reviews Message */}
+                {reviews.length === 0 ? (
+                  <div className="text-center text-gray-500 py-6">
+                    <p>No reviews available yet</p>
+                    <p className="text-sm mt-2">
+                      Be the first to write a review!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {reviews.map((review, index) => (
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 pb-4 last:border-b-0"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center space-x-3">
+                            <div>
+                              <p className="font-semibold text-gray-800">
+                                {review.username}
+                              </p>
+                              <div className="text-yellow-500 flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={
+                                      i < review.rating
+                                        ? "text-yellow-500"
+                                        : "text-gray-300"
+                                    }
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {formatTimestamp(review.timestamp)}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-gray-700">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Write a Review Form */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">
+                    Write a Review
+                  </h3>
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div className="flex flex-col space-y-2">
+                      <label className="text-gray-700 font-medium">
+                        Your Rating
+                      </label>
+                      <StarRating
+                        rating={newReview.rating}
+                        setRating={(rating) =>
+                          setNewReview((prev) => ({ ...prev, rating }))
+                        }
+                      />
+                    </div>
+
+                    <textarea
+                      name="comment"
+                      value={newReview.comment}
+                      onChange={(e) =>
+                        setNewReview((prev) => ({
+                          ...prev,
+                          comment: e.target.value,
+                        }))
+                      }
+                      placeholder="Write your review here..."
+                      className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      required
+                    />
+
+                    <Button
+                      type="submit"
+                      disabled={newReview.rating === 0} // Add this disable condition
+                      className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${
+                        newReview.rating === 0
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-yellow-500 text-white hover:bg-yellow-600"
+                      }`}
+                    >
+                      Submit Review
+                    </Button>
+                  </form>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     );
