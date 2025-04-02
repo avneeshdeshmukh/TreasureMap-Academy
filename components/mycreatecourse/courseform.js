@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button"
 import { courseCategories, courseLanguages } from "@/lib/data";
 import Select from "react-select";
-import { getFirestore, getDoc, setDoc, doc, increment } from "firebase/firestore";
+import { getFirestore, getDoc, setDoc, doc, increment, updateDoc } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { auth } from "@/lib/firebase";
 
@@ -162,7 +162,7 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
       // Create a new course object
       const newCourse = {
         courseId,
-        creatorId : user.uid,
+        creatorId: user.uid,
         creator: userData.username,
         title: courseDetails.courseTitle,
         description: courseDetails.description,
@@ -178,24 +178,9 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
 
       const courseRef = doc(firestore, "courses", courseId);
       const courseProgressRef = doc(firestore, "courseProgress", user.uid);
-      const courseProSnap = getDoc(courseProgressRef);
-      if (courseProSnap.data()) {
-        await updateDoc(courseProgressRef, {
-          totalCourses : increment(1),
-        }, {merge : true})
-      } else {
-        const progress = {
-          userId : user.uid,
-          username: userData.username,
-          totalCourses: 1,
-          publishedCourses: 0,
-          totalRevenue: 0,
-          averageRating: 0,
-          totalEnrollments: 0,
-        }
-
-        await setDoc(courseProgressRef, progress);
-      }
+      await updateDoc(courseProgressRef, {
+        totalCourses: increment(1),
+      }, { merge: true })
       await setDoc(courseRef, newCourse, { merge: true });
 
       // Call the onCourseSubmit function to propagate changes
