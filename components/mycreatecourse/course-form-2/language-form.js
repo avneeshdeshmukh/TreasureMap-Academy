@@ -109,7 +109,7 @@ export const LanguageForm = ({initialData}) => {
           </Button>
         </div>
         {!isEditing && (
-          <p className="text-sm mt-2">{courseData.language}</p>
+          <p className="text-sm mt-2">{courseData.language[0].toUpperCase()}{courseData.language.substring(1)}</p>
         )}
         {isEditing && (
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">

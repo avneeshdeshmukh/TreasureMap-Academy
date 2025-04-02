@@ -253,7 +253,7 @@ export default function VideoUploadForm({ onNext }) {
               {/* Pass the handleAddVideo function to AddVideos */}
               <AddVideos onAdd={handleAddVideo} numOfVideos={numOfVideos} fetchVideos = {fetchCourseVideos}/>
             </div>
-            {videos.length && 
+            {videos.length !== 0 && 
             <div className="w-full flex">
               <Button
                 size="sm"

@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 
 const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins, time, factor, preview }) => {
-  const [selectedValue, setSelectedValue] = useState(50);
+  const [selectedValue, setSelectedValue] = useState(parseInt((questionData.max+questionData.min)/2));
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null); // Null = no answer yet
 
@@ -29,11 +29,11 @@ const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins, time
   };
 
   const incrementValue = () => {
-    setSelectedValue((prev) => (prev < 100 ? prev + 1 : prev));
+    setSelectedValue((prev) => (prev < questionData.max ? prev + 1 : prev));
   };
 
   const decrementValue = () => {
-    setSelectedValue((prev) => (prev > 0 ? prev - 1 : prev));
+    setSelectedValue((prev) => (prev > questionData.min ? prev - 1 : prev));
   };
 
   return (
@@ -61,11 +61,11 @@ const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins, time
 
           <div className="w-full mb-6 flex flex-col items-center">
             <div className="flex justify-between w-full mb-3 text-sm font-semibold">
-              <span>0%</span>
+              <span>{questionData.min}</span>
               <span className="text-xl font-bold text-yellow-600">
-                {selectedValue}%
+                {selectedValue}
               </span>
-              <span>100%</span>
+              <span>{questionData.max}</span>
             </div>
             <div className="flex items-center w-full">
               <Button variant="ghost" onClick={decrementValue} className="mr-3 px-4 py-2">
@@ -74,8 +74,8 @@ const SliderQuizModal = ({ questionData, onSubmit, currentPoints, setCoins, time
 
               <input
                 type="range"
-                min="0"
-                max="100"
+                min={questionData.min}
+                max={questionData.max}
                 value={selectedValue}
                 onChange={(e) => setSelectedValue(Number(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
