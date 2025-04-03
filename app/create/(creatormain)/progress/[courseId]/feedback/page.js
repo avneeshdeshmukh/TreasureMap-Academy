@@ -1,8 +1,10 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 export default function Feedback() {
+  const {courseId} = useParams();
   const feedbacks = [
     {
       adminName: "John Doe",

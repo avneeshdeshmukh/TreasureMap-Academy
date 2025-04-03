@@ -1,8 +1,8 @@
 export const metadata = {
-    title: "Lesson",
+    title: "Badges",
     description: "View the top players on the leaderboard.",
 };
 
-export default function LessonPageLayout({ children }) {
+export default function SignUpLayout({ children }) {
     return <>{children}</>;
 }

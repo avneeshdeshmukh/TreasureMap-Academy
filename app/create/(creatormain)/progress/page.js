@@ -105,7 +105,7 @@ export default function ProgressPage() {
                     <button
                       className="text-xs font-medium text-gray-900 bg-yellow-400 px-3 py-1 rounded-lg shadow-sm transition duration-300 ease-in-out hover:bg-yellow-500 hover:shadow-md"
                       onClick={() =>
-                        router.push(`create/${course.id}/feedback`)
+                        router.push(`/create/progress/${course.courseId}/feedback`)
                       }
                     >
                       View Feedback
