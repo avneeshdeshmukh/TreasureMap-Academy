@@ -9,10 +9,8 @@ import { auth } from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState, useEffect } from "react";
 
-// Renamed to start with an uppercase letter
 const CreatorDashboard = () => {
     const firestore = getFirestore();
-    // Static data for now; dynamic data can replace this in the future
     const userId = auth.currentUser.uid;
     const userRef = doc(firestore, "users", userId);
     const courseProgressRef = doc(firestore, "courseProgress", userId);
@@ -45,4 +43,4 @@ const CreatorDashboard = () => {
     );
 };
 
-export default CreatorDashboard; // Updated export
+export default CreatorDashboard; 
