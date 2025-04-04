@@ -1,17 +1,16 @@
-"use client"
+"use client";
 
 import { FeedWrapper } from "@/components/feed-wrapper";
-import { Header } from './header'
-import YourCourses from '@/components/creatorDashboard/yourcourses'
-import CreatorStats from '@/components/creatorDashboard/creatorStats'
+import { Header } from './header';
+import YourCourses from '@/components/creatorDashboard/yourcourses';
+import CreatorStats from '@/components/creatorDashboard/creatorStats';
 import FeaturedCourses from "@/components/creatorDashboard/featuredcourses";
 import { auth } from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useState, useEffect } from "react";
 
-const creatordashboard = () => {
+const CreatorDashboard = () => {
     const firestore = getFirestore();
-    // Static data for now; dynamic data can replace this in the future
     const userId = auth.currentUser.uid;
     const userRef = doc(firestore, "users", userId);
     const courseProgressRef = doc(firestore, "courseProgress", userId);
@@ -28,19 +27,20 @@ const creatordashboard = () => {
             } catch (err) {
                 console.log(err);
             }
-        }
+        };
 
         fetchCourseProgress();
-    }, [userId])
+    }, [userId]);
 
     return (
         courseProgress &&
         <FeedWrapper>
             <Header user={user} />
-            <YourCourses data = {courseProgress}/>
+            <YourCourses data={courseProgress} />
             <CreatorStats data={courseProgress} />
             {/* <FeaturedCourses /> */}
         </FeedWrapper>
-    )
-}
-export default creatordashboard;
+    );
+};
+
+export default CreatorDashboard; 
