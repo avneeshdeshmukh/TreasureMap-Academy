@@ -272,7 +272,7 @@ export default function VideoUploadForm({ onNext }) {
 
 
             {isEditing && (
-              <p className="text-sm text-gray-500">Drag and drop videos to reorder, then click "Update".</p>
+              <p className="text-sm text-gray-500">Drag and drop videos to reorder, then click &quot;Update&quot;.</p>
             )}
             {/* Use DragDropContext to wrap the videos list */}
             {videos.length > 0 ? (
@@ -352,7 +352,7 @@ export default function VideoUploadForm({ onNext }) {
               </DragDropContext>
             ) : (
               <p className="text-sm text-gray-500 text-center">
-                No videos added yet. Click "Add Video" to get started.
+                No videos added yet. Click &quot;Add Video&quot; to get started.
               </p>
             )}
 

@@ -5,7 +5,7 @@ const HowItWorks = () => {
     <div className="how-it-works-section py-10 bg-white text-center px-4 sm:px-6 lg:px-12">
     <h2 className="text-3xl sm:text-4xl font-bold">How It Works</h2>
     <p className="mt-4 text-lg text-gray-600">
-      Whether you're here to learn or create, we have a simple process for everyone.
+      Whether you&apos;re here to learn or create, we have a simple process for everyone.
     </p>
 
     <div className="flex flex-col md:flex-row gap-6 mt-10">

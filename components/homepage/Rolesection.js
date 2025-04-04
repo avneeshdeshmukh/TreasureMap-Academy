@@ -60,7 +60,7 @@ const Rolesection = () => {
               Embark on an exciting journey of discovery with our carefully
               crafted lessons. Each course is a hidden gem designed to unlock
               your potential and guide you step-by-step through new skills and
-              knowledge. Whether you're a beginner or an expert, there's
+              knowledge. Whether you&apos;re a beginner or an expert, there&apos;s
               always something new to uncover!
             </p>
             <p className="text-base sm:text-md text-gray-500">
@@ -106,12 +106,12 @@ const Rolesection = () => {
             <p className="text-base sm:text-md text-gray-500">
               At Treasure Map Academy, you can upload your own courses and
               create engaging, customizable quizzes that captivate students.
-              Design courses tailored to your audience's interests for a
+              Design courses tailored to your audience&apos;s interests for a
               unique learning experience.
             </p>
             <p className="text-base sm:text-md text-gray-500">
               Explore a variety of courses based on your preferences and
-              collaborate with fellow creators. Whether you're an experienced
+              collaborate with fellow creators. Whether you&apos;re an experienced
               educator or a passionate innovator, Treasure Map Academy offers
               exciting opportunities for growth!
             </p>
