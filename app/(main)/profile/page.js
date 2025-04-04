@@ -12,13 +12,81 @@ import { useEffect, useState } from "react";
 
 const firestore = getFirestore();
 
-export default function ProfilePage() {  // ❌ Removed async
+export default function ProfilePage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // Assuming useAuth provides loading state
+
+  // Define all hooks at the top level, unconditionally
+  const [userData, setUserData] = useState(null);
+  const [coins, setCoins] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [lessonsCompleted, setLessonsCompleted] = useState(0);
+  const [quizCompleted, setQuizCompleted] = useState(0);
+  // const [createdDate, setCreatedDate] = useState(0); // Commented out as in original
+
+  useEffect(() => {
+    if (user) {
+      const getUserData = async () => {
+        try {
+          const userRef = doc(firestore, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+
+            // Extract and format the createdAt field
+            if (userData.createdAt) {
+              const createdAtDate = userData.createdAt.toDate();
+              const formattedDate = createdAtDate.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              });
+              userData.formattedCreatedAt = formattedDate;
+            }
+
+            setUserData(userData);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      const getUserProgress = async () => {
+        try {
+          const userProgRef = doc(firestore, "userProgress", user.uid);
+          const userSnap = await getDoc(userProgRef);
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            setCoins(data.coins || 0);
+            setStreak(data.streak || 0);
+
+            let totalLessons = 0;
+            let totalQuizzes = 0;
+
+            if (data.courseProgress) {
+              Object.values(data.courseProgress).forEach((course) => {
+                totalLessons += course.currentVideo - 1 || 0;
+                totalQuizzes += course.quizzesCompleted || 0;
+              });
+            }
+
+            setLessonsCompleted(totalLessons);
+            setQuizCompleted(totalQuizzes);
+          }
+        } catch (error) {
+          console.error("Error fetching user progress:", error);
+        }
+      };
+
+      getUserData();
+      getUserProgress();
+    }
+  }, [user?.uid]); // Consistent dependency as in original
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); 
+      await signOut(auth);
       console.log("User logged out successfully!");
       router.push("/login");
     } catch (error) {
@@ -26,77 +94,21 @@ export default function ProfilePage() {  // ❌ Removed async
     }
   };
 
-  if (!user) {
-    router.push("/login");
-    return null; 
+  // Handle rendering based on authentication and data states
+  if (loading) {
+    return <div className="text-center mt-12">Loading...</div>;
   }
 
-  const [userData, setUserData] = useState(null);
-  const [coins, setCoins] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [lessonsCompleted, setLessonsCompleted] = useState(0);
-  const [quizCompleted, setQuizCompleted] = useState(0);
- // const[createdDate, setCreatedDate] = useState(0);
+  if (!user) {
+    router.push("/login");
+    return null;
+  }
 
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const userRef = doc(firestore, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-    
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-    
-          // Extract and format the createdAt field
-          if (userData.createdAt) {
-            const createdAtDate = userData.createdAt.toDate(); // Convert Firestore Timestamp to Date
-            const formattedDate = createdAtDate.toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            });
-    
-            userData.formattedCreatedAt = formattedDate; // Store the formatted date
-          }
-    
-          setUserData(userData);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+  if (!userData) {
+    return <div className="text-center mt-12">Loading user data...</div>;
+  }
 
-    const getUserProgress = async () => {
-      try {
-        const userProgRef = doc(firestore, "userProgress", user.uid);
-        const userSnap = await getDoc(userProgRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          setCoins(data.coins || 0);
-          setStreak(data.streak || 0);
-
-          let totalLessons = 0;
-          let totalQuizzes = 0;
-
-          if (data.courseProgress) {
-            Object.values(data.courseProgress).forEach((course) => {
-              totalLessons += course.currentVideo-1 || 0;
-              totalQuizzes += course.quizzesCompleted || 0;
-            });
-          }
-
-          setLessonsCompleted(totalLessons);
-          setQuizCompleted(totalQuizzes);
-        }
-      } catch (error) {
-        console.error("Error fetching user progress:", error);
-      }
-    };
-
-    getUserData();
-    getUserProgress();
-  }, [user.uid]); 
-
+  // Render the profile page (unchanged from original)
   return (
     <div className="min-h-screen bg-[#1a2332] text-white py-12">
       <div className="max-w-5xl mx-auto px-6">
