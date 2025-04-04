@@ -191,7 +191,7 @@ export default  function LoginPage() {
                 Ahoy, Fearless Buccaneer!
               </h2>
               <div className="border-2 w-10 border-yellow-400 inline-block mb-2"></div>
-              <p className="mb-5">Don't have an account yet?</p>
+              <p className="mb-5">Don&apos;t have an account yet?</p>
               <Link
                 href="/signup"
                 className="border-2 border-yellow-400 rounded-full px-12 py-2 inline-block font-semibold hover:bg-yellow-400 hover:text-blue-800"
