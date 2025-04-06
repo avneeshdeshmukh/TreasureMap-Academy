@@ -8,7 +8,7 @@ const YourCourses = ({ data }) => {
   }
 
   const courses = data.courses;
-  console.log(isEmpty(courses));
+  console.log(courses);
   return (
     <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mt-6 mx-auto max-w-3xl">
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -26,9 +26,9 @@ const YourCourses = ({ data }) => {
     <div className="courses-container bg-[#f8f4eb] border border-dashed border-[#d1c4a8] rounded-lg p-4 sm:p-6">
       {!isEmpty(courses) ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {Object.values(courses).map((course) => (
+          {Object.values(courses).map((course, index) => (
             <div 
-              key={course.courseId} 
+              key={index} 
               className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col"
             >
               <h2 className="text-xl font-semibold text-[#5a3b1a] mb-2">{course.title}</h2>

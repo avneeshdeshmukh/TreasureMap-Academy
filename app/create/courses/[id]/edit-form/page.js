@@ -53,18 +53,18 @@ export default function EditFormPage() {
 
   // Handle the submit logic
   const handlePublish = async () => {
-    if (course.totalVideos < 10) {
-      alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
-      return;
-    }
+    // if (course.totalVideos < 10) {
+    //   alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
+    //   return;
+    // }
 
     const quizzesPresent = await checkQuizzes();
     console.log(quizzesPresent);
 
-    if (!quizzesPresent) {
-      alert(`Please add at least one quiz in each video`);
-      return;
-    }
+    // if (!quizzesPresent) {
+    //   alert(`Please add at least one quiz in each video`);
+    //   return;
+    // }
 
     setShowTermsModal(true);
   };
