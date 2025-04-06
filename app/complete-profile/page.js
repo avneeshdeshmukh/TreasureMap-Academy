@@ -71,7 +71,7 @@ export default function CompleteProfile() {
     setLoading(true); // Set loading to true when submitting
     setError(null); // Clear any previous errors
 
-    try {
+    try { 
       const usernameQuery = query(
         collection(firestore, "users"),
         where("username", "==", username.toLowerCase())
