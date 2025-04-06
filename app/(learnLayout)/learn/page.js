@@ -8,17 +8,23 @@ import { LessonButton } from "./lesson-button";
 import LeaderboardPos from "./leaderboard-position";
 import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc } from "firebase/firestore";
 import { useAuth } from "../../context/AuthProvider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { setLatestCourse } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import StreakGoalModal from "./streak-modal";
 import { IoClose } from 'react-icons/io5'; // Import the close icon
+import Certificate from "@/components/certificate";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const LearnPage = () => {
     const firestore = getFirestore();
     const { user } = useAuth();
     const router = useRouter();
+    const [isCertOpen, setIsCertOpen] = useState(false);
+    const certificateRef = useRef(null);
+
 
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
@@ -51,6 +57,20 @@ const LearnPage = () => {
             setTopCourses(usrData.enrolledCourses)
         else if (usrData.enrolledCourses?.length > 3)
             setTopCourses(usrData.enrolledCourses.slice(0, 3))
+    };
+
+    const downloadPDF = () => {
+        if (!certificateRef.current) return;
+
+        html2canvas(certificateRef.current, { scale: 2 }).then((canvas) => {
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("landscape");
+            pdf.addImage(imgData, "PNG", 10, 10, 280, 200);
+            pdf.save("certificate.pdf");
+        });
+
+        setModalOpen(true);
+        setIsCertOpen(false);
     };
 
     const handleSaveGoal = async (goal) => {
@@ -228,6 +248,7 @@ const LearnPage = () => {
                                         aria-hidden
                                     />
                                 </div>
+
                             }
                             <img
                                 src={isChestOpened ? "images/chest_opened.png" : "images/chest_closed.png"}
@@ -241,6 +262,39 @@ const LearnPage = () => {
                             />
                         </div>
                     </div>
+                    {isCertOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+                            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl relative">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setIsCertOpen(false)}
+                                    className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl"
+                                >
+                                    &times;
+                                </button>
+
+                                {/* Certificate Component */}
+                                <div ref={certificateRef}>
+                                    <Certificate
+                                        username="John Doe"
+                                        courseName="Advanced Treasure Hunting"
+                                        creatorName="Captain Silver"
+                                        issueDate="April 4, 2025"
+                                    />
+                                </div>
+
+                                {/* Download Button */}
+                                <div className="mt-6 flex justify-center">
+                                    <button
+                                        onClick={downloadPDF}
+                                        className="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+                                    >
+                                        Download as PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
 
                 </FeedWrapper>
@@ -254,11 +308,21 @@ const LearnPage = () => {
                         <button
                             onClick={() => {
                                 setModalOpen(false);
+                                setIsCertOpen(true);
+                            }}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+                        >
+                            Get Your Certificate
+                        </button>
+                        <button
+                            onClick={() => {
+                                setModalOpen(false);
                                 setIsChestOpened(true);
                             }}
                             className="absolute -top-4 -right-4 text-white bg-black rounded-full p-1"
                             aria-label="Close modal"
                         >
+
                             <IoClose size={24} />
                         </button>
                     </div>
