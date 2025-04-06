@@ -121,6 +121,7 @@ export default function VideoQuiz({
     const getVideo = async () => {
       try {
         const videoSnap = await getDoc(videoRef);
+
         const vid = videoSnap.data();
         const quiz = vid.quizzes;
 
@@ -365,6 +366,8 @@ export default function VideoQuiz({
             );
 
             try {
+              const userProgressSnap = await getDoc(userProgressRef);
+              const userProgressData = userProgressSnap.data();
               const vnSnap = await getDoc(videoNotesRef);
               if (vnSnap.exists() && vnSnap.data().isCompleted) {
                 return; // Don't update if already true
@@ -375,13 +378,31 @@ export default function VideoQuiz({
                   { isCompleted: true },
                   { merge: true }
                 );
-                await updateDoc(
-                  userProgressRef,
-                  {
-                    [`courseProgress.${courseId}.currentVideo`]: increment(1),
-                  },
-                  { merge: true }
-                );
+
+                const courseSnap = await getDoc(doc(firestore, "courses", courseId));
+                const courseData = courseSnap.data();
+
+                if (userProgressData.courseProgress[courseId].currentVideo === courseData.totalVideos) {
+                  await updateDoc(
+                    userProgressRef,
+                    {
+                      [`courseProgress.${courseId}.currentVideo`]: increment(1),
+                      [`courseProgress.${courseId}.isCompleted`]: true,
+                      [`courseProgress.${courseId}.isRewardClaimed`]: false,
+                    },
+                    { merge: true }
+                  );
+                  console.log("Boobs")
+                } else {
+                  await updateDoc(
+                    userProgressRef,
+                    {
+                      [`courseProgress.${courseId}.currentVideo`]: increment(1),
+                    },
+                    { merge: true }
+                  );
+                  console.log("No Boobs")
+                }
                 setIsIncremented(true);
               }
             } catch (error) {

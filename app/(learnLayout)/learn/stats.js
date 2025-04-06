@@ -35,7 +35,7 @@ export const Stats = ({ userProgress, courseId, setIsModalOpen }) => {
                 label="Lessons Completed"
             />
             <ProgressBar
-                currentValue={userProgress.coins}
+                currentValue={userProgress.courseProgress[courseId].courseCoins || 0}
                 // maxValue={300}
                 label="Coins Earned"
             />

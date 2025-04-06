@@ -220,7 +220,7 @@ const LearnPage = () => {
 
                         <div className="relative mt-8"
                         >
-                            {/* {(!isChestOpened) &&
+                            {(!isChestOpened) &&
                                 <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-yellow-400 px-3 py-2.5 font-bold uppercase tracking-wide text-white">
                                     Open
                                     <div
@@ -228,15 +228,15 @@ const LearnPage = () => {
                                         aria-hidden
                                     />
                                 </div>
-                            } */}
+                            }
                             <img
-                                src={isChestOpened ? "images/chest_opened.png" : "images/chest_closed-modified.png"}
+                                src={isChestOpened ? "images/chest_opened.png" : "images/chest_closed.png"}
                                 alt="Treasure Chest"
-                                // onClick={() => {
-                                //     if (!isChestOpened) {
-                                //         setModalOpen(true);
-                                //     }
-                                // }}
+                                onClick={() => {
+                                    if (!isChestOpened) {
+                                        setModalOpen(true);
+                                    }
+                                }}
                                 className="mt-4 cursor-pointer w-24 h-24"
                             />
                         </div>
