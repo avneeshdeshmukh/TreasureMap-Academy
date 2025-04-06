@@ -1,17 +1,18 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
 import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import { courseCategories, courseLanguages } from "@/lib/data";
 import Select from "react-select";
 import { getFirestore, getDoc, setDoc, doc, increment, updateDoc } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { auth } from "@/lib/firebase";
+import { CircularProgressbar } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 
 const firestore = getFirestore();
 
 const CourseForm = ({ closeForm, onCourseSubmit }) => {
-
   const { user } = useAuth();
 
   const [courseDetails, setCourseDetails] = useState({
@@ -25,13 +26,14 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // New state for upload progress
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
 
-  //const router = useRouter();
   const fileInputRef = useRef(null);
   const courseId = uuidv4();
 
+  // Handle thumbnail file selection
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -43,6 +45,7 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
     }
   };
 
+  // Handle category selection
   const handleCategoryChange = (selectedOptions) => {
     setCourseDetails((prev) => ({
       ...prev,
@@ -50,6 +53,7 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
     }));
   };
 
+  // Get file extension from MIME type
   const getFileExtension = (mimeType) => {
     const mimeMapping = {
       "image/jpeg": "jpeg",
@@ -57,12 +61,11 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
       "image/png": "png",
       "image/gif": "gif",
       "image/webp": "webp",
-      // Add more mappings as needed
     };
     return mimeMapping[mimeType] || "unknown";
   };
 
-
+  // Generate upload URL for Firebase Storage
   const generateUploadUrl = async () => {
     if (!courseDetails.thumbnail) {
       setErrors({ thumbnail: "Please select a thumbnail file first." });
@@ -99,26 +102,42 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
     }
   };
 
+  // Upload thumbnail with progress tracking
   const uploadThumbnail = async (url) => {
     if (!url || !courseDetails.thumbnail) {
       setErrors({ thumbnail: "No thumbnail file selected or upload URL missing." });
-      return false;
+      return null;
     }
 
     try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": courseDetails.thumbnail.type,
-        },
-        body: courseDetails.thumbnail,
-      });
+      setUploadProgress(0); // Reset progress before upload
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader("Content-Type", courseDetails.thumbnail.type);
 
-      if (response.ok) {
-        return url.split("?")[0]; // Return the file URL (without query params)
-      } else {
-        throw new Error("Failed to upload thumbnail");
-      }
+      // Track upload progress
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          setUploadProgress(percentComplete);
+        }
+      };
+
+      return new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(url.split("?")[0]);
+          } else {
+            reject(new Error("Failed to upload thumbnail"));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error("Error uploading thumbnail"));
+        };
+
+        xhr.send(courseDetails.thumbnail);
+      });
     } catch (err) {
       console.error("Error uploading thumbnail:", err);
       setErrors({ thumbnail: "Error uploading thumbnail." });
@@ -126,8 +145,8 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
     }
   };
 
+  // Handle form submission
   const handleSubmit = async () => {
-    // Initialize error object
     const newErrors = {};
     if (!courseDetails.courseTitle) newErrors.courseTitle = "Course title is required.";
     if (!courseDetails.description) newErrors.description = "Description is required.";
@@ -135,31 +154,23 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
       newErrors.category = "At least one category is required.";
     if (!courseDetails.difficulty) newErrors.difficulty = "Difficulty is required.";
     if (!courseDetails.thumbnail) newErrors.thumbnail = "Thumbnail is required.";
-    if (!courseDetails.price || parseFloat(courseDetails.price) < 0) newErrors.price = "Please enter a valid price.";
+    if (!courseDetails.price || parseFloat(courseDetails.price) < 0)
+      newErrors.price = "Please enter a valid price.";
     if (!courseDetails.language) newErrors.language = "Please select a language.";
 
-
-    // Set errors if any and exit early
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    // Disable the submit button
     setIsSubmitting(true);
     try {
       const uploadUrl = await generateUploadUrl();
       const thumbnailUrl = uploadUrl ? await uploadThumbnail(uploadUrl) : null;
 
-      // if (!thumbnailUrl) {
-      //   setErrors({ thumbnail: "Failed to upload thumbnail. Submission aborted." });
-      //   return;
-      // }
-
       const userRef = doc(firestore, "users", user.uid);
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
-      // Create a new course object
       const newCourse = {
         courseId,
         creatorId: user.uid,
@@ -173,59 +184,43 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
         isPublished: false,
         totalVideos: 0,
         totalQuizzes: 0,
-        thumbnailURL: `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`,
+        thumbnailURL: thumbnailUrl
+          ? `${userData.username}/${courseId}/thumbnail.${getFileExtension(courseDetails.thumbnail.type)}`
+          : null,
       };
 
       const courseRef = doc(firestore, "courses", courseId);
       const courseProgressRef = doc(firestore, "courseProgress", user.uid);
       await updateDoc(courseProgressRef, {
         totalCourses: increment(1),
-      }, { merge: true })
+      }, { merge: true });
       await setDoc(courseRef, newCourse, { merge: true });
 
-      // Call the onCourseSubmit function to propagate changes
       if (onCourseSubmit) {
         onCourseSubmit(newCourse);
       }
 
-      // Reset form state
       setCourseDetails({
         courseTitle: "",
         description: "",
         category: "",
+        price: "",
+        language: "",
         difficulty: "",
         thumbnail: null,
       });
 
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
 
-      // Clear errors and enable submit button
       setErrors({});
-      setIsSubmitting(false);
-
-    }
-    catch (err) {
-      setError(`An error occured : ${err}`)
+    } catch (err) {
+      setError(`An error occurred: ${err}`);
+    } finally {
+      setIsSubmitting(false); // Ensure ring disappears after submission
     }
   };
-
-
-  // const handleDelete = (id) => {
-  //   if (confirm("Are you sure you want to delete this course?")) {
-  //     setSubmittedCourses((prevCourses) =>
-  //       prevCourses.filter((course) => course.id !== id)
-  //     );
-  //   }
-  // };
-
-  // const handleEdit = (courseid) => {
-  //     router.push(`/mycourses/${courseid}/edit-form`);
-  //     console.log("edit button is working")
-  // };
-
 
   return (
     <div className="bg-white rounded-lg shadow-md p-8 mt-6 mx-auto max-w-3xl relative">
@@ -233,17 +228,16 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
         onClick={closeForm}
         className="absolute top-2 right-2 text-gray-500 hover:text-black text-lg font-bold"
       >
-        &times;
+        ×
       </button>
       <h3 className="text-2xl font-semibold text-gray-800 mb-6">Create Course</h3>
-      {error && <p>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       {/* Course Title */}
       <div className="mb-6">
         <label className="block font-medium text-gray-700 mb-2">Course Title</label>
         <p className="text-sm text-slate-600 py-1">
-          What would you like to name your course? Don&apos;t worry, you can change
-          this later.
+          What would you like to name your course? Don't worry, you can change this later.
         </p>
         <input
           type="text"
@@ -297,13 +291,11 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
           styles={{
             control: (base) => ({
               ...base,
-              border: "1px solid #d1d5db", // Matches the border style of other inputs
+              border: "1px solid #d1d5db",
               borderRadius: "0.375rem",
               padding: "3px",
               boxShadow: "none",
-              "&:hover": {
-                borderColor: "#a0aec0",
-              },
+              "&:hover": { borderColor: "#a0aec0" },
             }),
           }}
         />
@@ -348,19 +340,16 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
           styles={{
             control: (base) => ({
               ...base,
-              border: "1px solid #d1d5db", // Matches the style of other inputs
+              border: "1px solid #d1d5db",
               borderRadius: "0.375rem",
               padding: "3px",
               boxShadow: "none",
-              "&:hover": {
-                borderColor: "#a0aec0",
-              },
+              "&:hover": { borderColor: "#a0aec0" },
             }),
           }}
         />
         {errors.language && <p className="text-red-500 text-sm">{errors.language}</p>}
       </div>
-
 
       {/* Difficulty */}
       <div className="mb-6">
@@ -398,52 +387,41 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
           className="w-full"
         />
         {courseDetails.thumbnail && (
-          <p className="text-green-600">
-            Thumbnail uploaded: {courseDetails.thumbnail.name}
-          </p>
+          <p className="text-green-600">Thumbnail uploaded: {courseDetails.thumbnail.name}</p>
         )}
         {errors.thumbnail && (
           <p className="text-red-500 text-sm">{errors.thumbnail}</p>
         )}
-
       </div>
+
+      {/* Uploading Ring Overlay */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <p className="mb-4 text-lg font-semibold">Uploading thumbnail...</p>
+            <div className="w-32 h-32">
+              <CircularProgressbar
+                value={uploadProgress}
+                text={`${Math.round(uploadProgress)}%`}
+                styles={{
+                  path: { stroke: "hsl(48, 100%, 67%)" }, 
+                  text: { fill: "#000", fontSize: "16px" },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex justify-end mt-6">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={closeForm}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="ghost" onClick={closeForm} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="ghost" onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
-
-      {/* Submitted Courses */}
-      {/* {submittedCourses.length > 0 && (
-        <div className="mt-10">
-          <h3 className="text-lg font-semibold mb-4">Your Courses</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {submittedCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                onDelete={() => handleDelete(course.id)}
-                onEdit={() => handleEdit(course.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
