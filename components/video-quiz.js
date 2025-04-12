@@ -163,8 +163,8 @@ export default function VideoQuiz({
         });
 
         if (!response.ok) throw new Error("Failed to fetch video URL");
-
         const data = await response.json();
+        console.time("VideoStartStreaming");
         setVideoUrl(data.videoUrl);
       } catch (err) {
         console.error("Error fetching video URL:", err);
@@ -389,10 +389,10 @@ export default function VideoQuiz({
                       [`courseProgress.${courseId}.currentVideo`]: increment(1),
                       [`courseProgress.${courseId}.isCompleted`]: true,
                       [`courseProgress.${courseId}.isRewardClaimed`]: false,
+                      [`courseProgress.${courseId}.dateCompleted`]: new Date(),
                     },
                     { merge: true }
                   );
-                  console.log("Boobs")
                 } else {
                   await updateDoc(
                     userProgressRef,
@@ -401,7 +401,6 @@ export default function VideoQuiz({
                     },
                     { merge: true }
                   );
-                  console.log("No Boobs")
                 }
                 setIsIncremented(true);
               }
@@ -472,6 +471,11 @@ export default function VideoQuiz({
           player.currentTime(lastAllowedTimeRef.current); // Restrict seeking past quizzes
         }
       };
+
+      player.on("loadeddata", () => {
+        console.timeEnd("VideoStartStreaming");
+      });
+      
 
       player.on("timeupdate", handleTimeUpdate);
       player.on("ended", function () {
