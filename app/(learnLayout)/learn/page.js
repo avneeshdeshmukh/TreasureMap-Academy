@@ -6,7 +6,7 @@ import { StreakIcons } from "@/components/streak-icons";
 import { Header } from "./header";
 import { LessonButton } from "./lesson-button";
 import LeaderboardPos from "./leaderboard-position";
-import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getFirestore, collection, query, where, getDocs, getDoc, updateDoc, increment } from "firebase/firestore";
 import { useAuth } from "../../context/AuthProvider";
 import { useState, useEffect, useRef } from "react";
 import { setLatestCourse } from "@/lib/utils";
@@ -17,6 +17,7 @@ import { IoClose } from 'react-icons/io5'; // Import the close icon
 import Certificate from "@/components/certificate";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { useCoins } from "@/app/context/CoinsContext";
 
 const LearnPage = () => {
     const firestore = getFirestore();
@@ -24,7 +25,7 @@ const LearnPage = () => {
     const router = useRouter();
     const [isCertOpen, setIsCertOpen] = useState(false);
     const certificateRef = useRef(null);
-
+    const { coins, setCoins } = useCoins();
 
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
@@ -33,6 +34,9 @@ const LearnPage = () => {
     const [modalOpen, setModalOpen] = useState(false);
 
     const [courseId, setCourseId] = useState(null);
+    const [isCourseCompleted, setIsCourseCompleted] = useState(false);
+    const [isRewardClaimed, setIsRewardClaimed] = useState(false);
+    const [reward, setReward] = useState(0);
     const [topCourses, setTopCourses] = useState([]);
     const [userData, setUserData] = useState(null);
     const [videos, setVideos] = useState([]);
@@ -51,8 +55,22 @@ const LearnPage = () => {
 
         const usrData = usr.data();
         setUserData(usrData);
+        const courseId = usrData.enrolledCourses?.[0] || null;
 
-        setCourseId(usrData.enrolledCourses?.[0] || null);
+        setCourseId(courseId);
+
+        const userProgressSnap = await getDoc(userProgRef);
+        const userProgressData = userProgressSnap.data()
+
+        if (courseId) {
+            const courseData = userProgressData.courseProgress[courseId];
+            setIsCourseCompleted(courseData.isCompleted || false);
+            setIsRewardClaimed(courseData.isRewardClaimed || false);
+
+            console.log(courseData.isCompleted)
+            console.log(courseData.isCompleted)
+        }
+
         if (usrData.enrolledCourses?.length <= 3)
             setTopCourses(usrData.enrolledCourses)
         else if (usrData.enrolledCourses?.length > 3)
@@ -106,6 +124,19 @@ const LearnPage = () => {
         if (!courseId || !videos.length) return;
 
         try {
+            const courseSnap = await getDoc(doc(firestore, "courses", courseId));
+            const difficulty = courseSnap.data().difficulty;
+            switch (difficulty) {
+                case "Beginner":
+                    setReward(10000);
+                    break;
+                case "Intermediate":
+                    setReward(15000);
+                    break;
+                case "Advanced":
+                    setReward(25000);
+                    break;
+            }
             const prog = await getDoc(userProgRef);
             const progData = prog.data();
             setUserProgress(progData);
@@ -166,6 +197,7 @@ const LearnPage = () => {
     const handleCourseSelect = async (selectedCourse) => {
         const updatedCourses = setLatestCourse(userData.enrolledCourses, selectedCourse);
         setCourseId(updatedCourses[0]);
+
         if (userData.enrolledCourses?.length <= 3)
             setTopCourses(updatedCourses)
         else if (userData.enrolledCourses?.length > 3)
@@ -174,11 +206,33 @@ const LearnPage = () => {
         await updateDoc(userRef, {
             enrolledCourses: updatedCourses
         })
+
+        const userProgressSnap = await getDoc(userProgRef);
+        const userProgressData = userProgressSnap.data();
+
+        const courseData = userProgressData.courseProgress[updatedCourses[0]];
+        setIsCourseCompleted(courseData.isCompleted || false);
+        setIsRewardClaimed(courseData.isRewardClaimed || false);
     };
 
     const handleAfterSelect = async () => {
         fetchUserDetails();
         fetchVideos();
+    }
+
+    const handleRewardClaim = async () => {
+        const userProgressSnap = await getDoc(userProgRef);
+        const userProgressData = userProgressSnap.data();
+
+        // await updateDoc(userProgRef, {
+        //     coins: increment(reward),
+        //     [`courseProgress.${courseId}.isRewardClaimed`]: true,
+        // });
+
+        setCoins(userProgressData.coins + reward);
+        setIsRewardClaimed(true);
+
+        setModalOpen(true);
     }
 
     if (topCourses.length === 0) {
@@ -207,7 +261,7 @@ const LearnPage = () => {
         return (
             <div className="flex flex-row-reverse gap-[48px] px-6">
                 <StickyWrapper>
-                    <StreakIcons streak={39} />
+                    <StreakIcons />
                     <Stats userProgress={userProgress} courseId={topCourses[0]} setIsModalOpen={setIsModalOpen} />
                     <LeaderboardPos position={position} level={level} />
                 </StickyWrapper>
@@ -240,7 +294,7 @@ const LearnPage = () => {
 
                         <div className="relative mt-8"
                         >
-                            {(!isChestOpened) &&
+                            {(isCourseCompleted && !isRewardClaimed && !isCertOpen && !modalOpen) &&
                                 <div className="absolute -top-6 left-2.5 z-10 animate-bounce rounded-xl border-2 bg-yellow-400 px-3 py-2.5 font-bold uppercase tracking-wide text-white">
                                     Open
                                     <div
@@ -251,19 +305,33 @@ const LearnPage = () => {
 
                             }
                             <img
-                                src={isChestOpened ? "images/chest_opened.png" : "images/chest_closed.png"}
+                                src={
+                                    !isCourseCompleted
+                                        ? "images/chest_closed_bw.png"
+                                        : isRewardClaimed
+                                            ? "images/chest_opened.png"
+                                            : "images/chest_closed.png"
+                                }
                                 alt="Treasure Chest"
                                 onClick={() => {
-                                    if (!isChestOpened) {
-                                        setModalOpen(true);
+                                    if (isCourseCompleted && !isRewardClaimed) {
+                                        handleRewardClaim();
+                                    } else if (isRewardClaimed) {
+                                        setIsCertOpen(true);
                                     }
                                 }}
                                 className="mt-4 cursor-pointer w-24 h-24"
                             />
                         </div>
                     </div>
+                    {isRewardClaimed && (
+                        <p className="font-extrabold text-center text-yellow-400 drop-shadow-lg mb-4">
+                            + {reward} coins earned!
+                        </p>
+                    )
+                    }
                     {isCertOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-[200]">
                             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl relative">
                                 {/* Close Button */}
                                 <button
@@ -304,6 +372,9 @@ const LearnPage = () => {
                 {/* Modal for Chest Opening GIF */}
                 <div className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     <div className="relative w-80 h-80">
+                        <div className="text-xl md:text-4xl font-extrabold text-yellow-400 drop-shadow-lg mb-4">
+                            +{reward} coins earned!
+                        </div>
                         <img src="images/chest_gif.gif" alt="Opening Chest" className="w-full h-full shadow-lg" />
                         <Button
                             onClick={() => {
@@ -328,7 +399,7 @@ const LearnPage = () => {
                         </button>
                     </div>
                 </div>
-            </div>
+            </div >
         );
     }
 }
