@@ -376,15 +376,16 @@ const LearnPage = () => {
                             +{reward} coins earned!
                         </div>
                         <img src="images/chest_gif.gif" alt="Opening Chest" className="w-full h-full shadow-lg" />
-                        <button
+                        <Button
                             onClick={() => {
                                 setModalOpen(false);
                                 setIsCertOpen(true);
                             }}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+                            variant={"secondary"}
+                            className="ml-14"
                         >
                             Get Your Certificate
-                        </button>
+                        </Button>
                         <button
                             onClick={() => {
                                 setModalOpen(false);
