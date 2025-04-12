@@ -305,15 +305,16 @@ const LearnPage = () => {
                 <div className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${modalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                     <div className="relative w-80 h-80">
                         <img src="images/chest_gif.gif" alt="Opening Chest" className="w-full h-full shadow-lg" />
-                        <button
+                        <Button
                             onClick={() => {
                                 setModalOpen(false);
                                 setIsCertOpen(true);
                             }}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition"
+                            variant={"secondary"}
+                            className="ml-14"
                         >
                             Get Your Certificate
-                        </button>
+                        </Button>
                         <button
                             onClick={() => {
                                 setModalOpen(false);
