@@ -47,7 +47,7 @@ export const Header = ({ topCourses, onCourseSelect, afterSelect }) => {
 
     if (courses) {
         return (
-            <div className="sticky py-4 lg:top-2 top-14 bg-slate-800 lg:pt-[28px] flex items-center justify-between shadow-lg border-4 border-[#2c3748] border-b-8 border-b-[#11151c] mb-10 text-white rounded-sm z-50 lg:mt-[-28px]">
+            <div className="sticky py-4 lg:top-2 top-14 bg-slate-800 lg:pt-[28px] flex items-center justify-between shadow-lg border-4 border-[#2c3748] border-b-8 border-b-[#11151c] mb-10 text-white rounded-sm z-20 lg:mt-[-28px]">
                 <div />
                 <div className="w-full flex justify-center">
                     <div
