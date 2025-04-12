@@ -34,6 +34,8 @@ const LearnPage = () => {
     const [modalOpen, setModalOpen] = useState(false);
 
     const [courseId, setCourseId] = useState(null);
+    const [currentCourse, setCurrentCourse] = useState(null);
+    const [currentCourseCreator, setCurrentCourseCreator] = useState(null);
     const [isCourseCompleted, setIsCourseCompleted] = useState(false);
     const [isRewardClaimed, setIsRewardClaimed] = useState(false);
     const [reward, setReward] = useState(0);
@@ -125,6 +127,12 @@ const LearnPage = () => {
 
         try {
             const courseSnap = await getDoc(doc(firestore, "courses", courseId));
+            setCurrentCourse(courseSnap.data());
+
+            const creatorSnap = await getDoc(doc(firestore, "users", courseSnap.data().creatorId));
+            const creatorName = creatorSnap.data().name;
+            setCurrentCourseCreator(creatorName);
+
             const difficulty = courseSnap.data().difficulty;
             switch (difficulty) {
                 case "Beginner":
@@ -220,6 +228,16 @@ const LearnPage = () => {
         fetchVideos();
     }
 
+    const formatDate = (timestamp) => {
+        if (!timestamp) return "N/A"; // Handle null/undefined case
+        const date = timestamp.toDate(); // Convert Firestore Timestamp to JS Date
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        }); // e.g., "April 12, 2025"
+    };
+
     const handleRewardClaim = async () => {
         const userProgressSnap = await getDoc(userProgRef);
         const userProgressData = userProgressSnap.data();
@@ -231,7 +249,7 @@ const LearnPage = () => {
 
         setCoins(userProgressData.coins + reward);
         setIsRewardClaimed(true);
-
+        console.log(userProgress.courseProgress[courseId].dateCompleted);
         setModalOpen(true);
     }
 
@@ -344,10 +362,10 @@ const LearnPage = () => {
                                 {/* Certificate Component */}
                                 <div ref={certificateRef}>
                                     <Certificate
-                                        username="John Doe"
-                                        courseName="Advanced Treasure Hunting"
-                                        creatorName="Captain Silver"
-                                        issueDate="April 4, 2025"
+                                        username={user.displayName}
+                                        courseName={currentCourse.title}
+                                        creatorName={currentCourseCreator}
+                                        issueDate={formatDate( userProgress.courseProgress[courseId].dateCompleted)}
                                     />
                                 </div>
 
