@@ -242,10 +242,10 @@ const LearnPage = () => {
         const userProgressSnap = await getDoc(userProgRef);
         const userProgressData = userProgressSnap.data();
 
-        // await updateDoc(userProgRef, {
-        //     coins: increment(reward),
-        //     [`courseProgress.${courseId}.isRewardClaimed`]: true,
-        // });
+        await updateDoc(userProgRef, {
+            coins: increment(reward),
+            [`courseProgress.${courseId}.isRewardClaimed`]: true,
+        });
 
         setCoins(userProgressData.coins + reward);
         setIsRewardClaimed(true);
