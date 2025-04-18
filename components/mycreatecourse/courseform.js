@@ -237,7 +237,7 @@ const CourseForm = ({ closeForm, onCourseSubmit }) => {
       <div className="mb-6">
         <label className="block font-medium text-gray-700 mb-2">Course Title</label>
         <p className="text-sm text-slate-600 py-1">
-          What would you like to name your course? Don't worry, you can change this later.
+          What would you like to name your course? Don&apos;t worry, you can change this later.
         </p>
         <input
           type="text"
