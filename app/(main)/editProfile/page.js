@@ -78,7 +78,7 @@ export default function EditProfilePage() {
         pauseOnHover: true,
         draggable: true,
       });
-      router.back();
+      router.push("/profile");
     } catch (err) {
       setError(err.message || "Failed to update profile");
     } finally {
@@ -95,7 +95,7 @@ export default function EditProfilePage() {
       <div className="max-w-4xl mx-auto px-6">
         {/* Back Button */}
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push("/profile")}
           className="flex items-center gap-2 text-gray-300 hover:text-yellow-500 mb-6"
         >
           <ArrowLeft size={20} /> Back
@@ -143,7 +143,7 @@ export default function EditProfilePage() {
             <Button variant="secondary" type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save Changes"}
             </Button>
-            <Button variant="danger" onClick={() => router.back()} disabled={loading}>
+            <Button variant="danger" onClick={() => router.push("/profile")} disabled={loading}>
               Cancel
             </Button>
           </div>
