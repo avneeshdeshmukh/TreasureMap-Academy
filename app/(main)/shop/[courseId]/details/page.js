@@ -217,7 +217,7 @@ export default function Details() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount : course.price}),
+        body: JSON.stringify({ amount: course.price }),
       });
 
       const data = await response.json();
@@ -235,8 +235,36 @@ export default function Details() {
         order_id: data.orderId,
         name: 'TreasureMap Academy',
         description: `Payment for the course - ${course.title}`,
-        handler: (response) => {
-          alert(`Payment successful: ${response.razorpay_payment_id}`);
+        handler: async (response) => {
+          console.log('Payment Response:', response);
+
+          try {
+            const verifyResponse = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+
+            if (verifyData.success) {
+              // Redirect to success page with payment ID as query param
+              // handleEnroll();
+            } else {
+              alert('Payment verification failed');
+              router.push('/error');
+            }
+          } catch (error) {
+            console.error('Verification error:', error);
+            alert('Error verifying payment');
+            router.push('/error');
+          }
         },
         prefill: {
           name: user.displayName,
@@ -247,6 +275,11 @@ export default function Details() {
         },
         method: {
           upi: true,
+          card: false, // Disable cards
+          netbanking: false, // Disable netbanking
+          wallet: false, // Disable wallets
+          emi: false, // Disable EMI
+          paylater: false, // Disable pay later
         },
       };
 

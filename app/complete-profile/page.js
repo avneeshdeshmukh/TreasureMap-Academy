@@ -21,6 +21,7 @@ import {
   FaBriefcase,
 } from "react-icons/fa";
 import { updateProfile } from "firebase/auth";
+import { isValidPhoneNumber } from 'libphonenumber-js';
 
 const firestore = getFirestore();
 
@@ -30,6 +31,7 @@ export default function CompleteProfile() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [occupation, setOccupation] = useState("");
   const [dob, setDob] = useState("");
   const [error, setError] = useState(null);
@@ -68,6 +70,11 @@ export default function CompleteProfile() {
       return;
     }
 
+    if (isValidPhoneNumber(phoneNumber)) {
+      setError("Please add a valid contact.");
+      return;
+    }
+
     setLoading(true); // Set loading to true when submitting
     setError(null); // Clear any previous errors
 
@@ -95,6 +102,7 @@ export default function CompleteProfile() {
         username: username.toLowerCase(),
         dob: parsedDob,
         occupation,
+        phoneNumber,
       };
 
       const progress = {
@@ -158,6 +166,24 @@ export default function CompleteProfile() {
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full outline-none bg-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <label htmlFor="name" className="text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <div className="flex items-center border border-gray-300 rounded-lg p-3">
+              <FaUser className="text-gray-500 mr-2" />
+              <input
+                type="text"
+                id="phoneNumber"
+                placeholder="Enter your Contact Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
                 required
                 className="w-full outline-none bg-transparent"
               />
