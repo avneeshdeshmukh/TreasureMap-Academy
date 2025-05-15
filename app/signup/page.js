@@ -23,6 +23,7 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import { isValidPhoneNumber } from 'libphonenumber-js';
 
 import {
   FaFacebookF,
@@ -44,6 +45,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [username, setUsername] = useState("");
   const [occupation, setOccupation] = useState("");
   const [dob, setDob] = useState("");
@@ -60,6 +62,11 @@ export default function SignUpPage() {
       throw new Error("Invalid Date of Birth");
     }
 
+    if (isValidPhoneNumber(phoneNumber)) {
+      setError("Please add a valid contact.");
+      return;
+    }
+
     const userRef = doc(firestore, "users", user.uid);
     const userProgRef = doc(firestore, "userProgress", user.uid);
 
@@ -72,6 +79,7 @@ export default function SignUpPage() {
       name,
       username: username.toLowerCase(),
       dob: parsedDob,
+      phoneNumber,
       occupation,
       provider: "email",
       createdAt: new Date(),
@@ -268,6 +276,16 @@ export default function SignUpPage() {
                       placeholder="Email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      className="bg-gray-200 outline-none text-sm flex-1"
+                    />
+                  </div>
+                  <div className="bg-gray-200 w-full max-w-xs p-2 flex items-center mb-3">
+                    <FaEnvelope className="text-gray-500 m-2" />
+                    <input
+                      type="text"
+                      placeholder="Phone Number"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
                       className="bg-gray-200 outline-none text-sm flex-1"
                     />
                   </div>

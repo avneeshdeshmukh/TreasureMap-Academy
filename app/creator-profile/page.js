@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthProvider";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { FaPlus, FaTimes } from "react-icons/fa";
-import { isValidPhoneNumber } from 'libphonenumber-js';
 
 const firestore = getFirestore();
 
@@ -15,6 +14,7 @@ export default function CompleteCreatorProfile() {
     const [expertise, setExpertise] = useState([]);
     const [currentExpertise, setCurrentExpertise] = useState("");
     const [contact, setContact] = useState("");
+    const [upi, setUpi] = useState("");
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -60,11 +60,6 @@ export default function CompleteCreatorProfile() {
             return;
         }
 
-        if (isValidPhoneNumber(contact)) {
-            setError("Please add a valid contact.");
-            return;
-        }
-
         try {
             setSubmitting(true);
             setError(null);
@@ -80,6 +75,7 @@ export default function CompleteCreatorProfile() {
                     updatedAt: new Date().toISOString()
                 },
                 contact,
+                upi,
             };
 
             const progress = {
@@ -179,6 +175,17 @@ export default function CompleteCreatorProfile() {
                             placeholder="Contact"
                             value={contact}
                             onChange={(e) => setContact(e.target.value)}
+                            className="bg-gray-200 outline-none text-sm flex-1"
+                            required
+                        />
+                    </div>
+
+                    <div className="flex">
+                        <input
+                            type="text"
+                            placeholder="UPI ID"
+                            value={upi}
+                            onChange={(e) => setUpi(e.target.value)}
                             className="bg-gray-200 outline-none text-sm flex-1"
                             required
                         />
