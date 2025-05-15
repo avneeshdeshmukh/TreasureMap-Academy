@@ -41,6 +41,21 @@ export default function Details() {
     rating: 0,
     comment: "",
   });
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  // Load Razorpay SDK dynamically
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => setScriptLoaded(true);
+    script.onerror = () => alert('Failed to load Razorpay SDK');
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const convertSecondsToHMS = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -104,7 +119,7 @@ export default function Details() {
   }, [courseId, user, enrolled]);
 
   useEffect(() => {
-    if(!creatorId) return;
+    if (!creatorId) return;
     const fetchCourseProgress = async () => {
       const courseProgressRef = doc(firestore, "courseProgress", creatorId);
       const cpro = await getDoc(courseProgressRef);
@@ -191,6 +206,57 @@ export default function Details() {
     setEnrolled(true);
   };
 
+  const initiatePayment = async () => {
+    if (!scriptLoaded || typeof window.Razorpay === 'undefined') {
+      alert('Razorpay SDK failed to load. Please try again.');
+      return;
+    }
+    try {
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount : course.price}),
+      });
+
+      const data = await response.json();
+
+      if (!data.orderId) {
+        alert('Payment initiation failed');
+        return;
+      }
+
+      // Razorpay options
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: 'INR',
+        order_id: data.orderId,
+        name: 'TreasureMap Academy',
+        description: `Payment for the course - ${course.title}`,
+        handler: (response) => {
+          alert(`Payment successful: ${response.razorpay_payment_id}`);
+        },
+        prefill: {
+          name: user.displayName,
+          email: user.email,
+        },
+        theme: {
+          color: '#3399cc',
+        },
+        method: {
+          upi: true,
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleGoToCourse = async () => {
     console.log(userData.enrolledCourses);
     const latestCourses = setLatestCourse(userData.enrolledCourses, courseId);
@@ -222,7 +288,7 @@ export default function Details() {
   const formatTimestamp = (timestamp) => {
     // Ensure the timestamp is converted to a JavaScript Date object
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp.seconds * 1000);
-  
+
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
@@ -232,7 +298,7 @@ export default function Details() {
       hour12: true, // Ensures AM/PM format
     }).format(date);
   };
-  
+
 
   // Handle review submission
   const handleSubmitReview = async (e) => {
@@ -335,7 +401,7 @@ export default function Details() {
                 {!enrolled ? (
                   <Button
                     className="w-full bg-yellow-500 text-white font-semibold py-2 rounded-lg transition duration-300 ease-in-out transform hover:bg-yellow-600 hover:scale-105 hover:shadow-lg"
-                    onClick={handleEnroll}
+                    onClick={initiatePayment}
                   >
                     Enroll Now
                   </Button>
@@ -357,152 +423,152 @@ export default function Details() {
           </div>
 
           {/* Course Details Section */}
-            <div className="mt-8 grid grid-cols-3 gap-12">
-              <div className="col-span-2 mr-10">
-                <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:shadow-xl hover:-translate-y-1">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                    Course Details
-                  </h2>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="flex items-center space-x-3">
-                      <Clock className="text-blue-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Duration</p>
-                        <p className="font-medium text-gray-900">
-                          {displayTime(course.courseDuration)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <BookOpen className="text-green-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Total Lessons</p>
-                        <p className="font-medium text-gray-900">
-                          {course.totalVideos}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <BarChart className="text-yellow-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Level</p>
-                        <p className="font-medium text-gray-900">
-                          {course.difficulty}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <User className="text-red-600" size={24} />
-                      <div>
-                        <p className="text-sm text-gray-500">Students Enrolled</p>
-                        <p className="font-medium text-gray-900">
-                          {courseProgress?.courses[courseId].enrollments}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Student Reviews Section */}
-                <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                    Student Reviews
-                  </h2>
-
-                  {/* Existing Reviews or No Reviews Message */}
-                  {reviews.length === 0 ? (
-                    <div className="text-center text-gray-500 py-6">
-                      <p>No reviews available yet</p>
-                      <p className="text-sm mt-2">
-                        Be the first to write a review!
+          <div className="mt-8 grid grid-cols-3 gap-12">
+            <div className="col-span-2 mr-10">
+              <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:shadow-xl hover:-translate-y-1">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                  Course Details
+                </h2>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="flex items-center space-x-3">
+                    <Clock className="text-blue-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Duration</p>
+                      <p className="font-medium text-gray-900">
+                        {displayTime(course.courseDuration)}
                       </p>
                     </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {reviews.map((review, index) => (
-                        <div
-                          key={index}
-                          className="border-b border-gray-200 pb-4 last:border-b-0"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center space-x-3">
-                              <div>
-                                <p className="font-semibold text-gray-800">
-                                  {review.username}
-                                </p>
-                                <div className="text-yellow-500 flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <span
-                                      key={i}
-                                      className={
-                                        i < review.rating
-                                          ? "text-yellow-500"
-                                          : "text-gray-300"
-                                      }
-                                    >
-                                      ★
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-500">
-                              {formatTimestamp(review.timestamp)}
-                            </p>
-                          </div>
-                          <p className="mt-2 text-gray-700">{review.comment}</p>
-                        </div>
-                      ))}
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <BookOpen className="text-green-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Total Lessons</p>
+                      <p className="font-medium text-gray-900">
+                        {course.totalVideos}
+                      </p>
                     </div>
-                  )}
-
-                  {/* Write a Review Form */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-800 mb-4">
-                      Write a Review
-                    </h3>
-                    <form onSubmit={handleSubmitReview} className="space-y-4">
-                      <div className="flex flex-col space-y-2">
-                        <label className="text-gray-700 font-medium">
-                          Your Rating
-                        </label>
-                        <StarRating
-                          rating={newReview.rating}
-                          setRating={(rating) =>
-                            setNewReview((prev) => ({ ...prev, rating }))
-                          }
-                        />
-                      </div>
-
-                      <textarea
-                        name="comment"
-                        value={newReview.comment}
-                        onChange={(e) =>
-                          setNewReview((prev) => ({
-                            ...prev,
-                            comment: e.target.value,
-                          }))
-                        }
-                        placeholder="Write your review here..."
-                        className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                        required
-                      />
-
-                      <Button
-                        type="submit"
-                        disabled={newReview.rating === 0} // Add this disable condition
-                        className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${newReview.rating === 0
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          : "bg-yellow-500 text-white hover:bg-yellow-600"
-                          }`}
-                      >
-                        Submit Review
-                      </Button>
-                    </form>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <BarChart className="text-yellow-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Level</p>
+                      <p className="font-medium text-gray-900">
+                        {course.difficulty}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <User className="text-red-600" size={24} />
+                    <div>
+                      <p className="text-sm text-gray-500">Students Enrolled</p>
+                      <p className="font-medium text-gray-900">
+                        {courseProgress?.courses[courseId].enrollments}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Student Reviews Section */}
+              <div className="mt-8 bg-white border border-gray-300 rounded-lg shadow-lg p-6">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                  Student Reviews
+                </h2>
+
+                {/* Existing Reviews or No Reviews Message */}
+                {reviews.length === 0 ? (
+                  <div className="text-center text-gray-500 py-6">
+                    <p>No reviews available yet</p>
+                    <p className="text-sm mt-2">
+                      Be the first to write a review!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {reviews.map((review, index) => (
+                      <div
+                        key={index}
+                        className="border-b border-gray-200 pb-4 last:border-b-0"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center space-x-3">
+                            <div>
+                              <p className="font-semibold text-gray-800">
+                                {review.username}
+                              </p>
+                              <div className="text-yellow-500 flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={
+                                      i < review.rating
+                                        ? "text-yellow-500"
+                                        : "text-gray-300"
+                                    }
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            {formatTimestamp(review.timestamp)}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-gray-700">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Write a Review Form */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-800 mb-4">
+                    Write a Review
+                  </h3>
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div className="flex flex-col space-y-2">
+                      <label className="text-gray-700 font-medium">
+                        Your Rating
+                      </label>
+                      <StarRating
+                        rating={newReview.rating}
+                        setRating={(rating) =>
+                          setNewReview((prev) => ({ ...prev, rating }))
+                        }
+                      />
+                    </div>
+
+                    <textarea
+                      name="comment"
+                      value={newReview.comment}
+                      onChange={(e) =>
+                        setNewReview((prev) => ({
+                          ...prev,
+                          comment: e.target.value,
+                        }))
+                      }
+                      placeholder="Write your review here..."
+                      className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      required
+                    />
+
+                    <Button
+                      type="submit"
+                      disabled={newReview.rating === 0} // Add this disable condition
+                      className={`w-full font-semibold py-2 rounded-lg transition duration-300 ease-in-out ${newReview.rating === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        }`}
+                    >
+                      Submit Review
+                    </Button>
+                  </form>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
       </div>
     );
