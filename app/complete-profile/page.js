@@ -148,8 +148,8 @@ export default function CompleteProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center py-12 px-4">
-      <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center px-4">
+      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         {/* Header section with gradient */}
         <div className="bg-slate-900 px-8 py-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-2">
@@ -161,128 +161,137 @@ export default function CompleteProfile() {
         </div>
 
         <div className="px-8 py-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Field */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <label htmlFor="name" className="text-gray-800 font-semibold text-sm">
-                  Name
-                </label>
-              </div>
-              <div className="relative">
-                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
-                  <FaUser className="text-gray-400 mr-3" />
-                  <input
-                    type="text"
-                    id="name"
-                    placeholder="Enter your full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
-                  />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Grid Layout for Form Fields */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* Name Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <label htmlFor="name" className="text-gray-800 font-semibold text-sm">
+                      Name
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                      <FaUser className="text-gray-400 mr-3" />
+                      <input
+                        type="text"
+                        id="name"
+                        placeholder="Enter your full name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone Number Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <label htmlFor="phoneNumber" className="text-gray-800 font-semibold text-sm">
+                      Phone Number
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                      <FaPhone className="text-gray-400 mr-3" />
+                      <input
+                        type="text"
+                        id="phoneNumber"
+                        placeholder="Enter your contact number"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
+                        className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Phone Number Field */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                <label htmlFor="phoneNumber" className="text-gray-800 font-semibold text-sm">
-                  Phone Number
-                </label>
-              </div>
-              <div className="relative">
-                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
-                  <FaPhone className="text-gray-400 mr-3" />
-                  <input
-                    type="text"
-                    id="phoneNumber"
-                    placeholder="Enter your contact number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    required
-                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
-                  />
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Username Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <label htmlFor="username" className="text-gray-800 font-semibold text-sm">
+                      Username
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                      <FaAddressCard className="text-gray-400 mr-3" />
+                      <input
+                        type="text"
+                        id="username"
+                        placeholder="Choose a unique username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Username Field */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                <label htmlFor="username" className="text-gray-800 font-semibold text-sm">
-                  Username
-                </label>
-              </div>
-              <div className="relative">
-                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
-                  <FaAddressCard className="text-gray-400 mr-3" />
-                  <input
-                    type="text"
-                    id="username"
-                    placeholder="Choose a unique username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
-                  />
+                {/* Date of Birth Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                    <label htmlFor="dob" className="text-gray-800 font-semibold text-sm">
+                      Date of Birth
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                      <FaCalendarAlt className="text-gray-400 mr-3" />
+                      <input
+                        type="date"
+                        id="dob"
+                        placeholder="Select your date of birth"
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                        required
+                        className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Date of Birth Field */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
-                <label htmlFor="dob" className="text-gray-800 font-semibold text-sm">
-                  Date of Birth
-                </label>
-              </div>
-              <div className="relative">
-                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
-                  <FaCalendarAlt className="text-gray-400 mr-3" />
-                  <input
-                    type="date"
-                    id="dob"
-                    placeholder="Select your date of birth"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    required
-                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Occupation Field */}
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
-                <label htmlFor="occupation" className="text-gray-800 font-semibold text-sm">
-                  Occupation
-                </label>
-              </div>
-              <div className="relative">
-                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
-                  <FaBriefcase className="text-gray-400 mr-3" />
-                  <select
-                    id="occupation"
-                    value={occupation}
-                    onChange={(e) => setOccupation(e.target.value)}
-                    className="w-full outline-none bg-transparent text-gray-900 appearance-none"
-                    required
-                  >
-                    <option value="">Select your occupation</option>
-                    <option value="student">Student</option>
-                    <option value="working">Working Professional</option>
-                  </select>
-                  <svg className="w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                {/* Occupation Field */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
+                    <label htmlFor="occupation" className="text-gray-800 font-semibold text-sm">
+                      Occupation
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                      <FaBriefcase className="text-gray-400 mr-3" />
+                      <select
+                        id="occupation"
+                        value={occupation}
+                        onChange={(e) => setOccupation(e.target.value)}
+                        className="w-full outline-none bg-transparent text-gray-900 appearance-none"
+                        required
+                      >
+                        <option value="">Select your occupation</option>
+                        <option value="student">Student</option>
+                        <option value="working">Working Professional</option>
+                      </select>
+                      <svg className="w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
