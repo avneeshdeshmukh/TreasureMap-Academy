@@ -13,8 +13,11 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
+import { ArrowBigLeft } from "lucide-react";
 import { motion } from "framer-motion"; // Import motion from framer-motion
 import {
+  FaPhone,
   FaUser,
   FaAddressCard,
   FaCalendarAlt,
@@ -145,126 +148,186 @@ export default function CompleteProfile() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-purple-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
-      >
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          Complete Your Profile
-        </h2>
-        <div className="space-y-6">
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-3">
-              <FaUser className="text-gray-500 mr-2" />
-              <input
-                type="text"
-                id="name"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full outline-none bg-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-gray-700">
-              Phone Number
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-3">
-              <FaUser className="text-gray-500 mr-2" />
-              <input
-                type="text"
-                id="phoneNumber"
-                placeholder="Enter your Contact Number"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-                className="w-full outline-none bg-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="username"
-              className="text-sm font-medium text-gray-700"
-            >
-              Username
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-3">
-              <FaAddressCard className="text-gray-500 mr-2" />
-              <input
-                type="text"
-                id="username"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full outline-none bg-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label htmlFor="dob" className="text-sm font-medium text-gray-700">
-              Date of Birth
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-3">
-              <FaCalendarAlt className="text-gray-500 mr-2" />
-              <input
-                type="date"
-                id="dob"
-                placeholder="Select your date of birth"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                required
-                className="w-full outline-none bg-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label
-              htmlFor="occupation"
-              className="text-sm font-medium text-gray-700"
-            >
-              Occupation
-            </label>
-            <div className="flex items-center border border-gray-300 rounded-lg p-3">
-              <FaBriefcase className="text-gray-500 mr-2" />
-              <select
-                id="occupation"
-                value={occupation}
-                onChange={(e) => setOccupation(e.target.value)}
-                className="w-full outline-none bg-transparent"
-                required
-              >
-                <option value="">Select Occupation</option>
-                <option value="student">Student</option>
-                <option value="working">Working Professional</option>
-              </select>
-            </div>
-          </div>
-
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-          <motion.button
-            type="submit"
-            disabled={loading || !name || !username || !dob || !occupation} 
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black px-5 py-3 rounded-lg font-semibold transition-all shadow-lg hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {loading ? "Logging in..." : "Submit"}{" "}
-          </motion.button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center py-12 px-4">
+      <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        {/* Header section with gradient */}
+        <div className="bg-slate-900 px-8 py-8 text-center">
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Complete Your Profile
+          </h2>
+          <p className="text-blue-100 text-sm">
+            Tell us a bit about yourself to get started
+          </p>
         </div>
-      </form>
+
+        <div className="px-8 py-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <label htmlFor="name" className="text-gray-800 font-semibold text-sm">
+                  Name
+                </label>
+              </div>
+              <div className="relative">
+                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                  <FaUser className="text-gray-400 mr-3" />
+                  <input
+                    type="text"
+                    id="name"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Phone Number Field */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <label htmlFor="phoneNumber" className="text-gray-800 font-semibold text-sm">
+                  Phone Number
+                </label>
+              </div>
+              <div className="relative">
+                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                  <FaPhone className="text-gray-400 mr-3" />
+                  <input
+                    type="text"
+                    id="phoneNumber"
+                    placeholder="Enter your contact number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Username Field */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                <label htmlFor="username" className="text-gray-800 font-semibold text-sm">
+                  Username
+                </label>
+              </div>
+              <div className="relative">
+                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                  <FaAddressCard className="text-gray-400 mr-3" />
+                  <input
+                    type="text"
+                    id="username"
+                    placeholder="Choose a unique username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Date of Birth Field */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                <label htmlFor="dob" className="text-gray-800 font-semibold text-sm">
+                  Date of Birth
+                </label>
+              </div>
+              <div className="relative">
+                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                  <FaCalendarAlt className="text-gray-400 mr-3" />
+                  <input
+                    type="date"
+                    id="dob"
+                    placeholder="Select your date of birth"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    required
+                    className="w-full outline-none bg-transparent text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Occupation Field */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
+                <label htmlFor="occupation" className="text-gray-800 font-semibold text-sm">
+                  Occupation
+                </label>
+              </div>
+              <div className="relative">
+                <div className="flex items-center border border-gray-200 rounded-xl p-4 bg-gray-50 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500 focus-within:ring-opacity-20 focus-within:bg-white transition-all duration-200">
+                  <FaBriefcase className="text-gray-400 mr-3" />
+                  <select
+                    id="occupation"
+                    value={occupation}
+                    onChange={(e) => setOccupation(e.target.value)}
+                    className="w-full outline-none bg-transparent text-gray-900 appearance-none"
+                    required
+                  >
+                    <option value="">Select your occupation</option>
+                    <option value="student">Student</option>
+                    <option value="working">Working Professional</option>
+                  </select>
+                  <svg className="w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center space-x-2">
+                <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-4">
+              <motion.button
+                type="submit"
+                disabled={loading || !name || !username || !dob || !occupation || !phoneNumber}
+                className={`w-full bg-yellow-500 text-black rounded-xl px-8 py-4 font-semibold text-lg shadow-lg hover:shadow-xl transform transition-all duration-200 ${
+                  loading || !name || !username || !dob || !occupation || !phoneNumber
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-yellow-600 hover:-translate-y-0.5"
+                }`}
+                whileHover={!(loading || !name || !username || !dob || !occupation || !phoneNumber) ? { scale: 1.02 } : {}}
+                whileTap={!(loading || !name || !username || !dob || !occupation || !phoneNumber) ? { scale: 0.98 } : {}}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin h-5 w-5 mr-3 border-2 border-black border-t-transparent rounded-full"></div>
+                    Processing...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    Complete Profile
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                )}
+              </motion.button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
