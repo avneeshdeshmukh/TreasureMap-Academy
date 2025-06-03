@@ -27,10 +27,10 @@ export default function secretURLPage() {
         }
 
         // 3. Handle cases where the last group has less than 10 users
-        // if (groups.length > 1 && groups[groups.length - 1].length < 10) {
-        //     let lastGroup = groups.pop();
-        //     groups[groups.length - 1] = groups[groups.length - 1].concat(lastGroup);
-        // }
+        if (groups.length > 1 && groups[groups.length - 1].length < 10) {
+            let lastGroup = groups.pop();
+            groups[groups.length - 1] = groups[groups.length - 1].concat(lastGroup);
+        }
 
         return groups;
     }
@@ -38,16 +38,15 @@ export default function secretURLPage() {
 
     const getLeaderBoards = async (level) => {
         const usersRef = collection(firestore, "userProgress");
-        const leadRef = collection(firestore, "leaderboard");
         const usersQuery = query(
             usersRef,
-            where("nextLeaderBoardType", "==", level), // Ensures courseProgress exists
+            // where("nextLeaderBoardType", "==", level), // Ensures courseProgress exists
         );
 
         const querySnapshot = await getDocs(usersQuery);
         const filteredUsers = querySnapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(user => Object.keys(user.courseProgress || {}).length > 0);
+            // .filter(user => Object.keys(user.courseProgress || {}).length > 0);
 
         // console.log(filteredUsers.length);
         // console.log(splitUsers(filteredUsers))

@@ -176,7 +176,9 @@ export default function Details() {
       const courseProgressRef = doc(firestore, "courseProgress", creatorId);
       await updateDoc(courseProgressRef, {
         totalEnrollments: increment(1),
-        [`courses[${courseId}].enrollments`]: increment(1),
+        totalRevenue : increment(course.price * 0.75),
+        [`courses.${courseId}.enrollments`]: increment(1),
+        [`courses.${courseId}.revenue`]: increment(course.price * 0.75),
       });
 
       console.log("Course enrolled successfully!");
@@ -255,7 +257,7 @@ export default function Details() {
 
             if (verifyData.success) {
               // Redirect to success page with payment ID as query param
-              // handleEnroll();
+              handleEnroll();
             } else {
               alert('Payment verification failed');
               router.push('/error');
