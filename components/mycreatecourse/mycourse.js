@@ -18,39 +18,18 @@ const MyCourses = () => {
 
   useEffect(() => {
     const fetchCourses = async () => {
-
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-      const coursesRef = collection(firestore, "courses");
-      // Query courses where username matches the current user's username
-      const q = query(
-        coursesRef,
-        where("creator", "==", userData.username),
-      );
-
-      // Fetch the query snapshot
-      const querySnapshot = await getDocs(q);
-
-      // Extract course data
-      const allCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // Filter for published courses
-      const publishedCourses = allCourses.filter(course => course.isPublished);
-
       const courseProgressRef = doc(firestore, "courseProgress", userId);
       const courseProSnap = await getDoc(courseProgressRef);
       const courseProData = courseProSnap.exists() ? courseProSnap.data() : { courses: {} };
-
+      
+      const courses = courseProData.courses || {};
       // Extract course data, filtering based on the conditions
-      const verified = allCourses
-        .filter(course => {
-          const courseId = course.id;
-          return courseProData.courses[courseId]?.status === "verification";
-        });
+      const verified = Object.values(courses).filter(course => course.status === "verification");
+      const published = Object.values(courses).filter(course => course.status === "published");
 
-      console.log(publishedCourses)
+      console.log(published)
       console.log(verified)
-      setCourses(publishedCourses);
+      setCourses(published);
       setInVerification(verified);
     }
 
@@ -82,7 +61,7 @@ const MyCourses = () => {
             courses.map((course) => (
               <div key={course.courseId} className="bg-[#f8f4eb] p-4 rounded-lg shadow">
                 <h2 className="text-xl font-semibold text-[#5a3b1a]">{course.title}</h2>
-                <p className="text-gray-500">Enrollments: 7</p>
+                <p className="text-gray-500">Enrollments: {course.enrollments}</p>
               </div>
             ))
           ) : (

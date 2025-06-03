@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
         console.log(userSnap.data());
         const userData = userSnap.data();
         const keys = Object.keys(userSnap.data());
-        if(!keys.includes('currentLeaderboard'))  userData.currentLeaderboard = null;
+        if (!keys.includes('currentLeaderboard')) userData.currentLeaderboard = null;
         setUserData(userSnap.data());
     }
 
@@ -58,8 +58,9 @@ export default function LeaderboardPage() {
                     ...doc.data()
                 }));
 
-                const sortedUsers = usersProgressData
-                .sort((a, b) => b.leaderboardCoins - a.leaderboardCoins);
+            const sortedUsers = usersProgressData
+                .sort((a, b) => (b.leaderboardCoins ?? 0) - (a.leaderboardCoins ?? 0));
+
 
             console.log("Fetched user progress data:", sortedUsers);
             setAllUsersProgress(sortedUsers);
@@ -103,18 +104,18 @@ export default function LeaderboardPage() {
     return (
         userData &&
         <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center py-10 px-5 lg:px-0">
-        {/* Rank Card */}
-        <div className="mb-6 w-full max-w-2xl">
-            <RankCard user={userData} level={level} rank={userRank} />
-        </div>
+            {/* Rank Card */}
+            <div className="mb-6 w-full max-w-2xl">
+                <RankCard user={userData} level={level} rank={userRank} />
+            </div>
 
-        {/* Leaderboard Section */}
-        <div className="w-full max-w-3xl bg-gray-800 text-white p-6 rounded-2xl shadow-xl border-2 border-yellow-400">
-            <h1 className="text-3xl font-bold text-yellow-400 text-center mb-4">
-                Leaderboard 🏆
-            </h1>
-            <Leaderboard users={allUsersProgress} user={userData}/>
+            {/* Leaderboard Section */}
+            <div className="w-full max-w-3xl bg-gray-800 text-white p-6 rounded-2xl shadow-xl border-2 border-yellow-400">
+                <h1 className="text-3xl font-bold text-yellow-400 text-center mb-4">
+                    Leaderboard 🏆
+                </h1>
+                <Leaderboard users={allUsersProgress} user={userData} />
+            </div>
         </div>
-    </div>
     );
 }
