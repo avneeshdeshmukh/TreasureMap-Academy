@@ -4,15 +4,21 @@ import { useAuth } from "@/app/context/AuthProvider";
 import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import { User, Phone, Star, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { FaRupeeSign } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 const firestore = getFirestore();
 
 const SettingsPage = () => {
+  const router = useRouter();
   const firestore = getFirestore();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
-  const [currentExpertise, setCurrentExpertise] = useState([]);
+  const [expertise, setExpertise] = useState([]);
+  const [currentExpertise, setCurrentExpertise] = useState('');
+  const [contact, setContact] = useState("");
+  const [upi, setUpi] = useState("");
 
   // const [profile, setProfile] = useState({
   //   username: '',
@@ -29,7 +35,9 @@ const SettingsPage = () => {
           if (userSnap.exists()) {
             const userData = userSnap.data();
             setUserData(userData);
-            setCurrentExpertise(userData.creatorProfile.expertise ?? []);
+            setExpertise(userData.creatorProfile.expertise ?? []);
+            setUpi(userData.creatorProfile.upi || "");
+            setContact(userData.contact || "");
           }
         } catch (err) {
           setError("Failed to load profile data");
@@ -40,33 +48,36 @@ const SettingsPage = () => {
       fetchUserData();
     }, [user]);
 
-
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfile(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const addExpertise = () => {
-    const trimmed = currentExpertise.trim();
-    if (trimmed && !currentExpertise.includes(trimmed)) {
-      setProfile(prev => ({
-        ...prev,
-        expertise: [...prev.expertise, trimmed]
-      }));
+    if (currentExpertise.trim() && !expertise.includes(currentExpertise.trim())) {
+      setExpertise([...expertise, currentExpertise.trim()]);
       setCurrentExpertise('');
     }
   };
 
   const removeExpertise = (indexToRemove) => {
-    setProfile(prev => ({
-      ...prev,
-      expertise: prev.expertise.filter((_, index) => index !== indexToRemove)
-    }));
+    setExpertise(expertise.filter((_, i) => i !== indexToRemove));
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if(expertise.length <= 0 || upi==="" || contact===""){
+      return;
+    }
+    try{
+      const userRef = doc(firestore, "users", user.uid);
+  
+      await updateDoc(userRef, {
+        contact : contact,
+        [`creatorProfile.upi`] : upi,
+        [`creatorProfile.expertise`] : expertise,
+      })
+
+      router.push("/create/settings");
+    } catch(e){
+      console.log(e);
+    }
+  }
 
  if(userData){
 
@@ -84,6 +95,7 @@ const SettingsPage = () => {
           <input
             type="text"
             name="username"
+            readOnly
             value={userData.username}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
           />
@@ -99,8 +111,8 @@ const SettingsPage = () => {
           <input
             type="text"
             name="contactNumber"
-            value={userData.contact}
-            onChange={handleInputChange}
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
             placeholder="Enter your contact number"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
           />
@@ -109,14 +121,14 @@ const SettingsPage = () => {
         {/* UPI Section */}
         <div className="space-y-2">
           <div className="flex items-center text-gray-700 mb-2">
-            <Phone className="mr-3 text-gray-600" />
+            <FaRupeeSign className="mr-3 text-gray-600" />
             <label className="font-semibold">UPI ID</label>
           </div>
           <input
             type="text"
             name="contactNumber"
-            value={userData.creatorProfile.upi}
-            onChange={handleInputChange}
+            value={upi}
+            onChange={(e) => setUpi(e.target.value)}
             placeholder="Enter your contact number"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
           />
@@ -132,6 +144,7 @@ const SettingsPage = () => {
           <div className="flex">
             <input
               type="text"
+              value={currentExpertise}
               onChange={(e) => setCurrentExpertise(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -151,9 +164,9 @@ const SettingsPage = () => {
             </button>
           </div>
 
-          {currentExpertise.length > 0 ? (
+          {expertise.length > 0 ? (
             <div className="flex flex-wrap gap-2 mt-4">
-              {currentExpertise.map((item, index) => (
+              {expertise.map((item, index) => (
                 <div
                   key={index}
                   className="bg-blue-100 text-yellow-800 px-3 py-2 rounded-lg flex items-center"
@@ -180,6 +193,7 @@ const SettingsPage = () => {
         <Button
           variant="submit"
           className="w-fit font-semibold py-3 rounded-lg transition-all"
+          onClick={handleSubmit}
         >
           Save Changes
         </Button>

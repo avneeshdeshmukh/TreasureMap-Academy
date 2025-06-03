@@ -18,7 +18,7 @@ export default function Feedback() {
       const courseProgressSnap = await getDoc(courseProgressRef);
       const data = courseProgressSnap.data();
       console.log(data.courses[courseId].feedback);
-      setFeedbacks(data.courses[courseId].feedback);
+      setFeedbacks(data.courses[courseId].feedback ?? []);
     }
 
     fetchFeedbacks();
