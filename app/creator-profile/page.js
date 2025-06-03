@@ -71,9 +71,9 @@ export default function CompleteCreatorProfile() {
                 isCreator: true,
                 creatorProfile: {
                     expertise,
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
+                    upi,
                 },
-                upi,
             };
 
             const progress = {
