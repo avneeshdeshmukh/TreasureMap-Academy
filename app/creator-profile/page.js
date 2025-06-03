@@ -13,6 +13,8 @@ export default function CompleteCreatorProfile() {
     const { user } = useAuth();
     const [expertise, setExpertise] = useState([]);
     const [currentExpertise, setCurrentExpertise] = useState("");
+    const [contact, setContact] = useState("");
+    const [upi, setUpi] = useState("");
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
@@ -71,18 +73,20 @@ export default function CompleteCreatorProfile() {
                 creatorProfile: {
                     expertise,
                     updatedAt: new Date().toISOString()
-                }
+                },
+                contact,
+                upi,
             };
 
             const progress = {
                 userId: user.uid,
-                username : userData.username,
+                username: userData.username,
                 totalCourses: 0,
                 publishedCourses: 0,
                 totalRevenue: 0,
                 averageRating: 0,
                 totalEnrollments: 0,
-                courses : {},
+                courses: {},
             }
 
             await setDoc(courseProgressRef, progress);
@@ -165,6 +169,28 @@ export default function CompleteCreatorProfile() {
                         )}
                     </div>
 
+                    <div className="flex">
+                        <input
+                            type="text"
+                            placeholder="Contact"
+                            value={contact}
+                            onChange={(e) => setContact(e.target.value)}
+                            className="bg-gray-200 outline-none text-sm flex-1"
+                            required
+                        />
+                    </div>
+
+                    <div className="flex">
+                        <input
+                            type="text"
+                            placeholder="UPI ID"
+                            value={upi}
+                            onChange={(e) => setUpi(e.target.value)}
+                            className="bg-gray-200 outline-none text-sm flex-1"
+                            required
+                        />
+                    </div>
+
                     {error && (
                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                             {error}
@@ -176,8 +202,8 @@ export default function CompleteCreatorProfile() {
                             type="submit"
                             disabled={submitting || expertise.length === 0}
                             className={`border-2 border-blue-800 text-blue-800 rounded-full px-12 py-2 inline-block font-semibold hover:bg-blue-800 hover:text-yellow-400 mt-3 ${submitting || expertise.length === 0
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                                 }`}
                         >
                             {submitting ? (

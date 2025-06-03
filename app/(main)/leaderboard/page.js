@@ -58,16 +58,8 @@ export default function LeaderboardPage() {
                     ...doc.data()
                 }));
 
-            const sortedUsers = usersProgressData
-                .map(user => {
-                    const totalScore =
-                        (user.PLUH?.DS?.value || 0) +
-                        (user.PLUH?.ES?.value || 0) +
-                        (user.PLUH?.QPS?.value || 0) +
-                        (user.PLUH?.RPS?.currentValue || 0);
-                    return { ...user, totalScore };
-                })
-                .sort((a, b) => b.totalScore - a.totalScore);
+                const sortedUsers = usersProgressData
+                .sort((a, b) => b.leaderboardCoins - a.leaderboardCoins);
 
             console.log("Fetched user progress data:", sortedUsers);
             setAllUsersProgress(sortedUsers);
