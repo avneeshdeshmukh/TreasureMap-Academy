@@ -13,7 +13,6 @@ export default function CompleteCreatorProfile() {
     const { user } = useAuth();
     const [expertise, setExpertise] = useState([]);
     const [currentExpertise, setCurrentExpertise] = useState("");
-    const [contact, setContact] = useState("");
     const [upi, setUpi] = useState("");
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -74,7 +73,6 @@ export default function CompleteCreatorProfile() {
                     expertise,
                     updatedAt: new Date().toISOString()
                 },
-                contact,
                 upi,
             };
 
@@ -167,17 +165,6 @@ export default function CompleteCreatorProfile() {
                                 Please add at least one area of expertise to continue.
                             </p>
                         )}
-                    </div>
-
-                    <div className="flex">
-                        <input
-                            type="text"
-                            placeholder="Contact"
-                            value={contact}
-                            onChange={(e) => setContact(e.target.value)}
-                            className="bg-gray-200 outline-none text-sm flex-1"
-                            required
-                        />
                     </div>
 
                     <div className="flex">
