@@ -167,6 +167,8 @@ const LearnPage = () => {
 
     useEffect(() => {
         fetchUserDetails();
+        // console.log(process.env.RAZORPAY_KEY_ID);
+        // console.log(process.env.RAZORPAY_KEY_SECRET);
     }, [user])
 
     useEffect(() => {
