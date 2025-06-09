@@ -2,13 +2,16 @@
 
 import { auth } from "@/lib/firebase";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function Feedback() {
   const firestore = getFirestore();
   const { courseId } = useParams();
   const userId = auth.currentUser.uid;
+  const router = useRouter();
 
   const [feedbacks, setFeedbacks] = useState([]);
 
@@ -25,8 +28,20 @@ export default function Feedback() {
   }, [courseId])
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-[#5a3b1a] text-center mb-6">Admin Feedback</h1>
+    <div className="min-w-full mx-auto p-6 bg-gray-50 min-h-screen">
+      <div className="relative flex items-center justify-center mb-6">
+  <Button 
+    variant={"secondary"}
+    onClick={() => router.push('/create/progress')} 
+    className="absolute left-0"
+  >
+    <FaArrowLeft /> Back
+  </Button>
+  <h1 className="text-3xl font-bold text-[#5a3b1a] text-center">
+    Admin Feedback
+  </h1>
+</div>
+
 
       {feedbacks.length === 0 ? (
         <div className="bg-white shadow-md rounded-lg p-6 text-center">
@@ -61,7 +76,7 @@ function FeedbackCard({ feedback }) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-yellow-500 max-h-fit">
         <div className="flex justify-between items-center border-b pb-2 mb-3">
-          <h3 className="text-lg font-semibold text-gray-800">{formatTimestamp(feedback.timestamp)}</h3>
+          <h3 className="text-lg font-semibold text-gray-800">{formatTimestamp(feedback.date)}</h3>
         </div>
         <p className="text-gray-700 leading-relaxed">
           {expanded ? feedback.message : `${feedback.message.slice(0, previewLength)}... `}
