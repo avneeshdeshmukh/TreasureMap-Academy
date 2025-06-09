@@ -37,7 +37,7 @@ const SettingsPage = () => {
             setUserData(userData);
             setExpertise(userData.creatorProfile.expertise ?? []);
             setUpi(userData.creatorProfile.upi || "");
-            setContact(userData.contact || "");
+            setContact(userData.phoneNumber || "");
           }
         } catch (err) {
           setError("Failed to load profile data");
@@ -68,7 +68,7 @@ const SettingsPage = () => {
       const userRef = doc(firestore, "users", user.uid);
   
       await updateDoc(userRef, {
-        contact : contact,
+        phoneNumber : contact,
         [`creatorProfile.upi`] : upi,
         [`creatorProfile.expertise`] : expertise,
       })
