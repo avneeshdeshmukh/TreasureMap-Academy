@@ -245,9 +245,6 @@ export default function SignUpPage() {
               </h2>
               <div className="border-2 w-10 border-blue-800 inline-block mb-2"></div>
               <div className="flex justify-center my-2">
-                <p className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer">
-                  <FaFacebookF className="text-sm" />
-                </p>
                 <p
                   onClick={() => handleProviderSignUp(new GoogleAuthProvider())}
                   className="border-2 text-blue-800 border-gray-200 rounded-full p-3 mx-1 cursor-pointer"
