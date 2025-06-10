@@ -1,21 +1,26 @@
 "use client";
 import { useAuth } from "@/app/context/AuthProvider";
 import { doc, getDoc, getFirestore, updateDoc, query, collection, where, getDocs } from "firebase/firestore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 const firestore = getFirestore();
 
 export default function EditProfilePage() {
   const { user } = useAuth();
   const router = useRouter();
+  const fileInputRef = useRef(null);
+  
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,6 +34,7 @@ export default function EditProfilePage() {
           const userData = userSnap.data();
           setName(user.displayName || "");
           setUsername(userData.username || "");
+          setProfileImagePreview(user.photoURL || "");
         }
       } catch (err) {
         setError("Failed to load profile data");
@@ -38,6 +44,42 @@ export default function EditProfilePage() {
     };
     fetchUserData();
   }, [user]);
+
+  // Handle image selection
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      setProfileImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfileImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setProfileImage(null);
+    setProfileImagePreview(user.photoURL || "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -62,7 +104,15 @@ export default function EditProfilePage() {
           throw new Error("The username is already taken.");
         }
       }
+
+      // TODO: Add image upload logic here
+      if (profileImage) {
+        console.log("Selected image:", profileImage);
+        // Add your image upload logic here
+      }
+
       await updateProfile(user, { displayName: name });
+      
       // Update user document
       await updateDoc(doc(firestore, "users", user.uid), {
         username: username.toLowerCase(),
@@ -112,6 +162,62 @@ export default function EditProfilePage() {
             </div>
           )}
 
+          {/* Profile Picture Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <div className="w-32 h-32 relative">
+                <Image
+                  src={profileImagePreview || "/images/login_pirate.png"}
+                  alt="Profile Preview"
+                  layout="fill"
+                  className="rounded-full border-4 border-yellow-400 object-cover"
+                />
+              </div>
+              
+              {/* Camera overlay button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-0 right-0 bg-yellow-500 hover:bg-yellow-600 p-2 rounded-full border-2 border-white transition-colors"
+              >
+                <Camera size={16} className="text-black" />
+              </button>
+            </div>
+
+            {/* Image controls */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Change Photo
+              </Button>
+              
+              {profileImage && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  onClick={handleRemoveImage}
+                >
+                  <X size={16} className="mr-1" />
+                  Remove
+                </Button>
+              )}
+            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+            />
+          </div>
+
           {/* Name Input */}
           <div>
             <label className="block text-lg font-semibold mb-2">Name</label>
@@ -121,19 +227,6 @@ export default function EditProfilePage() {
               onChange={(e) => setName(e.target.value)}
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
               placeholder="Edit name"
-              disabled={loading}
-            />
-          </div>
-
-          {/* Username Input */}
-          <div>
-            <label className="block text-lg font-semibold mb-2">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="Edit username"
               disabled={loading}
             />
           </div>

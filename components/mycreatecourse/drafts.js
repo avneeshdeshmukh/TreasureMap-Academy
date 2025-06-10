@@ -34,7 +34,7 @@ const Drafts = ({ onEdit }) => {
       const coursesRef = collection(firestore, "courses");
       console.log(userData.username)
 
-      // Query courses where username matches the current user's username
+      // Query courses where username matches the current user's uid
       const q = query(
         coursesRef,
         where("creatorId", "==", userData.uid),
