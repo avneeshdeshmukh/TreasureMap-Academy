@@ -1,0 +1,2 @@
+public/avatars/*.png filter=lfs diff=lfs merge=lfs -text
+public/avatars/*.jpg filter=lfs diff=lfs merge=lfs -text
