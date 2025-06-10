@@ -47,7 +47,7 @@ export default function EditProfilePage() {
 
   // Handle avatar selection from modal
   const handleAvatarUpdate = async (relativeUrl) => {
-    const fullUrl = `treasure-map-academy.vercel.app${relativeUrl}`;
+    const fullUrl = `https://treasure-map-academy.vercel.app${relativeUrl}`;
     setProfileImagePreview(fullUrl); // Update preview immediately
     setShowModal(false);
 
