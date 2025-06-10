@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import DeleteModal from "@/components/mycreatecourse/course-form-2/DeleteModal";
 import { auth } from "@/lib/firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { getFirestore, doc, collection, query, where, getDocs, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function EditFormPage() {
@@ -38,8 +40,8 @@ export default function EditFormPage() {
 
       let allHaveQuizzes = true;
 
-      for(let i = 0; i < videoList.length; i++){
-        if(videoList[i].quizzes === null || isEmpty(videoList[i].quizzes)){
+      for (let i = 0; i < videoList.length; i++) {
+        if (videoList[i].quizzes === null || isEmpty(videoList[i].quizzes)) {
           allHaveQuizzes = false;
           return;
         }
@@ -53,18 +55,32 @@ export default function EditFormPage() {
 
   // Handle the submit logic
   const handlePublish = async () => {
-    // if (course.totalVideos < 10) {
-    //   alert(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`);
-    //   return;
-    // }
+    if (course.totalVideos < 10) {
+      toast.error(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`, {
+        position: "bottom-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
 
     const quizzesPresent = await checkQuizzes();
     console.log(quizzesPresent);
 
-    // if (!quizzesPresent) {
-    //   alert(`Please add at least one quiz in each video`);
-    //   return;
-    // }
+    if (!quizzesPresent) {
+      toast.error(`Please add at least one quiz in each video`, {
+        position: "bottom-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
 
     setShowTermsModal(true);
   };
@@ -289,6 +305,7 @@ export default function EditFormPage() {
           </div>
         </div>
       )}
+      <ToastContainer />
     </div>
 
   );
