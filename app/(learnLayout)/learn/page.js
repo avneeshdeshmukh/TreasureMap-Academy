@@ -193,12 +193,20 @@ const LearnPage = () => {
 
             const leaderboardRef = doc(firestore, "leaderboard", userData.currentLeaderboard);
             const leaderboardSnap = await getDoc(leaderboardRef);
-            const allUsers = leaderboardSnap.data().users;
+            const sortedUsers = leaderboardSnap.data().users
+                .sort((a, b) => (b.leaderboardCoins ?? 0) - (a.leaderboardCoins ?? 0));
+            const allUsers = [];
 
-            const position = allUsers.indexOf(userData.username) + 1;
+            sortedUsers.forEach(user => {
+                allUsers.push(user.uid)
+            })
+
+            console.log(allUsers);
+
+            const position = allUsers.indexOf(userData.uid) + 1;
 
             setPosition(position);
-            setLevel(leaderboardSnap.data().level)
+            setLevel(userData.currentLeaderboardLevel)
         }
 
         setLeaderboardPosition();
@@ -283,7 +291,7 @@ const LearnPage = () => {
                 <StickyWrapper>
                     <StreakIcons />
                     <Stats userProgress={userProgress} courseId={topCourses[0]} setIsModalOpen={setIsModalOpen} />
-                    <LeaderboardPos position={position} level={level} />
+                    <LeaderboardPos position={position} level={level} coins={userProgress.leaderboardCoins}/>
                 </StickyWrapper>
                 <StreakGoalModal
                     isOpen={isModalOpen}
@@ -367,7 +375,7 @@ const LearnPage = () => {
                                         username={user.displayName}
                                         courseName={currentCourse.title}
                                         creatorName={currentCourseCreator}
-                                        issueDate={formatDate( userProgress.courseProgress[courseId].dateCompleted)}
+                                        issueDate={formatDate(userProgress.courseProgress[courseId].dateCompleted)}
                                     />
                                 </div>
 

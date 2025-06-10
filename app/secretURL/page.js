@@ -6,8 +6,61 @@ import { getFirestore, collection, query, getDocs, where, setDoc, updateDoc, doc
 export default function secretURLPage() {
     const firestore = getFirestore();
 
-    function splitUsers(users) {
-        if (!users || users.length === 0) return [];
+
+    const chunkUsers = (users) => {
+        const chunkSize = 10;
+        const chunks = [];
+
+        // Create chunks of 10
+        for (let i = 0; i < users.length; i += chunkSize) {
+            chunks.push(users.slice(i, i + chunkSize));
+        }
+
+        // Handle remaining users if any
+        if (chunks.length > 0 && chunks[chunks.length - 1].length < 10) {
+            const lastChunk = chunks[chunks.length - 1];
+            const remainingCount = lastChunk.length;
+
+            if (remainingCount < 5 && chunks.length > 1) {
+                // If less than 5, merge with previous chunk
+                const lastUsers = chunks.pop();
+                chunks[chunks.length - 1].push(...lastUsers);
+            }
+            // If 5 or more, keep as separate chunk (already handled by slice)
+        }
+
+        // Categorize chunks into tiers
+        const totalChunks = chunks.length;
+        const baseThird = Math.floor(totalChunks / 3); // Base number of chunks per tier
+        const remainder = totalChunks % 3; // Extra chunks to distribute
+
+        // Assign chunks: captain and seafarer get baseThird, sailor gets baseThird + remainder
+        const captainCount = baseThird;
+        const seafarerCount = baseThird;
+        const sailorCount = baseThird + remainder;
+
+        const tieredChunks = {
+            captain: chunks.slice(0, captainCount),
+            sailor: chunks.slice(captainCount, captainCount + sailorCount),
+            seafarer: chunks.slice(captainCount + sailorCount, totalChunks)
+        };
+
+        return tieredChunks;
+    };
+
+
+
+    const getLeaderBoards = async () => {
+        const usersRef = collection(firestore, "userProgress");
+        const usersQuery = query(
+            usersRef,
+        );
+
+        const querySnapshot = await getDocs(usersQuery);
+
+        const users = querySnapshot.docs.map(doc => ({
+            ...doc.data(),
+        }));
 
         users.forEach(user => {
             user.PLUH.total =
@@ -20,97 +73,96 @@ export default function secretURLPage() {
         // 1. Sort users in descending order of score
         users.sort((a, b) => b.PLUH.total - a.PLUH.total);
 
-        // 2. Split users into groups of 10
-        let groups = [];
-        for (let i = 0; i < users.length; i += 10) {
-            groups.push(users.slice(i, i + 10));
-        }
+        const userChunks = chunkUsers(users);
+        console.log(userChunks);
 
-        // 3. Handle cases where the last group has less than 10 users
-        if (groups.length > 1 && groups[groups.length - 1].length < 10) {
-            let lastGroup = groups.pop();
-            groups[groups.length - 1] = groups[groups.length - 1].concat(lastGroup);
-        }
+        for (let chunk of userChunks.captain) {
+            const leaderboardId = uuidv4();
+            const leaderboardEntry = {
+                id: leaderboardId, // Generate unique ID
+                level: "captain", // Store the level for reference
+                users: chunk, // Add the users in this group
+                createdAt: new Date(), // Timestamp
+            };
 
-        return groups;
-    }
-
-
-    const getLeaderBoards = async (level) => {
-        const usersRef = collection(firestore, "userProgress");
-        const usersQuery = query(
-            usersRef,
-        );
-
-        const querySnapshot = await getDocs(usersQuery);
-
-        const users = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-
-        console.log(users);
-
-        // For each user, get the level of their current leaderboard
-        const filteredUsers = [];
-
-        for (const user of users) {
-            const leaderboardId = user.currentLeaderboard;
-            if (!leaderboardId) continue;
-
-            const leaderboardDocRef = doc(firestore, "leaderboard", leaderboardId);
-            const leaderboardDoc = await getDoc(leaderboardDocRef);
-
-            if (leaderboardDoc.exists()) {
-                const leaderboardData = leaderboardDoc.data();
-                if (leaderboardData.level != level) {
-                    filteredUsers.push(user);
+            for (let user of chunk) {
+                try {
+                    const userDocRef = doc(firestore, "userProgress", user.uid);
+                    await updateDoc(userDocRef,
+                        {
+                            currentLeaderboard: leaderboardId,
+                            currentLeaderboardLevel: "captain",
+                        }
+                    );
+                } catch (err) {
+                    console.log(err);
                 }
             }
+
+            const leaderboardDocRef = doc(firestore, "leaderboard", leaderboardId);
+            await setDoc(leaderboardDocRef, leaderboardEntry);
         }
 
-        console.log(filteredUsers);
+        for (let chunk of userChunks.sailor) {
+            const leaderboardId = uuidv4();
+            const leaderboardEntry = {
+                id: leaderboardId, // Generate unique ID
+                level: "sailor", // Store the level for reference
+                users: chunk, // Add the users in this group
+                createdAt: new Date(), // Timestamp
+            };
 
+            for (let user of chunk) {
+                try {
+                    const userDocRef = doc(firestore, "userProgress", user.uid);
+                    await updateDoc(userDocRef,
+                        {
+                            currentLeaderboard: leaderboardId,
+                            currentLeaderboardLevel: "sailor",
+                        }
+                    );
+                } catch (err) {
+                    console.log(err);
+                }
+            }
 
+            const leaderboardDocRef = doc(firestore, "leaderboard", leaderboardId);
+            await setDoc(leaderboardDocRef, leaderboardEntry);
+        }
 
+        for (let chunk of userChunks.seafarer) {
+            const leaderboardId = uuidv4();
+            const leaderboardEntry = {
+                id: leaderboardId, // Generate unique ID
+                level: "seafarer", // Store the level for reference
+                users: chunk, // Add the users in this group
+                createdAt: new Date(), // Timestamp
+            };
 
-        // console.log(filteredUsers.length);
-        // console.log(splitUsers(filteredUsers))
+            for (let user of chunk) {
+                try {
+                    const userDocRef = doc(firestore, "userProgress", user.uid);
+                    await updateDoc(userDocRef,
+                        {
+                            currentLeaderboard: leaderboardId,
+                            currentLeaderboardLevel: "seafarer",
+                        }
+                    );
+                } catch (err) {
+                    console.log(err);
+                }
+            }
 
-        // const groups = splitUsers(filteredUsers);
+            const leaderboardDocRef = doc(firestore, "leaderboard", leaderboardId);
+            await setDoc(leaderboardDocRef, leaderboardEntry);
+        }
 
-        // for (const group of groups) {
-
-        //     let users = [];
-        //     group.forEach(user => {
-        //         users.push(user.username);
-        //     })
-        //     const leaderboardId = uuidv4();
-        //     const leaderboardEntry = {
-        //         id: leaderboardId, // Generate unique ID
-        //         level: level, // Store the level for reference
-        //         users: users, // Add the users in this group
-        //         createdAt: new Date(), // Timestamp
-        //     };
-
-        //     for (const user of group) {
-        //         try {
-        //             console.log(user);
-        //             const userDocRef = doc(firestore, "userProgress", user.uid);
-        //             await updateDoc(userDocRef, { currentLeaderboard: leaderboardId });
-        //         } catch (err) {
-        //             console.log(err);
-        //         }
-        //     }
-        //     const leaderboardDocRef = doc(firestore, "leaderboard", leaderboardId);
-        //     await setDoc(leaderboardDocRef, leaderboardEntry);
-        // }
     }
 
     return (
         <Button
             variant={"sidebarOutline"}
-            onClick={() => getLeaderBoards("captain")}
+            onClick={() => getLeaderBoards()}
         >
             Make Leaderboard
         </Button>
