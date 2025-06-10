@@ -34,13 +34,13 @@ export const StreakIcons = () => {
 
         return (
             <div className="flex items-center justify-center gap-x-1 w-full">
-                <Link href={'/courses'}>
-                    <Button variant="ghost" >
+                
+                    <Button variant="ghost" className="cursor-default" >
                         <Flame className=" mr-2" size={30} stroke="orange" fill={"orange"} />
                         <p className="text-bold text-xl">{streak}</p>
                     </Button>
 
-                </Link>
+                
                 <Link href={"/leaderboard"}>
                     <Button variant="ghost" >
                         <CircleDollarSign className="mr-2" size={30} fill={"none"} />
