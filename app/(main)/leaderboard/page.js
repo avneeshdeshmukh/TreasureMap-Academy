@@ -4,11 +4,14 @@ import Leaderboard from "@/components/leaderboard/Leaderboard";
 import { auth } from "@/lib/firebase";
 import { doc, getDoc, getFirestore, collection, query, getDocs, where } from "firebase/firestore";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/app/context/AuthProvider";
+import { updateProfile } from "firebase/auth";
 
 export default function LeaderboardPage() {
 
     const firestore = getFirestore();
     const uid = auth.currentUser.uid;
+    const {user} = useAuth();
     const userProgRef = doc(firestore, "userProgress", uid);
     const [userData, setUserData] = useState(null);
     const [userRank, setUserRank] = useState(0);
@@ -23,6 +26,7 @@ export default function LeaderboardPage() {
         const keys = Object.keys(userSnap.data());
         if (!keys.includes('currentLeaderboard')) userData.currentLeaderboard = null;
         setUserData(userSnap.data());
+        // await updateProfile(user, { photoURL: `${window.location.origin}/avatars/avatar3.png` });
     }
 
     const fetchLeaderBoard = async () => {
