@@ -86,22 +86,6 @@ const SettingsPage = () => {
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-8 space-y-6">
         <h1 className="text-3xl font-bold text-[#5a3b1a] flex mb-6 justify-center">Edit Profile</h1>
 
-        {/* Username Section */}
-        <div className="space-y-2">
-          <div className="flex items-center text-gray-700 mb-2">
-            <User className="mr-3 text-gray-600" />
-            <label className="font-semibold">Username</label>
-          </div>
-          <input
-            type="text"
-            name="username"
-            readOnly
-            value={userData.username}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
-          />
-         
-        </div>
-
         {/* Contact Number Section */}
         <div className="space-y-2">
           <div className="flex items-center text-gray-700 mb-2">
