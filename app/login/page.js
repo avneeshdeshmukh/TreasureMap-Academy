@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import {
   FaGoogle,
   FaEnvelope,
-  FaGithub,
 } from "react-icons/fa";
 import { MdLock } from "react-icons/md";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";

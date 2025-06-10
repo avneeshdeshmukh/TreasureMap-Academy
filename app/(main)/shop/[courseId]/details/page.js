@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "@/app/context/AuthProvider";
 import { setLatestCourse } from "@/lib/utils";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Details() {
   const firestore = getFirestore();
@@ -42,6 +43,10 @@ export default function Details() {
     comment: "",
   });
   const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  const [discount, setDiscount] = useState(0);
+  const [maxDiscount, setMaxDiscount] = useState(0);
+  const [currentPrice, setCurrentPrice] = useState(0);
 
   // Load Razorpay SDK dynamically
   useEffect(() => {
@@ -94,6 +99,7 @@ export default function Details() {
         const crsData = crs.data();
         setCourse(crsData);
         setCreatorId(crsData.creatorId);
+        setCurrentPrice(crsData.price);
       } else {
         console.log("Course not found");
       }
@@ -112,6 +118,10 @@ export default function Details() {
 
       // Check if enrolledCourses exist and if it includes courseId
       setEnrolled(usrData.enrolledCourses?.includes(courseId) || false);
+
+      const userProgSnap = await getDoc(userProgRef);
+      const userCoins = userProgSnap.data().coins;
+      setMaxDiscount(Math.floor(userCoins / 10000) * 10);
     };
 
     fetchCourseDetails();
@@ -166,9 +176,42 @@ export default function Details() {
     fetchThumbnailUrl();
   }, [course]);
 
+  const increaseDiscount = () => {
+    setDiscount(prev => Math.min(prev + 10, maxDiscount));
+  };
+
+  const decreaseDiscount = () => {
+    setDiscount(prev => Math.max(prev - 10, 0));
+  };
+
+  useEffect(() => {
+    if (!course) return;
+    const discounted = course.price - (course.price * discount) / 100;
+    setCurrentPrice(discounted); // Rounded for currency
+  }, [discount]);
+
   const handleEnroll = async () => {
     if (!creatorId) return;
     try {
+      const settlementId = uuidv4();
+      const settlementRef = doc(firestore, "settlements", settlementId);
+
+      const creatorSnap = await getDoc(doc(firestore, "users", creatorId));
+      const creator = creatorSnap.data();
+
+      const settlementEntry = {
+        creatorId,
+        buyer: user.uid,
+        courseId: courseId,
+        title: course.title,
+        amount: course.price * 0.75,
+        createdAt: new Date(),
+        status: 0,
+        upi: creator.creatorProfile.upi ?? null,
+      }
+
+      await setDoc(settlementRef, settlementEntry, { merge: true });
+
       // Attempt to update the enrolledCourses array
       await updateDoc(userRef, {
         enrolledCourses: arrayUnion(courseId),
@@ -176,7 +219,7 @@ export default function Details() {
       const courseProgressRef = doc(firestore, "courseProgress", creatorId);
       await updateDoc(courseProgressRef, {
         totalEnrollments: increment(1),
-        totalRevenue : increment(course.price * 0.75),
+        totalRevenue: increment(course.price * 0.75),
         [`courses.${courseId}.enrollments`]: increment(1),
         [`courses.${courseId}.revenue`]: increment(course.price * 0.75),
       });
@@ -191,20 +234,29 @@ export default function Details() {
         console.error("Error enrolling in course:", error);
       }
     }
-
     try {
       const updateProgress = {
         courseId,
         currentVideo: 1,
       };
 
-      await updateDoc(userProgRef, {
-        [`courseProgress.${courseId}`]: updateProgress,
-      });
+      if (discount > 0) {
+        const coinsUsed = discount * 1000;
+        await updateDoc(userProgRef, {
+          [`courseProgress.${courseId}`]: updateProgress,
+          coins: increment(-1 * coinsUsed),
+        });
+      } else {
+        await updateDoc(userProgRef, {
+          [`courseProgress.${courseId}`]: updateProgress,
+        });
+      }
+
     } catch (err) {
       console.error("Error enrolling in course:", error);
     }
-
+    setDiscount(0);
+    setCurrentPrice(course.price);
     setEnrolled(true);
   };
 
@@ -219,7 +271,7 @@ export default function Details() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: course.price }),
+        body: JSON.stringify({ amount: currentPrice }),
       });
 
       const data = await response.json();
@@ -429,10 +481,37 @@ export default function Details() {
                 </div>
               )}
               <CardContent className="p-5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <p className="text-3xl font-bold">₹{course.price}</p>
+                <div className="flex justify-center items-center space-x-2">
+                  {discount > 0 ? (
+                    <>
+                      <p className="text-2xl text-gray-500 line-through">₹{course.price}</p>
+                      <p className="text-3xl font-bold text-green-600">₹{currentPrice}</p>
+                    </>
+                  ) : (
+                    <p className="text-3xl font-bold">₹{course.price}</p>
+                  )}
                 </div>
+                {!enrolled &&
+                  <div>
+                    {/* Discount label */}
+                    <p className="text-lg font-semibold text-center">Your Discount</p>
 
+                    {/* Discount Counter */}
+                    <div className="flex items-center justify-center w-full">
+                      <Button variant="ghost" onClick={decreaseDiscount} className="mr-3 px-4 py-2">
+                        <span className="text-4xl leading-none">−</span>
+                      </Button>
+
+                      <span className="text-xl font-medium">{discount}%</span>
+
+                      <Button variant="ghost" onClick={increaseDiscount} className="ml-3 px-4 py-2">
+                        <span className="text-4xl leading-none">+</span>
+                      </Button>
+                    </div>
+
+                    {/* Info text below counter */}
+                    <p className="text-sm text-gray-500 text-center">10,000 coins = 10% discount</p>
+                  </div>}
                 {!enrolled ? (
                   <Button
                     className="w-full bg-yellow-500 text-white font-semibold py-2 rounded-lg transition duration-300 ease-in-out transform hover:bg-yellow-600 hover:scale-105 hover:shadow-lg"
@@ -454,6 +533,7 @@ export default function Details() {
                   <p>✓ Access on mobile and desktop</p>
                 </div>
               </CardContent>
+
             </Card>
           </div>
 
