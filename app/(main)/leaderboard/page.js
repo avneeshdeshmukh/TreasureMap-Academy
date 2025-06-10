@@ -38,27 +38,9 @@ export default function LeaderboardPage() {
 
     const fetchAllUsersData = async () => {
         if (allUsers.length === 0) return;
-        const usersRef = collection(firestore, "userProgress");
-        const q = query(usersRef, where("__name__", "in", allUsers));
-
         try {
-            const usersRef = collection(firestore, "userProgress");
-            const batches = [];
-            for (let i = 0; i < allUsers.length; i += 10) {
-                const batchUsers = allUsers.slice(i, i + 10);
-                const q = query(usersRef, where("username", "in", batchUsers));
-                batches.push(getDocs(q));
-            }
 
-            const querySnapshots = await Promise.all(batches);
-            const usersProgressData = querySnapshots
-                .flatMap(snapshot => snapshot.docs)
-                .map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-            const sortedUsers = usersProgressData
+            const sortedUsers = allUsers
                 .sort((a, b) => (b.leaderboardCoins ?? 0) - (a.leaderboardCoins ?? 0));
 
 

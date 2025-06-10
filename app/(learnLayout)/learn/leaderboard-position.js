@@ -5,7 +5,7 @@ import { Anchor, CompassIcon } from "lucide-react"
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const LeaderboardPos = ({ position, level }) => {
+const LeaderboardPos = ({ position, level, coins }) => {
 
     const displayPosition = (position) =>{
         switch (position) {
@@ -38,7 +38,7 @@ const LeaderboardPos = ({ position, level }) => {
                 </div>
                 <div className="div w-2/3">
                     <p className="text-sm font-bold mb-2">You’re {displayPosition(position)} {`${level[0].toUpperCase()}${level.substring(1)}`}</p>
-                    <p className="text-sm">You&apos;ve earned 50 Coins this week so far</p>
+                    <p className="text-sm">You&apos;ve earned {coins} Coins this week so far</p>
                 </div>
             </div>
             <div className="flex justify-end mt-5">
