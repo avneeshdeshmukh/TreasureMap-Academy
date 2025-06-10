@@ -6,6 +6,8 @@ import { User, Phone, Star, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FaRupeeSign } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const firestore = getFirestore();
 
@@ -72,6 +74,15 @@ const SettingsPage = () => {
         [`creatorProfile.upi`] : upi,
         [`creatorProfile.expertise`] : expertise,
       })
+
+      toast.success('Profile updated successfully!', {
+              position: "top-center",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
 
       router.push("/create/settings");
     } catch(e){
@@ -182,6 +193,7 @@ const SettingsPage = () => {
           Save Changes
         </Button>
       </div>
+      <ToastContainer/>
     </div>
   );
 }
