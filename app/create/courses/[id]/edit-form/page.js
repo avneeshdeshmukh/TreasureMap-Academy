@@ -52,23 +52,35 @@ export default function EditFormPage() {
       console.error("Error fetching videos:", error);
     }
   }
+  const getCourse = async () => {
+    const courseSnap = await getDoc(courseRef);
+    if (courseSnap.exists()) {
+      setCourse(courseSnap.data());
+    }
+  }
 
   // Handle the submit logic
   const handlePublish = async () => {
-    if (course.totalVideos < 10) {
-      toast.error(`The course must have at least 10 lessons. Currently there are ${course.totalVideos}`, {
-        position: "bottom-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+    let updatedCourse=null;
+    const courseSnap = await getDoc(courseRef);
+    if (courseSnap.exists()) {
+      updatedCourse = courseSnap.data()
+      setCourse(courseSnap.data());
+    }
+    if (updatedCourse.totalVideos < 10) {
+      alert(`The course must have at least 10 lessons. Currently there are ${updatedCourse.totalVideos}`);
+      // toast.error(`The course must have at least 10 lessons. Currently there are ${updatedCourse.totalVideos}`, {
+      //   position: "bottom-center",
+      //   autoClose: 3000,
+      //   hideProgressBar: false,
+      //   closeOnClick: true,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      // });
       return;
     }
 
     const quizzesPresent = await checkQuizzes();
-    console.log(quizzesPresent);
 
     if (!quizzesPresent) {
       toast.error(`Please add at least one quiz in each video`, {
@@ -133,13 +145,6 @@ export default function EditFormPage() {
   };
 
   useEffect(() => {
-    const getCourse = async () => {
-      const courseSnap = await getDoc(courseRef);
-      if (courseSnap.exists()) {
-        setCourse(courseSnap.data());
-        console.log(courseSnap.data());
-      }
-    }
     getCourse();
   }, [id])
 

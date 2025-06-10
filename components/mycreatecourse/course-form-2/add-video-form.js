@@ -211,7 +211,7 @@ export default function AddVideos({ onAdd, numOfVideos, fetchVideos }) {
       await updateDoc(courseRef, {
         totalVideos : increment(1),
         courseDuration : increment(Math.round(duration)),
-      }, {merge : true })
+      })
 
       setStatus("");
 
