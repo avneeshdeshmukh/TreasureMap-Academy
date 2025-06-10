@@ -94,7 +94,14 @@ export default function EditFormPage() {
       await updateDoc(courseProgressRef, {
         [`courses.${id}.status`]: "verification",
       })
-      alert("Course sent for verification successfully");
+      toast.success('Course sent for verification', {
+              position: "top-center",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
       setShowTermsModal(false);
       router.push("/create/mycourses");
       return;
