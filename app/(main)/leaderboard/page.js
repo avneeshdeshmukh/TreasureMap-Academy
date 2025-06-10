@@ -43,11 +43,14 @@ export default function LeaderboardPage() {
             const sortedUsers = allUsers
                 .sort((a, b) => (b.leaderboardCoins ?? 0) - (a.leaderboardCoins ?? 0));
 
-
-            console.log("Fetched user progress data:", sortedUsers);
             setAllUsersProgress(sortedUsers);
+            const tempUsers = [];
 
-            const userIndex = sortedUsers.findIndex(user => user.id === uid);
+            sortedUsers.forEach(user => {
+                tempUsers.push(user.uid)
+            })
+
+            const userIndex = tempUsers.indexOf(uid);
             if (userIndex !== -1) {
                 setUserRank(userIndex + 1); // Convert 0-based index to 1-based rank
             }

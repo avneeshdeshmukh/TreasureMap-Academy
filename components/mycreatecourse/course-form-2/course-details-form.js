@@ -203,6 +203,7 @@ export default function VideoUploadForm({ onNext }) {
 
       await Promise.all(batchUpdates);
       setIsEditing(false);
+      setOriginalVideos(videos);
       toast.success("Video order updated", {
         position: "top-center",
         autoClose: 3000,
@@ -222,7 +223,7 @@ export default function VideoUploadForm({ onNext }) {
   };
 
   const handleEditButton = () => {
-    setVideos(originalVideos);
+    setVideos(videos);
     setIsEditing(!isEditing);
   };
 
