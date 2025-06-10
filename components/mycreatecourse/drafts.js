@@ -32,15 +32,15 @@ const Drafts = ({ onEdit }) => {
 
       // Reference the 'courses' collection
       const coursesRef = collection(firestore, "courses");
+      console.log(userData.username)
 
       // Query courses where username matches the current user's username
       const q = query(
         coursesRef,
-        where("creator", "==", userData.username),
+        where("creatorId", "==", userData.uid),
         where("isPublished", "==", false)
       );
       const querySnapshot = await getDocs(q);
-
 
       // Fetch the query snapshot
       const courseProgressRef = doc(firestore, "courseProgress", user.uid);
@@ -57,6 +57,7 @@ const Drafts = ({ onEdit }) => {
           // Check if the course is in courseProData.course
           return !(courseId in courseProgressMap) || courseProgressMap[courseId]?.status === "rejected";// Include courses not present in courseProData.course
         });
+
       return userCourses; // Return the array of courses
     } catch (error) {
       console.error("Error fetching user courses:", error);

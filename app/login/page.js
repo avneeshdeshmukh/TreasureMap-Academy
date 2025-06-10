@@ -39,17 +39,12 @@ export default  function LoginPage() {
       // Redirect to the homepage or another protected page after successful login
       router.push("/shop"); // Replace with your desired route
     } catch (err) {
-      // Handle specific errors
-      if (err.code === "auth/user-not-found") {
-        setError("No user found with this email. Please sign up.");
-      } else if (err.code === "auth/wrong-password") {
-        setError("Incorrect password. Please try again.");
-      } else if (err.code === "auth/invalid-email") {
-        setError("The email address is not valid. Please provide a valid email.");
-      } else {
+      if (err.code === "auth/invalid-credential") {
+        setError("Invalid credentials! Please try again.");
+      } 
+      else {
         setError("An unexpected error occurred. Please try again.");
       }
-
       console.error("Error during login:", err.message);
     }
   };

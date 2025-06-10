@@ -9,7 +9,6 @@ export default function Leaderboard({users, user}) {
 
         const isUser = user.username;
         console.log(isUser);
-
     return (
 <div className="flex justify-center px-4 sm:px-6 lg:px-8">
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 sm:p-6 rounded-2xl shadow-2xl mt-8 w-full max-w-3xl border-2 border-gray-700">
