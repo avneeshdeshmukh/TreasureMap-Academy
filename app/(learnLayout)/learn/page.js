@@ -187,7 +187,7 @@ const LearnPage = () => {
             if (!Object.keys(userData).includes("currentLeaderboard")) {
                 userData.currentLeaderboard = null;
                 setPosition(0);
-                setLeadType(null);
+                setLevel(null);
                 return;
             }
 
